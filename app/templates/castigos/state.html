@@ -1,0 +1,22 @@
+<!-- Modal: Cambiar Estado del Castigo -->
+<div class="modal fade" id="stateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header border-0 pb-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-arrow-repeat text-success mb-3" style="font-size: 3rem;"></i>
+                <h5 class="text-white fw-bold">Estado de <span id="stateCastigoName" class="text-purple"></span></h5>
+                <form id="stateForm" method="POST" action="" class="mt-4">
+                    <select name="castigoState" id="stateSelect" class="form-select glass-input mb-3 text-center">
+                        <option value="Activo" style="background: #250035;">Activo</option>
+                        <option value="Pausado" style="background: #250035;">Pausado</option>
+                        <option value="Completado" style="background: #250035;">Completado</option>
+                    </select>
+                    <button type="submit" class="btn w-100 btn-success fw-bold">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

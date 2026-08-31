@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo_pagina %}Usuario {{ user.nameUser }}{% endblock %}
+{% block content %}
+    <div class="container">
+        <table class="table table-bordered">
+            <tr>
+                <th>ID</th>
+                <td>{{ user.idUser }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ user.nameUser }}</td>
+            </tr>
+            <tr>
+                <th>Contraseña</th>
+                <td>{{ user.passwordUser }}</td>
+            </tr>
+        </table>
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('user.edit', id=user.idUser) }}" class="btn btn-primary btn-sm mb-1">
+                <i class="bi bi-pencil-square"></i>
+            </a>
+            <a href="{{ url_for('user.delete', id=user.idUser) }}" class="btn btn-danger btn-sm mb-1">
+                <i class="bi bi-trash"></i>
+            </a>
+        </div>
+        <h2 class="text-center">Código QR</h2>
+        <div class="text-center">
+            <img src="{{ url_for('user.generate_qr', id=user.idUser) }}" alt="QR Code" class="img-fluid">
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Mi Nivel Personal{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+                <li class="sidebar-item">
+            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
+                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
+            </a>
+        </li>
+<li class="sidebar-item">
+            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
+                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link active">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<style>
+    .nivel-wrapper {
+        width: 95%;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 10vh 20px 60px 20px;
+        box-sizing: border-box;
+    }
+
+    .nivel-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 45px;
+        text-align: center;
+    }
+
+    .nivel-badge {
+        width: 130px;
+        height: 130px;
+        margin: 0 auto 20px auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 30% 30%, #ffe680, #ffb700 55%, #b8860b 100%);
+        box-shadow: 0 0 35px rgba(255, 183, 0, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.4);
+        position: relative;
+    }
+
+    .nivel-badge i {
+        font-size: 3.4rem;
+        color: #3a2400;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .nivel-numero {
+        position: absolute;
+        bottom: -6px;
+        right: -6px;
+        background: #1a1030;
+        border: 2px solid #ffb700;
+        color: #ffd700;
+        font-weight: 700;
+        font-style: italic;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .nivel-titulo {
+        color: #fff;
+        font-size: 2rem;
+        font-style: italic;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .nivel-subtitulo {
+        color: rgba(255, 255, 255, 0.55);
+        margin-bottom: 30px;
+    }
+
+    .nivel-xp-bar {
+        height: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 10px;
+    }
+
+    .nivel-xp-fill {
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, #ff8c00, #ffd700);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+        transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .nivel-xp-texto {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9rem;
+        margin-bottom: 35px;
+    }
+
+    .nivel-stats-row {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 25px;
+    }
+
+    .nivel-stat {
+        text-align: center;
+        padding: 10px;
+        min-width: 120px;
+    }
+
+    .nivel-stat-valor {
+        font-size: 2rem;
+        color: #e100ff;
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .nivel-stat-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        font-style: italic;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="nivel-wrapper">
+    <div class="nivel-card">
+        <div class="nivel-badge">
+            <i class="bi bi-award-fill"></i>
+            <span class="nivel-numero">{{ data.nivel }}</span>
+        </div>
+
+        <div class="nivel-titulo">Nivel {{ data.nivel }} · {{ data.titulo }}</div>
+        <p class="nivel-subtitulo">Sigue completando hábitos y manteniendo tu racha para subir de nivel</p>
+
+        <div class="nivel-xp-bar">
+            <div class="nivel-xp-fill" style="width: {{ data.pct_nivel }}%;"></div>
+        </div>
+        <p class="nivel-xp-texto">{{ data.xp_en_nivel }} / {{ data.xp_por_nivel }} XP &middot; te faltan {{ data.xp_para_subir }} XP para el nivel {{ data.nivel + 1 }}</p>
+
+        <div class="nivel-stats-row">
+            <div class="nivel-stat">
+                <div class="nivel-stat-valor">{{ data.xp }}</div>
+                <div class="nivel-stat-label">XP Total</div>
+            </div>
+            <div class="nivel-stat">
+                <div class="nivel-stat-valor">{{ data.completados }}</div>
+                <div class="nivel-stat-label">Hábitos Completados</div>
+            </div>
+            <div class="nivel-stat">
+                <div class="nivel-stat-valor">{{ data.racha_max }}</div>
+                <div class="nivel-stat-label">Racha Máxima (días)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebarToggle.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+        sidebarToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+    });
+</script>
+{% endblock %}

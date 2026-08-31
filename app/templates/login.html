@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Bienvenido a mi aplicativo{% endblock %}
+
+{% block content %}
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+
+<div class="login-wrapper">
+    <div class="login-left">
+        <div class="login-brand">
+            <a href="#" class="portfolio-badge">
+                <i class="bi bi-briefcase-fill"></i> Mi Portafolio
+            </a>
+            <h1>Bienvenido</h1>
+            <p>Accede a tu cuenta para continuar disfrutando de todos nuestros servicios y funcionalidades exclusivas.</p>
+        </div>
+    </div>
+    
+    <div class="login-right">
+        <div class="card shadow-lg border-0 rounded-lg" style="display: grid; overflow: hidden; position: relative;">
+            
+            <!-- SECCIÓN DE LOGIN -->
+            <div id="loginSection" style="grid-area: 1 / 1; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease; opacity: 1; transform: translateX(0); z-index: 2;">
+                <div class="card-header">
+                    <h1>Iniciar sesión</h1>
+                    <p>Ingresa tus credenciales</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('auth.login') }}">
+                        <div class="form-group mb-4">
+                            <label for="nameUser" class="form-label">Usuario</label>
+                            <input type="text" name="nameUser" id="nameUser" class="form-control" placeholder="Nombre de usuario" required>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="passwordUser" class="form-label">Contraseña</label>
+                            <input type="password" name="passwordUser" id="passwordUser" class="form-control" placeholder="Tu contraseña" required>
+                        </div>
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </button>
+                            <a href="javascript:void(0)" onclick="toggleForms('register')" class="forgot-link text-center w-100 d-block mt-3" style="text-align: center;">
+                                <i class="bi bi-person-plus"></i> Crear Cuenta Nueva
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SECCIÓN DE REGISTRO -->
+            <div id="registerSection" style="grid-area: 1 / 1; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease; opacity: 0; transform: translateX(100%); visibility: hidden; pointer-events: none; z-index: 1;">
+                <div class="card-header">
+                    <h1>Registrarse</h1>
+                    <p>Crea tu nueva cuenta</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ url_for('user.add') }}" onsubmit="return validatePasswords(event)">
+                        <div class="form-group mb-3">
+                            <label for="regNameUser" class="form-label">Usuario</label>
+                            <input type="text" name="nameUser" id="regNameUser" class="form-control" placeholder="Elige un nombre" required>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="regPasswordUser" class="form-label">Contraseña</label>
+                            <input type="password" name="passwordUser" id="regPasswordUser" class="form-control" placeholder="Crea una contraseña" required onkeyup="checkPasswordMatch()">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="regPasswordConfirm" class="form-label">Confirmar Contraseña</label>
+                            <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Repite tu contraseña" required onkeyup="checkPasswordMatch()">
+                            <div id="passwordError" style="color: #ff0077; font-size: 0.85rem; font-style: italic; margin-top: 8px; display: none;">
+                                <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.
+                            </div>
+                        </div>
+                        <div class="d-grid gap-3">
+                            <button type="submit" id="btnRegister" class="btn btn-primary btn-block">
+                                <i class="bi bi-check2-circle"></i> Registrarse
+                            </button>
+                            <a href="javascript:void(0)" onclick="toggleForms('login')" class="forgot-link text-center w-100 d-block mt-2" style="text-align: center;">
+                                <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleForms(target) {
+        const loginSec = document.getElementById('loginSection');
+        const registerSec = document.getElementById('registerSection');
+        
+        if (target === 'register') {
+            // Ocultar Login (Mover a la izquierda)
+            loginSec.style.transform = 'translateX(-100%)';
+            loginSec.style.opacity = '0';
+            loginSec.style.visibility = 'hidden';
+            loginSec.style.pointerEvents = 'none';
+
+            // Mostrar Registro (Traer de la derecha)
+            registerSec.style.transform = 'translateX(0)';
+            registerSec.style.opacity = '1';
+            registerSec.style.visibility = 'visible';
+            registerSec.style.pointerEvents = 'auto';
+        } else {
+            // Mostrar Login (Traer del centro)
+            loginSec.style.transform = 'translateX(0)';
+            loginSec.style.opacity = '1';
+            loginSec.style.visibility = 'visible';
+            loginSec.style.pointerEvents = 'auto';
+
+            // Ocultar Registro (Mover a la derecha)
+            registerSec.style.transform = 'translateX(100%)';
+            registerSec.style.opacity = '0';
+            registerSec.style.visibility = 'hidden';
+            registerSec.style.pointerEvents = 'none';
+        }
+    }
+
+    function checkPasswordMatch() {
+        const pwd = document.getElementById('regPasswordUser').value;
+        const confirm = document.getElementById('regPasswordConfirm').value;
+        const errorDiv = document.getElementById('passwordError');
+        const btnRegister = document.getElementById('btnRegister');
+
+        if (confirm === "") {
+            errorDiv.style.display = 'none';
+            btnRegister.disabled = false;
+            return true;
+        }
+
+        if (pwd !== confirm) {
+            errorDiv.style.display = 'block';
+            btnRegister.disabled = true;
+            return false;
+        } else {
+            errorDiv.style.display = 'none';
+            btnRegister.disabled = false;
+            return true;
+        }
+    }
+
+    function validatePasswords(e) {
+        if (!checkPasswordMatch()) {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        {% if request.args.get('register') %}
+        toggleForms('register');
+        {% endif %}
+    });
+</script>
+
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <!-- Track LTR (Izquierda a Derecha) -->
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+        <!-- Track RTL (Derecha a Izquierda) -->
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>&copy; mi aplicacion de mejoras, diyer 2026</span>
+    </div>
+</footer>
+{% endblock %}

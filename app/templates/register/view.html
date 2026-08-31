@@ -1,0 +1,38 @@
+<!-- Modal: Ver Detalles del Hábito -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-eye text-info"></i></div>
+                    Detalles del Hábito
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-white">
+                <div class="mb-3 text-center">
+                    <h3 id="viewName" class="fw-bold text-purple mb-1"></h3>
+                    <span id="viewState" class="badge bg-primary rounded-pill"></span>
+                </div>
+                <hr style="border-color: rgba(255,255,255,0.1);">
+                <div class="row text-center mt-3 mb-3">
+                    <div class="col-6">
+                        <small class="text-white-50 d-block">Categoría</small>
+                        <strong id="viewCategory"></strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-white-50 d-block">Frecuencia</small>
+                        <strong id="viewFreq"></strong>
+                    </div>
+                </div>
+                <div class="bg-dark bg-opacity-50 p-3 rounded-3 mt-3 border" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <small class="text-white-50 d-block mb-1">Descripción</small>
+                    <div id="viewDesc" class="fst-italic"></div>
+                </div>
+                <div class="text-center mt-3">
+                    <small class="text-white-50">Creado el: <span id="viewDate"></span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

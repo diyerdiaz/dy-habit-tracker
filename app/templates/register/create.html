@@ -1,0 +1,44 @@
+<!-- Modal: Crear Hábito -->
+<div class="modal fade" id="habitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-plus-circle text-purple"></i></div>
+                    Crear Nuevo Hábito
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="POST" action="{{ url_for('habits.register_habit') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Nombre del Hábito</label>
+                        <input type="text" name="habitName" class="form-control glass-input" placeholder="Ej: Meditar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Descripción o Meta</label>
+                        <input type="text" name="habitDesc" class="form-control glass-input" placeholder="Opcional">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Frecuencia</label>
+                        <select name="habitFreq" class="form-select glass-input">
+                            <option value="diario" style="background: #250035;">Diario</option>
+                            <option value="semanal" style="background: #250035;">Semanal</option>
+                            <option value="mensual" style="background: #250035;">Mensual</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-white-50">Categoría</label>
+                        <select name="habitCategory" class="form-select glass-input">
+                            <option value="salud" style="background: #250035;">Salud y Deporte</option>
+                            <option value="mente" style="background: #250035;">Mente y Educación</option>
+                            <option value="finanzas" style="background: #250035;">Finanzas</option>
+                            <option value="espiritual" style="background: #250035;">Espiritual / Social</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-purple fw-bold">Guardar Hábito</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

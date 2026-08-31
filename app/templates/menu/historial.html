@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Historial de Hábitos{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link active">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+                <li class="sidebar-item">
+            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
+                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
+            </a>
+        </li>
+<li class="sidebar-item">
+            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
+                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Contenedor Principal -->
+<div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
+    
+    <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
+        <h1 style="text-align: center; margin-top: 20px; color: #fff; font-style: italic; font-weight: 700;">Historial</h1>
+        <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Aquí se registrarán tus actividades pasadas.</p>
+    </div>
+    
+    <div class="card shadow-lg border-0 rounded-lg fade-in-section" style="max-width: 1000px; padding: 40px; width: 100%; text-align: center; margin-bottom: 60px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);">
+        <i class="bi bi-calendar2-check" style="font-size: 4rem; color: #d966ff; margin-bottom: 20px;"></i>
+        <h3 class="text-white">Módulo en Construcción</h3>
+    </div>
+</div>
+
+<script>
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebarToggle.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+        sidebarToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+    });
+</script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <!-- Track LTR -->
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+            </div>
+        </div>
+        <!-- Track RTL -->
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+                <span>Historial &bull; Registro &bull; Tiempo &bull; Memoria &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

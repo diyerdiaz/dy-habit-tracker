@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Gestión de Castigos{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link active">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Castigos
+            </a>
+        </li>
+                <li class="sidebar-item">
+            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
+                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
+            </a>
+        </li>
+<li class="sidebar-item">
+            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
+                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Contenedor Principal -->
+<div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
+    
+    <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; max-width: none !important; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
+        <h1 style="text-align: center; margin-top: 20px; color: #fff; font-style: italic; font-weight: 700;">Gestión de Castigos</h1>
+        <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Administra tus castigos, filtra por categorías y realiza un seguimiento de tus metas.</p>
+        
+        <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#castigoModal" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+            <i class="bi bi-plus-circle" style="margin-right: 8px;"></i> Registrar un Nuevo Castigo
+        </button>
+    </div>
+    
+    <!-- Contenedor Tabla -->
+    <div class="card shadow-lg border-0 rounded-lg fade-in-section" style="max-width: 1200px; padding: 30px; width: 100%; margin-bottom: 60px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);">
+        
+        <!-- Filtros y Búsqueda -->
+        <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 mb-3 mb-md-0">
+                <div class="input-group">
+                    <span class="input-group-text glass-input"><i class="bi bi-search text-white"></i></span>
+                    <input type="text" id="searchInput" class="form-control glass-input" placeholder="Buscar castigo...">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 mb-3 mb-md-0">
+                <select id="filterCategory" class="form-select glass-input">
+                    <option value="">Todas las Categorías</option>
+                    <option value="salud">Salud y Deporte</option>
+                    <option value="mente">Mente y Educación</option>
+                    <option value="finanzas">Finanzas</option>
+                    <option value="espiritual">Espiritual / Social</option>
+                </select>
+            </div>
+            <div class="col-lg-4 col-md-3">
+                <select id="filterState" class="form-select glass-input">
+                    <option value="">Todos los Estados</option>
+                    <option value="Activo">Activo</option>
+                    <option value="Pausado">Pausado</option>
+                    <option value="Completado">Completado</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle custom-table" style="color: #fff; margin-bottom: 0;">
+                <thead style="border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
+                    <tr>
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Nombre</th>
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Categoría</th>
+                        
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Estado</th>
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="castigosTableBody">
+                    {% for castigo in castigos %}
+                    <tr class="castigo-row" data-id="{{ castigo.idCastigo }}" data-name="{{ castigo.castigoName|lower }}" data-category="{{ castigo.castigoCategory }}" data-state="{{ castigo.castigoState }}" data-desc="{{ castigo.castigoDesc or '' }}" style="background: rgba(255, 255, 255, 0.02); transition: background 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.02)'">
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
+                            <div class="d-flex align-items-center">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(155, 89, 182, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    {% if castigo.castigoCategory == 'salud' %}
+                                        <i class="bi bi-heart-pulse text-info" style="font-size: 1.2rem;"></i>
+                                    {% elif castigo.castigoCategory == 'mente' %}
+                                        <i class="bi bi-book text-warning" style="font-size: 1.2rem;"></i>
+                                    {% elif castigo.castigoCategory == 'finanzas' %}
+                                        <i class="bi bi-wallet2 text-success" style="font-size: 1.2rem;"></i>
+                                    {% else %}
+                                        <i class="bi bi-people text-primary" style="font-size: 1.2rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600;">{{ castigo.castigoName }}</div>
+                                    <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">{{ castigo.createdAt.strftime('%d/%m/%Y') }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
+                            <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 20px; font-weight: normal; border: 1px solid rgba(255, 255, 255, 0.05);">
+                                {{ castigo.castigoCategory|capitalize }}
+                            </span>
+                        </td>
+                        
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
+                            {% if castigo.castigoState == 'Activo' %}
+                                {% set bg_color = 'rgba(46, 204, 113, 0.15)' %}
+                                {% set text_color = '#2ecc71' %}
+                            {% elif castigo.castigoState == 'Pausado' %}
+                                {% set bg_color = 'rgba(241, 196, 15, 0.15)' %}
+                                {% set text_color = '#f1c40f' %}
+                            {% else %}
+                                {% set bg_color = 'rgba(52, 152, 219, 0.15)' %}
+                                {% set text_color = '#3498db' %}
+                            {% endif %}
+                            <span class="badge" style="background: {{ bg_color }}; color: {{ text_color }}; padding: 8px 12px; border-radius: 20px; font-weight: 600; border: 1px solid {{ bg_color }};">
+                                <i class="bi bi-circle-fill" style="font-size: 0.5rem; margin-right: 5px; vertical-align: middle;"></i> {{ castigo.castigoState }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
+                            <div class="d-flex justify-content-end gap-2" style="white-space: nowrap;">
+                                <button type="button" class="btn btn-sm btn-outline-info rounded-circle" title="Ver" onclick="openViewModal({{ castigo.idCastigo }})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ castigo.idCastigo }}, '{{ castigo.castigoName|escape }}', '{{ castigo.castigoDesc|escape }}', '{{ castigo.castigoCategory }}', '{{ castigo.castigoCategory }}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-circle" title="Cambiar Estado" onclick="openStateModal({{ castigo.idCastigo }}, '{{ castigo.castigoState }}', '{{ castigo.castigoName|escape }}')">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ castigo.idCastigo }}, '{{ castigo.castigoName|escape }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr id="emptyRow">
+                        <td colspan="5" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
+                            <i class="bi bi-inbox" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5; color: #9b59b6;"></i>
+                            <span style="font-size: 1.1rem;">Aún no has registrado ningún castigo. ¡Comienza ahora!</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr id="noResultsRow" style="display: none;">
+                        <td colspan="5" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
+                            <i class="bi bi-search" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5;"></i>
+                            <span style="font-size: 1.1rem;">No se encontraron castigos que coincidan con la búsqueda.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <span id="pageInfo" style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Mostrando 0 registros</span>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                    <!-- Dinámico -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALES (cada uno en su propio archivo) ================= -->
+{% include 'castigos/create.html' %}
+{% include 'castigos/edit.html' %}
+{% include 'castigos/view.html' %}
+{% include 'castigos/state.html' %}
+{% include 'castigos/delete.html' %}
+
+<!-- Estilos para Modales y UI -->
+<style>
+.glass-modal {
+    background: rgba(30, 0, 45, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+}
+.glass-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 20px 25px;
+    color: white;
+}
+.icon-box {
+    width: 35px; height: 35px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 12px;
+}
+.text-purple { color: #d966ff; }
+.btn-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; }
+.btn-purple:hover { background: linear-gradient(135deg, #8e44ad, #732d91); color: white; }
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+.glass-input::placeholder { color: rgba(255,255,255,0.4) !important; }
+.glass-input:focus { border-color: #d966ff !important; box-shadow: 0 0 10px rgba(217,102,255,0.3) !important; }
+.glass-input option { background: #250035; color: white; }
+</style>
+
+<!-- Scripts de Frontend -->
+<script>
+    const ITEMS_PER_PAGE = 5;
+    let currentPage = 1;
+    let filteredRows = [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Sidebar logic
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        sidebarToggle.addEventListener('click', () => {
+            sidebarToggle.classList.toggle('active');
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+        sidebarOverlay.addEventListener('click', () => {
+            sidebarToggle.classList.remove('active');
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // Intro animation
+        const fadeSections = document.querySelectorAll('.fade-in-section');
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeSections.forEach(section => scrollObserver.observe(section));
+
+        // Inicializar Filtros y Paginación
+        initFiltersAndPagination();
+    });
+
+    // ── LÓGICA DE FILTROS Y BÚSQUEDA ──
+    const searchInput = document.getElementById('searchInput');
+    const filterCategory = document.getElementById('filterCategory');
+    const filterState = document.getElementById('filterState');
+    const allRows = Array.from(document.querySelectorAll('.castigo-row'));
+    const emptyRow = document.getElementById('emptyRow');
+    const noResultsRow = document.getElementById('noResultsRow');
+
+    function initFiltersAndPagination() {
+        if(allRows.length > 0 && emptyRow) { emptyRow.style.display = 'none'; }
+        
+        searchInput.addEventListener('input', applyFilters);
+        filterCategory.addEventListener('change', applyFilters);
+        filterState.addEventListener('change', applyFilters);
+        
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const query = searchInput.value.toLowerCase();
+        const category = filterCategory.value.toLowerCase();
+        const state = filterState.value.toLowerCase();
+
+        filteredRows = allRows.filter(row => {
+            const rowName = row.dataset.name || '';
+            const rowDesc = (row.dataset.desc || '').toLowerCase();
+            const rowCat = (row.dataset.category || '').toLowerCase();
+            const rowState = (row.dataset.state || '').toLowerCase();
+
+            const matchSearch = rowName.includes(query) || rowDesc.includes(query);
+            const matchCat = category === '' || rowCat === category;
+            const matchState = state === '' || rowState === state;
+
+            return matchSearch && matchCat && matchState;
+        });
+
+        currentPage = 1;
+        updateTable();
+    }
+
+    function updateTable() {
+        allRows.forEach(row => row.style.display = 'none');
+        if (noResultsRow) noResultsRow.style.display = 'none';
+
+        if (filteredRows.length === 0 && allRows.length > 0) {
+            if (noResultsRow) noResultsRow.style.display = '';
+            document.getElementById('paginationControls').innerHTML = '';
+            document.getElementById('pageInfo').textContent = 'Mostrando 0 registros';
+            return;
+        }
+
+        const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE);
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+
+        filteredRows.slice(startIndex, endIndex).forEach(row => row.style.display = '');
+
+        const infoText = `Mostrando ${filteredRows.length === 0 ? 0 : startIndex + 1} - ${Math.min(endIndex, filteredRows.length)} de ${filteredRows.length} registros`;
+        document.getElementById('pageInfo').textContent = infoText;
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const ul = document.getElementById('paginationControls');
+        ul.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+
+        ul.innerHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link glass-input" href="#" onclick="goToPage(${currentPage - 1}, event)">Anterior</a>
+        </li>`;
+
+        for (let i = 1; i <= totalPages; i++) {
+            ul.innerHTML += `<li class="page-item ${currentPage === i ? 'active' : ''}">
+                <a class="page-link glass-input" href="#" onclick="goToPage(${i}, event)" ${currentPage === i ? 'style="background: #9b59b6 !important; border-color: #9b59b6 !important;"' : ''}>${i}</a>
+            </li>`;
+        }
+
+        ul.innerHTML += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link glass-input" href="#" onclick="goToPage(${currentPage + 1}, event)">Siguiente</a>
+        </li>`;
+    }
+
+    function goToPage(page, event) {
+        if(event) event.preventDefault();
+        const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            updateTable();
+        }
+    }
+
+    // ── LÓGICA DE MODALES ──
+
+    function openEditModal(id, name, desc, freq, category) {
+        document.getElementById('editForm').action = `/castigo/${id}/edit`;
+        document.getElementById('editName').value = name;
+        document.getElementById('editDesc').value = desc !== 'None' ? desc : '';
+        document.getElementById('editCategory').value = freq;
+        document.getElementById('editCategory').value = category;
+        var modal = new bootstrap.Modal(document.getElementById('editModal'));
+        modal.show();
+    }
+
+    function openStateModal(id, state, name) {
+        document.getElementById('stateForm').action = `/castigo/${id}/state`;
+        document.getElementById('stateSelect').value = state;
+        document.getElementById('stateCastigoName').textContent = name;
+        var modal = new bootstrap.Modal(document.getElementById('stateModal'));
+        modal.show();
+    }
+
+    function openDeleteModal(id, name) {
+        document.getElementById('deleteForm').action = `/castigo/${id}/delete`;
+        document.getElementById('delCastigoName').textContent = name;
+        var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+
+    function openViewModal(id) {
+        fetch(`/castigo/${id}/json`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('viewName').textContent = data.castigoName;
+                document.getElementById('viewState').textContent = data.castigoState;
+                document.getElementById('viewCategory').textContent = data.castigoCategory.charAt(0).toUpperCase() + data.castigoCategory.slice(1);
+                document.getElementById('viewCategory').textContent = data.castigoCategory.charAt(0).toUpperCase() + data.castigoCategory.slice(1);
+                document.getElementById('viewDesc').textContent = data.castigoDesc || 'No se proporcionó descripción.';
+                document.getElementById('viewDate').textContent = data.createdAt;
+                
+                const stateBadge = document.getElementById('viewState');
+                stateBadge.className = 'badge rounded-pill mt-1 ' + 
+                    (data.castigoState === 'Activo' ? 'bg-success' : 
+                    data.castigoState === 'Pausado' ? 'bg-warning text-dark' : 'bg-info');
+
+                var modal = new bootstrap.Modal(document.getElementById('viewModal'));
+                modal.show();
+            })
+            .catch(err => alert("Error cargando los detalles del castigo."));
+    }
+</script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Castigos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
