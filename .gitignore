@@ -1,0 +1,13 @@
+# Entornos virtuales
+venv/
+.venv/
+
+# Bytecode de Python
+__pycache__/
+*.pyc
+
+# Base de datos local
+instance/*.sqlite
+
+# Editor / OS
+.DS_Store
