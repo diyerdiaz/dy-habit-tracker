@@ -1,7 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 from app.models.habitos import Habit
+from app.models.hist_habits import HistHabit
 from app import db
+from app.gamificacion import registrar_toggle_habito
+from datetime import date
 
 bp = Blueprint('habits', __name__)
 
@@ -31,6 +34,25 @@ def register_habit():
     habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.createdAt.desc()).all()
     return render_template("register/index.html", habits=habits)
 
+@bp.route('/habitos/check')
+@login_required
+def habits_check():
+    habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.habitName).all()
+    marcados_hoy = {
+        h.idHabit for h in HistHabit.query.filter_by(idUser=current_user.idUser, fecha=date.today()).all()
+    }
+    total_habitos = len(habits)
+    completados_hoy = sum(1 for h in habits if h.idHabit in marcados_hoy)
+    pct_hoy = round((completados_hoy / total_habitos * 100)) if total_habitos > 0 else 0
+    return render_template(
+        "register/check.html",
+        habits=habits,
+        marcados_hoy=marcados_hoy,
+        total_habitos=total_habitos,
+        completados_hoy=completados_hoy,
+        pct_hoy=pct_hoy,
+    )
+
 @bp.route('/habit/<int:habit_id>/json')
 @login_required
 def habit_detail_json(habit_id):
@@ -59,6 +81,23 @@ def habit_change_state(habit_id):
         db.session.commit()
         flash(f"Estado del hábito '{habit.habitName}' cambiado a '{new_state}'.", "success")
     return redirect(url_for('habits.register_habit'))
+
+@bp.route('/habit/<int:habit_id>/toggle_today', methods=['POST'])
+@login_required
+def habit_toggle_today(habit_id):
+    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    hoy = date.today()
+    entry = HistHabit.query.filter_by(idHabit=habit.idHabit, fecha=hoy).first()
+    if entry:
+        db.session.delete(entry)
+        done = False
+    else:
+        db.session.add(HistHabit(idUser=current_user.idUser, idHabit=habit.idHabit, fecha=hoy))
+        done = True
+    db.session.commit()
+
+    progress = registrar_toggle_habito(current_user.idUser, done)
+    return jsonify({'success': True, 'done': done, 'xpTotal': progress.xpTotal})
 
 @bp.route('/habit/<int:habit_id>/delete', methods=['POST'])
 @login_required

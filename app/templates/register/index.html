@@ -2,6 +2,10 @@
 
 {% block titulo_pagina %}Gestión de Hábitos{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+{% endblock %}
+
 {% block content %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
@@ -24,6 +28,16 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
                 <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
             </a>
@@ -31,16 +45,6 @@
         <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
-            </a>
-        </li>
-                <li class="sidebar-item">
-            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
-                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
-            </a>
-        </li>
-<li class="sidebar-item">
-            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
-                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
             </a>
         </li>
         <li class="sidebar-item">
@@ -74,7 +78,7 @@
 <div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
     
     <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; max-width: none !important; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
-        <h1 style="text-align: center; margin-top: 20px; color: #fff; font-style: italic; font-weight: 700;">Gestión de Hábitos</h1>
+        <h1 style="text-align: center; margin-top: 20px; color: #b366ff; font-style: italic; font-weight: 700; text-shadow: 0 0 18px rgba(138, 40, 255, 0.5);">Gestión de Hábitos</h1>
         <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Administra tus hábitos, filtra por categorías y realiza un seguimiento de tus metas.</p>
         
         <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#habitModal" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
@@ -117,9 +121,8 @@
                 <thead style="border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
                     <tr>
                         <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Nombre</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Categoría</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Frecuencia</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Estado</th>
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: center;">Categoría</th>
+                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: center;">Frecuencia</th>
                         <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: right;">Acciones</th>
                     </tr>
                 </thead>
@@ -145,28 +148,13 @@
                                 </div>
                             </div>
                         </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent; text-align: center;">
                             <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 20px; font-weight: normal; border: 1px solid rgba(255, 255, 255, 0.05);">
                                 {{ habit.habitCategory|capitalize }}
                             </span>
                         </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); background: transparent;">
+                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); background: transparent; text-align: center;">
                             {{ habit.habitFreq|capitalize }}
-                        </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
-                            {% if habit.habitState == 'Activo' %}
-                                {% set bg_color = 'rgba(46, 204, 113, 0.15)' %}
-                                {% set text_color = '#2ecc71' %}
-                            {% elif habit.habitState == 'Pausado' %}
-                                {% set bg_color = 'rgba(241, 196, 15, 0.15)' %}
-                                {% set text_color = '#f1c40f' %}
-                            {% else %}
-                                {% set bg_color = 'rgba(52, 152, 219, 0.15)' %}
-                                {% set text_color = '#3498db' %}
-                            {% endif %}
-                            <span class="badge" style="background: {{ bg_color }}; color: {{ text_color }}; padding: 8px 12px; border-radius: 20px; font-weight: 600; border: 1px solid {{ bg_color }};">
-                                <i class="bi bi-circle-fill" style="font-size: 0.5rem; margin-right: 5px; vertical-align: middle;"></i> {{ habit.habitState }}
-                            </span>
                         </td>
                         <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
                             <div class="d-flex justify-content-end gap-2" style="white-space: nowrap;">
@@ -176,9 +164,6 @@
                                 <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ habit.idHabit }}, '{{ habit.habitName|escape }}', '{{ habit.habitDesc|escape }}', '{{ habit.habitFreq }}', '{{ habit.habitCategory }}')">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-success rounded-circle" title="Cambiar Estado" onclick="openStateModal({{ habit.idHabit }}, '{{ habit.habitState }}', '{{ habit.habitName|escape }}')">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                </button>
                                 <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, '{{ habit.habitName|escape }}')">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -187,14 +172,14 @@
                     </tr>
                     {% else %}
                     <tr id="emptyRow">
-                        <td colspan="5" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
+                        <td colspan="4" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
                             <i class="bi bi-inbox" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5; color: #9b59b6;"></i>
                             <span style="font-size: 1.1rem;">Aún no has registrado ningún hábito. ¡Comienza ahora!</span>
                         </td>
                     </tr>
                     {% endfor %}
                     <tr id="noResultsRow" style="display: none;">
-                        <td colspan="5" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
+                        <td colspan="4" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
                             <i class="bi bi-search" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5;"></i>
                             <span style="font-size: 1.1rem;">No se encontraron hábitos que coincidan con la búsqueda.</span>
                         </td>
@@ -222,221 +207,10 @@
 {% include 'register/state.html' %}
 {% include 'register/delete.html' %}
 
-<!-- Estilos para Modales y UI -->
-<style>
-.glass-modal {
-    background: rgba(30, 0, 45, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
-}
-.glass-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 20px 25px;
-    color: white;
-}
-.icon-box {
-    width: 35px; height: 35px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    margin-right: 12px;
-}
-.text-purple { color: #d966ff; }
-.btn-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; }
-.btn-purple:hover { background: linear-gradient(135deg, #8e44ad, #732d91); color: white; }
+{% endblock %}
 
-.glass-input {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
-    box-shadow: none !important;
-}
-.glass-input::placeholder { color: rgba(255,255,255,0.4) !important; }
-.glass-input:focus { border-color: #d966ff !important; box-shadow: 0 0 10px rgba(217,102,255,0.3) !important; }
-.glass-input option { background: #250035; color: white; }
-</style>
-
-<!-- Scripts de Frontend -->
-<script>
-    const ITEMS_PER_PAGE = 5;
-    let currentPage = 1;
-    let filteredRows = [];
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Sidebar logic
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        sidebarToggle.addEventListener('click', () => {
-            sidebarToggle.classList.toggle('active');
-            sidebar.classList.toggle('active');
-            sidebarOverlay.classList.toggle('active');
-        });
-        sidebarOverlay.addEventListener('click', () => {
-            sidebarToggle.classList.remove('active');
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-        });
-
-        // Intro animation
-        const fadeSections = document.querySelectorAll('.fade-in-section');
-        const scrollObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('is-visible');
-                    scrollObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        fadeSections.forEach(section => scrollObserver.observe(section));
-
-        // Inicializar Filtros y Paginación
-        initFiltersAndPagination();
-    });
-
-    // ── LÓGICA DE FILTROS Y BÚSQUEDA ──
-    const searchInput = document.getElementById('searchInput');
-    const filterCategory = document.getElementById('filterCategory');
-    const filterState = document.getElementById('filterState');
-    const allRows = Array.from(document.querySelectorAll('.habit-row'));
-    const emptyRow = document.getElementById('emptyRow');
-    const noResultsRow = document.getElementById('noResultsRow');
-
-    function initFiltersAndPagination() {
-        if(allRows.length > 0 && emptyRow) { emptyRow.style.display = 'none'; }
-        
-        searchInput.addEventListener('input', applyFilters);
-        filterCategory.addEventListener('change', applyFilters);
-        filterState.addEventListener('change', applyFilters);
-        
-        applyFilters();
-    }
-
-    function applyFilters() {
-        const query = searchInput.value.toLowerCase();
-        const category = filterCategory.value.toLowerCase();
-        const state = filterState.value.toLowerCase();
-
-        filteredRows = allRows.filter(row => {
-            const rowName = row.dataset.name || '';
-            const rowDesc = (row.dataset.desc || '').toLowerCase();
-            const rowCat = (row.dataset.category || '').toLowerCase();
-            const rowState = (row.dataset.state || '').toLowerCase();
-
-            const matchSearch = rowName.includes(query) || rowDesc.includes(query);
-            const matchCat = category === '' || rowCat === category;
-            const matchState = state === '' || rowState === state;
-
-            return matchSearch && matchCat && matchState;
-        });
-
-        currentPage = 1;
-        updateTable();
-    }
-
-    function updateTable() {
-        allRows.forEach(row => row.style.display = 'none');
-        if (noResultsRow) noResultsRow.style.display = 'none';
-
-        if (filteredRows.length === 0 && allRows.length > 0) {
-            if (noResultsRow) noResultsRow.style.display = '';
-            document.getElementById('paginationControls').innerHTML = '';
-            document.getElementById('pageInfo').textContent = 'Mostrando 0 registros';
-            return;
-        }
-
-        const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE);
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-
-        filteredRows.slice(startIndex, endIndex).forEach(row => row.style.display = '');
-
-        const infoText = `Mostrando ${filteredRows.length === 0 ? 0 : startIndex + 1} - ${Math.min(endIndex, filteredRows.length)} de ${filteredRows.length} registros`;
-        document.getElementById('pageInfo').textContent = infoText;
-
-        renderPagination(totalPages);
-    }
-
-    function renderPagination(totalPages) {
-        const ul = document.getElementById('paginationControls');
-        ul.innerHTML = '';
-        
-        if (totalPages <= 1) return;
-
-        ul.innerHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-            <a class="page-link glass-input" href="#" onclick="goToPage(${currentPage - 1}, event)">Anterior</a>
-        </li>`;
-
-        for (let i = 1; i <= totalPages; i++) {
-            ul.innerHTML += `<li class="page-item ${currentPage === i ? 'active' : ''}">
-                <a class="page-link glass-input" href="#" onclick="goToPage(${i}, event)" ${currentPage === i ? 'style="background: #9b59b6 !important; border-color: #9b59b6 !important;"' : ''}>${i}</a>
-            </li>`;
-        }
-
-        ul.innerHTML += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-            <a class="page-link glass-input" href="#" onclick="goToPage(${currentPage + 1}, event)">Siguiente</a>
-        </li>`;
-    }
-
-    function goToPage(page, event) {
-        if(event) event.preventDefault();
-        const totalPages = Math.ceil(filteredRows.length / ITEMS_PER_PAGE);
-        if (page >= 1 && page <= totalPages) {
-            currentPage = page;
-            updateTable();
-        }
-    }
-
-    // ── LÓGICA DE MODALES ──
-
-    function openEditModal(id, name, desc, freq, category) {
-        document.getElementById('editForm').action = `/habit/${id}/edit`;
-        document.getElementById('editName').value = name;
-        document.getElementById('editDesc').value = desc !== 'None' ? desc : '';
-        document.getElementById('editFreq').value = freq;
-        document.getElementById('editCategory').value = category;
-        var modal = new bootstrap.Modal(document.getElementById('editModal'));
-        modal.show();
-    }
-
-    function openStateModal(id, state, name) {
-        document.getElementById('stateForm').action = `/habit/${id}/state`;
-        document.getElementById('stateSelect').value = state;
-        document.getElementById('stateHabitName').textContent = name;
-        var modal = new bootstrap.Modal(document.getElementById('stateModal'));
-        modal.show();
-    }
-
-    function openDeleteModal(id, name) {
-        document.getElementById('deleteForm').action = `/habit/${id}/delete`;
-        document.getElementById('delHabitName').textContent = name;
-        var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        modal.show();
-    }
-
-    function openViewModal(id) {
-        fetch(`/habit/${id}/json`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('viewName').textContent = data.habitName;
-                document.getElementById('viewState').textContent = data.habitState;
-                document.getElementById('viewCategory').textContent = data.habitCategory.charAt(0).toUpperCase() + data.habitCategory.slice(1);
-                document.getElementById('viewFreq').textContent = data.habitFreq.charAt(0).toUpperCase() + data.habitFreq.slice(1);
-                document.getElementById('viewDesc').textContent = data.habitDesc || 'No se proporcionó descripción.';
-                document.getElementById('viewDate').textContent = data.createdAt;
-                
-                const stateBadge = document.getElementById('viewState');
-                stateBadge.className = 'badge rounded-pill mt-1 ' + 
-                    (data.habitState === 'Activo' ? 'bg-success' : 
-                    data.habitState === 'Pausado' ? 'bg-warning text-dark' : 'bg-info');
-
-                var modal = new bootstrap.Modal(document.getElementById('viewModal'));
-                modal.show();
-            })
-            .catch(err => alert("Error cargando los detalles del hábito."));
-    }
-</script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/habits.js') }}"></script>
 {% endblock %}
 
 {% block footer %}

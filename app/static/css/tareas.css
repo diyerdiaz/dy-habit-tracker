@@ -1,0 +1,334 @@
+.tareas-title {
+    text-align: center;
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2.6rem;
+    margin-top: 20px;
+    text-shadow: 0 0 18px rgba(138, 40, 255, 0.5);
+}
+
+.tareas-wrapper {
+    width: 95%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 10vh 20px 60px 20px;
+    box-sizing: border-box;
+}
+
+.tareas-add-form {
+    display: flex;
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto 24px auto;
+}
+
+.tareas-input {
+    flex: 1 1 auto;
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 0.95rem;
+    font-style: italic;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tareas-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.tareas-input:focus {
+    border-color: #d966ff;
+    box-shadow: 0 0 14px rgba(217, 102, 255, 0.3);
+}
+
+.tareas-add-btn {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: #fff;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tareas-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.55);
+}
+
+.tareas-card {
+    background: rgba(80, 0, 120, 0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 14px;
+}
+
+.tarea-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.tarea-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(225, 0, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.tarea-item + .tarea-item {
+    margin-top: 6px;
+}
+
+.tarea-circle {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: 0.25s ease;
+}
+
+.tarea-item.done .tarea-circle {
+    background: #00ffab;
+    border-color: #00ffab;
+    color: #0a0015;
+    box-shadow: 0 0 12px rgba(0, 255, 171, 0.55);
+}
+
+.tarea-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: #fff;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.02rem;
+    transition: 0.25s ease;
+    word-break: break-word;
+}
+
+.tarea-item.done .tarea-text {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.tarea-delete {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 102, 102, 0.3);
+    background: rgba(255, 102, 102, 0.08);
+    color: #ff6666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.25s ease;
+    opacity: 0;
+}
+
+.tarea-item:hover .tarea-delete {
+    opacity: 1;
+}
+
+.tarea-delete:hover {
+    background: rgba(255, 102, 102, 0.2);
+}
+
+.tareas-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.tareas-empty i {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 15px;
+    opacity: 0.5;
+    color: #9b59b6;
+}
+
+.tareas-empty span {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 480px) {
+    .tarea-delete {
+        opacity: 1;
+    }
+}
+
+/* ── Historial de Tareas ── */
+.tareas-hist-toggle-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.tareas-hist-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 26px;
+    border-radius: 20px;
+    border: 1px solid rgba(217, 102, 255, 0.35);
+    background: rgba(138, 40, 255, 0.1);
+    color: #fff;
+    font-size: 0.95rem;
+    font-style: italic;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.tareas-hist-toggle-btn:hover {
+    background: rgba(138, 40, 255, 0.22);
+    border-color: rgba(217, 102, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.tareas-hist-panel {
+    display: none;
+    margin-top: 30px;
+}
+
+.tareas-hist-panel.open {
+    display: block;
+}
+
+.tareas-hist-title {
+    text-align: center;
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0 0 20px 0;
+    text-shadow: 0 0 14px rgba(138, 40, 255, 0.4);
+}
+
+.tareas-hist-filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tareas-hist-filter-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.tareas-hist-select {
+    padding: 9px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 0.9rem;
+    font-style: italic;
+    outline: none;
+    max-width: 100%;
+}
+
+.tareas-hist-select:focus {
+    border-color: #d966ff;
+    box-shadow: 0 0 14px rgba(217, 102, 255, 0.3);
+}
+
+.tareas-hist-select option {
+    background: #1a002a;
+    color: #fff;
+}
+
+.tareas-hist-day {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 18px 20px;
+}
+
+.tareas-hist-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tareas-hist-date {
+    color: #fff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.tareas-hist-count {
+    color: #d966ff;
+    font-style: italic;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.tareas-hist-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tareas-hist-items li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.75);
+    font-style: italic;
+    font-size: 0.92rem;
+}
+
+.tareas-hist-items li i {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.tareas-hist-items li.done {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.tareas-hist-items li.done i {
+    color: #00ffab;
+}

@@ -2,6 +2,10 @@
 
 {% block titulo_pagina %}Historial de Hábitos{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/historial.css') }}">
+{% endblock %}
+
 {% block content %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
@@ -24,6 +28,16 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
                 <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
             </a>
@@ -31,16 +45,6 @@
         <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link active">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
-            </a>
-        </li>
-                <li class="sidebar-item">
-            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
-                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
-            </a>
-        </li>
-<li class="sidebar-item">
-            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
-                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
             </a>
         </li>
         <li class="sidebar-item">
@@ -71,36 +75,90 @@
 </div>
 
 <!-- Contenedor Principal -->
-<div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
-    
+<div class="hist-wrapper">
+
     <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
-        <h1 style="text-align: center; margin-top: 20px; color: #fff; font-style: italic; font-weight: 700;">Historial</h1>
-        <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Aquí se registrarán tus actividades pasadas.</p>
+        <h1 style="text-align: center; margin-top: 20px; color: #fff; font-style: italic; font-weight: 700;">Historial de Actividad</h1>
+        <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Cada cuadro es un día. Haz clic en uno para ver cuántas actividades hiciste.</p>
     </div>
-    
-    <div class="card shadow-lg border-0 rounded-lg fade-in-section" style="max-width: 1000px; padding: 40px; width: 100%; text-align: center; margin-bottom: 60px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);">
-        <i class="bi bi-calendar2-check" style="font-size: 4rem; color: #d966ff; margin-bottom: 20px;"></i>
-        <h3 class="text-white">Módulo en Construcción</h3>
+
+    <div class="hist-summary-row">
+        <div class="hist-summary-item">
+            <div class="hist-summary-value">{{ total_actividades }}</div>
+            <div class="hist-summary-label">Actividades Registradas</div>
+        </div>
+        <div class="hist-summary-item">
+            <div class="hist-summary-value">{{ dias_activos }}</div>
+            <div class="hist-summary-label">Días Activos</div>
+        </div>
+    </div>
+
+    <div class="hist-year-row">
+        {% for anio in anios_disponibles %}
+        <a href="{{ url_for('menu.historial', year=anio) }}" class="hist-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
+        {% endfor %}
+    </div>
+
+    <h2 class="hist-calendar-title">Calendario de Hábitos</h2>
+
+    <div class="hist-card">
+        <div class="hist-calendar" id="histScroll">
+            <div class="hist-months">
+                {% for semana in semanas %}
+                <span class="hist-month-label">{{ semana.mes }}</span>
+                {% endfor %}
+            </div>
+            <div class="hist-grid-row">
+                <div class="hist-daylabels">
+                    <span>Lun</span>
+                    <span></span>
+                    <span>Mié</span>
+                    <span></span>
+                    <span>Vie</span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="hist-weeks">
+                    {% for semana in semanas %}
+                    <div class="hist-week">
+                        {% for dia in semana.dias %}
+                        <div class="hist-day level-{{ dia.nivel }}{{ ' is-future' if dia.es_futuro else '' }}"
+                             data-fecha="{{ dia.fecha }}"
+                             data-label="{{ dia.label }}"
+                             data-count="{{ dia.count }}"
+                             data-habitos="{{ dia.habitos|join(', ') }}"
+                             title="{{ dia.label }}: {{ dia.count }} actividad{{ 'es' if dia.count != 1 else '' }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="day-popup" id="dayPopup">
+                <div class="day-popup-title" id="dayPopupTitle"></div>
+                <div class="day-popup-count" id="dayPopupCount"></div>
+                <div class="day-popup-habits" id="dayPopupHabits"></div>
+            </div>
+        </div>
+
+        <div class="hist-legend">
+            Menos
+            <span class="hist-day level-0"></span>
+            <span class="hist-day level-1"></span>
+            <span class="hist-day level-2"></span>
+            <span class="hist-day level-3"></span>
+            <span class="hist-day level-4"></span>
+            Más
+        </div>
     </div>
 </div>
 
-<script>
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+{% endblock %}
 
-    sidebarToggle.addEventListener('click', () => {
-        sidebarToggle.classList.toggle('active');
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-
-    sidebarOverlay.addEventListener('click', () => {
-        sidebarToggle.classList.remove('active');
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-</script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/historial.js') }}"></script>
 {% endblock %}
 
 {% block footer %}

@@ -1,0 +1,31 @@
+.glass-modal {
+    background: rgba(30, 0, 45, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+}
+.glass-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 20px 25px;
+    color: white;
+}
+.icon-box {
+    width: 35px; height: 35px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 12px;
+}
+.text-purple { color: #d966ff; }
+.btn-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; }
+.btn-purple:hover { background: linear-gradient(135deg, #8e44ad, #732d91); color: white; }
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+.glass-input::placeholder { color: rgba(255,255,255,0.4) !important; }
+.glass-input:focus { border-color: #d966ff !important; box-shadow: 0 0 10px rgba(217,102,255,0.3) !important; }
+.glass-input option { background: #250035; color: white; }

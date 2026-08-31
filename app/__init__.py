@@ -21,15 +21,16 @@ def create_app():
 
     # Register blueprints
     from app.routes import (
-        users_route, auth, users_route_async, habits_route, menu_route, castigos_route
+        users_route, auth, users_route_async, habits_route, menu_route, castigos_route, tareas_route
     )
-    
+
     app.register_blueprint(auth.bp)
     app.register_blueprint(users_route.bp)
     app.register_blueprint(users_route_async.bp)
     app.register_blueprint(habits_route.bp)
     app.register_blueprint(menu_route.bp)
     app.register_blueprint(castigos_route.bp)
+    app.register_blueprint(tareas_route.bp)
 
     @app.errorhandler(Exception)
     def handle_error(e):

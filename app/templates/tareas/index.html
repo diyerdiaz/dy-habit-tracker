@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Tareas del Día{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tareas.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link active">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Contenedor Principal -->
+<div class="tareas-wrapper">
+
+    <div class="text-center mb-4" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
+        <h1 class="tareas-title">Tareas del Día</h1>
+        <p style="text-align: center; max-width: 600px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Agrega pendientes sueltos de hoy, sin necesidad de convertirlos en un hábito.</p>
+    </div>
+
+    <form class="tareas-add-form" id="addTaskForm">
+        <input type="text" id="newTaskInput" class="tareas-input" placeholder="Escribe una nueva tarea..." maxlength="255" required>
+        <button type="submit" class="tareas-add-btn"><i class="bi bi-plus-lg"></i></button>
+    </form>
+
+    <div class="tareas-card" id="tareasList" style="{{ 'display:none;' if not tareas else '' }}">
+        {% for tarea in tareas %}
+        <div class="tarea-item{{ ' done' if tarea.completada else '' }}" data-id="{{ tarea.idTarea }}">
+            <div class="tarea-circle"><i class="bi bi-check-lg"></i></div>
+            <div class="tarea-text">{{ tarea.descripcion }}</div>
+            <button type="button" class="tarea-delete" title="Eliminar">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="tareas-empty" id="tareasEmpty" style="{{ 'display:none;' if tareas else '' }}">
+        <i class="bi bi-clipboard-check"></i>
+        <span>No tienes tareas para hoy. ¡Agrega una!</span>
+    </div>
+
+    <div class="tareas-hist-toggle-row">
+        <button type="button" class="tareas-hist-toggle-btn" id="toggleHistBtn">
+            <i class="bi bi-clock-history"></i> Ver Historial
+        </button>
+    </div>
+
+    <div class="tareas-hist-panel" id="historialPanel">
+        <h2 class="tareas-hist-title">Historial de Tareas</h2>
+
+        {% if historial_dias %}
+        <div class="tareas-hist-filter-row">
+            <label for="historialSelect"><i class="bi bi-funnel-fill"></i> Filtrar por día</label>
+            <select id="historialSelect" class="tareas-hist-select">
+                {% for dia in historial_dias %}
+                <option value="{{ dia.label }}">{{ dia.label }} &middot; {{ dia.completadas }}/{{ dia.total }} completadas</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% for dia in historial_dias %}
+        <div class="tareas-hist-day" data-fecha="{{ dia.label }}"{% if not loop.first %} style="display:none;"{% endif %}>
+            <div class="tareas-hist-day-header">
+                <span class="tareas-hist-date">{{ dia.label }}</span>
+                <span class="tareas-hist-count">{{ dia.completadas }} / {{ dia.total }} completadas</span>
+            </div>
+            <ul class="tareas-hist-items">
+                {% for t in dia.tareas %}
+                <li class="{{ 'done' if t.completada else '' }}">
+                    <i class="bi {{ 'bi-check-circle-fill' if t.completada else 'bi-circle' }}"></i>
+                    {{ t.descripcion }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="tareas-empty">
+            <i class="bi bi-calendar3"></i>
+            <span>Aún no tienes historial de días anteriores.</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tareas.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+                <span>Organización &bull; Enfoque &bull; Productividad &bull; Constancia &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,261 @@
+.hist-wrapper {
+    width: 95%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 10vh 20px 60px 20px;
+    box-sizing: border-box;
+}
+
+.hist-summary-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.hist-summary-item {
+    text-align: center;
+}
+
+.hist-summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-style: italic;
+    color: #e100ff;
+    text-shadow: 0 0 12px rgba(225, 0, 255, 0.4);
+}
+
+.hist-summary-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+}
+
+.hist-year-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.hist-year-pill {
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-style: italic;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.25s ease;
+}
+
+.hist-year-pill:hover {
+    color: #fff;
+    border-color: rgba(225, 0, 255, 0.4);
+}
+
+.hist-year-pill.active {
+    background: rgba(138, 40, 255, 0.35);
+    border-color: rgba(138, 40, 255, 0.6);
+    color: #fff;
+}
+
+.hist-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    --cell-gap: 4px;
+}
+
+@media (max-width: 480px) {
+    .hist-card { --cell-gap: 2px; }
+}
+
+.hist-calendar-title {
+    text-align: center;
+    width: 100%;
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2.4rem;
+    text-shadow: 0 0 18px rgba(138, 40, 255, 0.5);
+    margin: 0 0 25px 0;
+}
+
+.hist-calendar {
+    position: relative;
+}
+
+.hist-months {
+    display: flex;
+    gap: var(--cell-gap);
+    margin-left: 42px;
+    margin-bottom: 8px;
+}
+
+.hist-month-label {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.hist-grid-row {
+    display: flex;
+    align-items: flex-start;
+}
+
+.hist-daylabels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cell-gap);
+    margin-right: 8px;
+    flex: 0 0 34px;
+}
+
+.hist-daylabels span {
+    flex: 1 1 0;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+}
+
+.hist-weeks {
+    display: flex;
+    gap: var(--cell-gap);
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.hist-week {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cell-gap);
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.hist-day {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform 0.15s ease, outline 0.15s ease;
+}
+
+.hist-day:hover {
+    transform: scale(1.25);
+    outline: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.hist-day.is-future {
+    cursor: default;
+    opacity: 0.12;
+}
+
+.hist-day.is-future:hover {
+    transform: none;
+    outline: none;
+}
+
+.hist-day.level-0 { background: rgba(255, 255, 255, 0.06); }
+.hist-day.level-1 { background: rgba(138, 40, 255, 0.35); }
+.hist-day.level-2 { background: rgba(138, 40, 255, 0.65); }
+.hist-day.level-3 { background: rgba(225, 0, 255, 0.8); }
+.hist-day.level-4 {
+    background: #e100ff;
+    box-shadow: 0 0 8px rgba(225, 0, 255, 0.75);
+}
+
+.hist-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 18px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-style: italic;
+}
+
+.hist-legend .hist-day {
+    width: 12px;
+    height: 12px;
+    flex: none;
+    cursor: default;
+}
+.hist-legend .hist-day:hover {
+    transform: none;
+    outline: none;
+}
+
+/* ── Popup de detalle de día ── */
+.day-popup {
+    position: absolute;
+    z-index: 50;
+    transform: translate(-50%, -100%);
+    background: rgba(20, 0, 35, 0.97);
+    border: 1px solid rgba(225, 0, 255, 0.4);
+    border-radius: 14px;
+    padding: 14px 18px;
+    min-width: 200px;
+    max-width: 260px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(225, 0, 255, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.day-popup.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.day-popup::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(20, 0, 35, 0.97);
+}
+
+.day-popup-title {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.78rem;
+    font-style: italic;
+    margin-bottom: 4px;
+}
+
+.day-popup-count {
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 1rem;
+    margin-bottom: 6px;
+}
+
+.day-popup-habits {
+    color: rgba(225, 0, 255, 0.85);
+    font-size: 0.82rem;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+@media (max-width: 576px) {
+    .hist-wrapper { padding-top: 8vh; }
+    .hist-card { padding: 20px 14px; }
+}

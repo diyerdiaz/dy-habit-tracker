@@ -1,0 +1,190 @@
+.check-title {
+    text-align: center;
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2.6rem;
+    margin-top: 20px;
+    text-shadow: 0 0 18px rgba(138, 40, 255, 0.5);
+}
+
+.check-wrapper {
+    width: 95%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 10vh 20px 60px 20px;
+    box-sizing: border-box;
+}
+
+.check-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: rgba(138, 40, 255, 0.12);
+    border: 1px solid rgba(138, 40, 255, 0.3);
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.check-countdown i {
+    color: #d966ff;
+    font-size: 1.05rem;
+}
+
+.check-countdown strong {
+    color: #fff;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+}
+
+.check-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 500px;
+    margin: 0 auto 24px auto;
+}
+
+.check-progress-bar {
+    flex: 1 1 auto;
+    height: 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.check-progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #8a28ff, #e100ff, #00ffab);
+    background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(225, 0, 255, 0.5);
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.check-progress-text {
+    flex: 0 0 auto;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.82rem;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.check-card {
+    background: rgba(80, 0, 120, 0.15);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 14px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.check-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(225, 0, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.check-item + .check-item {
+    margin-top: 6px;
+}
+
+.check-icon {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: 0.25s ease;
+}
+
+.check-icon.cat-salud { color: #00d2ff; background: rgba(0, 210, 255, 0.14); }
+.check-icon.cat-mente { color: #ffc107; background: rgba(255, 193, 7, 0.14); }
+.check-icon.cat-finanzas { color: #2ecc71; background: rgba(46, 204, 113, 0.14); }
+.check-icon.cat-espiritual { color: #d966ff; background: rgba(217, 102, 255, 0.14); }
+
+.check-item.done .check-icon {
+    opacity: 0.45;
+}
+
+.check-body {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.check-name {
+    color: #fff;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: 0.25s ease;
+}
+
+.check-item.done .check-name {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.check-meta {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.check-circle {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: 0.25s ease;
+}
+
+.check-item.done .check-circle {
+    background: #00ffab;
+    border-color: #00ffab;
+    color: #0a0015;
+    box-shadow: 0 0 12px rgba(0, 255, 171, 0.55);
+}
+
+.check-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.check-empty i {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 15px;
+    opacity: 0.5;
+    color: #9b59b6;
+}
+
+.check-empty span {
+    font-size: 1.1rem;
+}

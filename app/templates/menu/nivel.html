@@ -2,6 +2,10 @@
 
 {% block titulo_pagina %}Mi Nivel Personal{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/nivel.css') }}">
+{% endblock %}
+
 {% block content %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
@@ -24,6 +28,16 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
                 <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
             </a>
@@ -31,16 +45,6 @@
         <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
-            </a>
-        </li>
-                <li class="sidebar-item">
-            <a href="{{ url_for('castigos.castigos_index') }}" class="sidebar-link">
-                <i class="bi bi-exclamation-triangle-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Castigos
-            </a>
-        </li>
-<li class="sidebar-item">
-            <a href="{{ url_for('menu.ruleta') }}" class="sidebar-link">
-                <i class="bi bi-pie-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Ruleta de Castigos
             </a>
         </li>
         <li class="sidebar-item">
@@ -70,140 +74,41 @@
     <span></span><span></span><span></span><span></span><span></span>
 </div>
 
-<style>
-    .nivel-wrapper {
-        width: 95%;
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 10vh 20px 60px 20px;
-        box-sizing: border-box;
-    }
-
-    .nivel-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 45px;
-        text-align: center;
-    }
-
-    .nivel-badge {
-        width: 130px;
-        height: 130px;
-        margin: 0 auto 20px auto;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at 30% 30%, #ffe680, #ffb700 55%, #b8860b 100%);
-        box-shadow: 0 0 35px rgba(255, 183, 0, 0.55), inset 0 0 15px rgba(255, 255, 255, 0.4);
-        position: relative;
-    }
-
-    .nivel-badge i {
-        font-size: 3.4rem;
-        color: #3a2400;
-        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-
-    .nivel-numero {
-        position: absolute;
-        bottom: -6px;
-        right: -6px;
-        background: #1a1030;
-        border: 2px solid #ffb700;
-        color: #ffd700;
-        font-weight: 700;
-        font-style: italic;
-        border-radius: 50%;
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-    }
-
-    .nivel-titulo {
-        color: #fff;
-        font-size: 2rem;
-        font-style: italic;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .nivel-subtitulo {
-        color: rgba(255, 255, 255, 0.55);
-        margin-bottom: 30px;
-    }
-
-    .nivel-xp-bar {
-        height: 14px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 20px;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        margin-bottom: 10px;
-    }
-
-    .nivel-xp-fill {
-        height: 100%;
-        border-radius: 20px;
-        background: linear-gradient(90deg, #ff8c00, #ffd700);
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-        transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .nivel-xp-texto {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.9rem;
-        margin-bottom: 35px;
-    }
-
-    .nivel-stats-row {
-        display: flex;
-        justify-content: space-around;
-        flex-wrap: wrap;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        padding-top: 25px;
-    }
-
-    .nivel-stat {
-        text-align: center;
-        padding: 10px;
-        min-width: 120px;
-    }
-
-    .nivel-stat-valor {
-        font-size: 2rem;
-        color: #e100ff;
-        font-weight: bold;
-        font-style: italic;
-    }
-
-    .nivel-stat-label {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.85rem;
-        font-style: italic;
-        margin-top: 5px;
-    }
-</style>
-
 <div class="nivel-wrapper">
     <div class="nivel-card">
-        <div class="nivel-badge">
-            <i class="bi bi-award-fill"></i>
-            <span class="nivel-numero">{{ data.nivel }}</span>
+        <div class="nivel-top-row">
+            <div class="nivel-badge{{ ' nivel-badge-max' if data.es_nivel_maximo else '' }}">
+                <i class="bi bi-award-fill"></i>
+                <span class="nivel-numero">{{ data.nivel }}</span>
+            </div>
+
+            <div class="racha-badge">
+                <div class="flame-wrap">
+                    <i class="bi bi-fire flame-icon"></i>
+                </div>
+                <div class="racha-count">{{ data.racha_actual }}</div>
+                <div class="racha-label">{{ 'día' if data.racha_actual == 1 else 'días' }} de racha</div>
+            </div>
         </div>
 
-        <div class="nivel-titulo">Nivel {{ data.nivel }} · {{ data.titulo }}</div>
+        <div class="nivel-titulo">Nivel {{ data.nivel }}/{{ data.nivel_maximo }} · {{ data.titulo }}</div>
         <p class="nivel-subtitulo">Sigue completando hábitos y manteniendo tu racha para subir de nivel</p>
+
+        {% if data.penalizado %}
+        <div class="nivel-penalizacion">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Perdiste {{ data.penalizacion_xp }} XP por no tener actividad ayer. ¡No rompas la racha!
+        </div>
+        {% endif %}
 
         <div class="nivel-xp-bar">
             <div class="nivel-xp-fill" style="width: {{ data.pct_nivel }}%;"></div>
         </div>
+        {% if data.es_nivel_maximo %}
+        <p class="nivel-xp-texto">{{ data.xp }} XP &middot; ¡Alcanzaste el nivel máximo!</p>
+        {% else %}
         <p class="nivel-xp-texto">{{ data.xp_en_nivel }} / {{ data.xp_por_nivel }} XP &middot; te faltan {{ data.xp_para_subir }} XP para el nivel {{ data.nivel + 1 }}</p>
+        {% endif %}
 
         <div class="nivel-stats-row">
             <div class="nivel-stat">
@@ -220,23 +125,58 @@
             </div>
         </div>
     </div>
+
+    <!-- ── Camino al Nivel Máximo ── -->
+    <div class="nivel-camino-card">
+        {% if data.es_nivel_maximo %}
+        <i class="bi bi-trophy-fill"></i>
+        <div>
+            <div class="nivel-camino-titulo">¡Alcanzaste el nivel máximo!</div>
+            <div class="nivel-camino-texto">Eres {{ data.nivel_max_titulo }}. Sigue completando hábitos para mantener tu racha.</div>
+        </div>
+        {% else %}
+        <i class="bi bi-flag-fill"></i>
+        <div>
+            <div class="nivel-camino-titulo">Camino al Nivel {{ data.nivel_maximo }} · {{ data.nivel_max_titulo }}</div>
+            <div class="nivel-camino-texto">
+                Te faltan <strong>{{ data.xp_faltante_max }} XP</strong>
+                (unos <strong>{{ data.habitos_faltantes_max }}</strong> {{ 'hábito completado' if data.habitos_faltantes_max == 1 else 'hábitos completados' }} más)
+                para llegar al nivel máximo.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Mapa de los 10 Niveles ── -->
+    <div class="nivel-mapa-card">
+        <h2 class="nivel-mapa-titulo">Mapa de Niveles</h2>
+        <div class="nivel-mapa-lista">
+            {% for n in data.niveles %}
+            <div class="nivel-mapa-item{{ ' actual' if n.actual else '' }}{{ ' alcanzado' if n.alcanzado and not n.actual else '' }}">
+                <div class="nivel-mapa-num">
+                    {% if n.alcanzado and not n.actual %}
+                    <i class="bi bi-check-lg"></i>
+                    {% else %}
+                    {{ n.nivel }}
+                    {% endif %}
+                </div>
+                <div class="nivel-mapa-info">
+                    <div class="nivel-mapa-nombre">Nivel {{ n.nivel }} · {{ n.titulo }}</div>
+                    <div class="nivel-mapa-umbral">{{ n.umbral }} XP</div>
+                </div>
+                {% if n.actual %}
+                <span class="nivel-mapa-badge">Actual</span>
+                {% elif not n.alcanzado %}
+                <i class="bi bi-lock-fill nivel-mapa-lock"></i>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
-<script>
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
+{% endblock %}
 
-    sidebarToggle.addEventListener('click', () => {
-        sidebarToggle.classList.toggle('active');
-        sidebar.classList.toggle('active');
-        sidebarOverlay.classList.toggle('active');
-    });
-
-    sidebarOverlay.addEventListener('click', () => {
-        sidebarToggle.classList.remove('active');
-        sidebar.classList.remove('active');
-        sidebarOverlay.classList.remove('active');
-    });
-</script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 {% endblock %}
