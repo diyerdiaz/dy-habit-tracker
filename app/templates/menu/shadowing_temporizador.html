@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Temporizador de Shadowing{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle toggle-right">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('menu.shadowing') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Shadowing
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Shadowing 🇺🇸</span>
+        <h1 class="ingles-title">Temporizador</h1>
+        <p class="ingles-desc">Repite en voz alta lo que escuchas en inglés mientras cronometras tu práctica.</p>
+    </div>
+
+    <div class="vocab-stats-row fade-in-section">
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-clock-history"></i>
+            <h3 id="shadowTotalTiempo">{{ (total_segundos // 60) }}m {{ (total_segundos % 60) }}s</h3>
+            <p>Tiempo Total</p>
+        </div>
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-collection-play"></i>
+            <h3>{{ total_sesiones }}</h3>
+            <p>Sesiones</p>
+        </div>
+    </div>
+
+    <!-- Selector de modo: Cronómetro o Agregar Tiempo -->
+    <div class="shadow-mode-toggle fade-in-section" id="shadowModeToggle">
+        <span class="shadow-mode-thumb"></span>
+        <button type="button" class="shadow-mode-option active-side" data-mode="timer">
+            <i class="bi bi-hourglass-split"></i> Cronómetro
+        </button>
+        <button type="button" class="shadow-mode-option" data-mode="manual">
+            <i class="bi bi-pencil-square"></i> Agregar Tiempo
+        </button>
+    </div>
+
+    <!-- Temporizador -->
+    <div class="shadow-timer-card fade-in-section" id="shadowTimerCard">
+        <div class="shadow-hourglass paused" id="shadowHourglass">
+            <div class="shadow-glass-top">
+                <div class="shadow-sand-top"></div>
+            </div>
+            <div class="shadow-glass-neck"></div>
+            <div class="shadow-glass-bottom">
+                <div class="shadow-sand-bottom"></div>
+            </div>
+        </div>
+
+        <div class="shadow-timer-display" id="shadowTimerDisplay">00:00</div>
+
+        <div class="shadow-timer-buttons">
+            <button type="button" id="shadowStartBtn" class="btn btn-vocab-accent shadow-timer-btn">
+                <i class="bi bi-play-fill"></i> Iniciar
+            </button>
+            <button type="button" id="shadowStopBtn" class="btn shadow-timer-btn shadow-stop-btn" style="display: none;">
+                <i class="bi bi-stop-fill"></i> Detener y Guardar
+            </button>
+            <button type="button" id="shadowResetBtn" class="btn shadow-timer-btn shadow-reset-btn">
+                <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+            </button>
+        </div>
+    </div>
+
+    <form id="shadowManualForm" class="shadow-manual-card fade-in-section" style="display: none;">
+        <div class="shadow-manual-inputs">
+            <div>
+                <label class="form-label text-white-50">Minutos</label>
+                <input type="number" id="shadowManualMin" min="0" class="form-control glass-input" placeholder="0">
+            </div>
+            <div>
+                <label class="form-label text-white-50">Segundos</label>
+                <input type="number" id="shadowManualSeg" min="0" max="59" class="form-control glass-input" placeholder="0">
+            </div>
+        </div>
+        <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Registrar Tiempo</button>
+    </form>
+
+    {% if sesiones %}
+    <p class="vocab-rank-subtitle fade-in-section">Últimas sesiones</p>
+    <div class="vocab-history-table-wrapper fade-in-section">
+        <table class="vocab-history-table">
+            <thead>
+                <tr>
+                    <th>Duración</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sesiones %}
+                <tr>
+                    <td>{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s</td>
+                    <td>{{ s.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

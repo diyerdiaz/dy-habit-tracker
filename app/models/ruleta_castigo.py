@@ -9,7 +9,7 @@ class Castigo(db.Model):
     castigoDesc = db.Column(db.String(255), nullable=True)
     castigoCategory = db.Column(db.String(50), nullable=False)
     castigoState = db.Column(db.String(50), default='Pendiente') # Pendiente, En progreso, Completado
-    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    createdAt = db.Column(db.DateTime, default=datetime.now)
 
     def to_dict(self):
         return {

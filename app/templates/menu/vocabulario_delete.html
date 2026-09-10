@@ -1,0 +1,21 @@
+<!-- Modal: Eliminar Vocabulario -->
+<div class="modal fade" id="vocabDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal border-danger">
+            <div class="modal-header glass-header border-0 pb-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="text-white fw-bold mb-3">¿Eliminar esta palabra?</h5>
+                <p class="text-white-50 text-sm mb-4">Esta acción no se puede deshacer. Se borrará "<span id="vocabDelNombre" class="text-white"></span>".</p>
+                <form id="vocabDeleteForm" method="POST" action="">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary flex-grow-1 glass-input" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger flex-grow-1">Sí, Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

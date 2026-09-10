@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Historial de Vocabulario{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle toggle-right">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('menu.vocabulario_aprender') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Aprender Vocabulario
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Tu Progreso 🇺🇸</span>
+        <h1 class="ingles-title">Historial de Aprendizaje</h1>
+        <p class="ingles-desc">Así te ha ido calificando cada palabra que has practicado.</p>
+    </div>
+
+    {% if total == 0 %}
+    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
+        <p class="ingles-desc">
+            <i class="bi bi-graph-up" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            Aún no has calificado ninguna palabra. Ve a "Aprender Vocabulario" y completa una sesión para ver tu historial aquí.
+        </p>
+    </div>
+    {% else %}
+
+    <!-- Tarjetas de Resumen -->
+    <div class="vocab-stats-row fade-in-section">
+        <div class="ingles-card vocab-stat-card vocab-stat-easy">
+            <i class="bi bi-emoji-smile"></i>
+            <h3>{{ total_facil }}</h3>
+            <p>Fácil</p>
+            <span class="vocab-stat-pct">{{ pct_facil }}%</span>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-medium">
+            <i class="bi bi-emoji-neutral"></i>
+            <h3>{{ total_medio }}</h3>
+            <p>Medio fácil</p>
+            <span class="vocab-stat-pct">{{ pct_medio }}%</span>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-hard">
+            <i class="bi bi-emoji-frown"></i>
+            <h3>{{ total_dificil }}</h3>
+            <p>Difícil</p>
+            <span class="vocab-stat-pct">{{ pct_dificil }}%</span>
+        </div>
+    </div>
+
+    <!-- Barra de proporción -->
+    <div class="vocab-proportion-bar fade-in-section" title="Distribución de calificaciones">
+        {% if pct_facil > 0 %}<div class="vocab-proportion-segment vocab-rating-easy" style="width: {{ pct_facil }}%;"></div>{% endif %}
+        {% if pct_medio > 0 %}<div class="vocab-proportion-segment vocab-rating-medium" style="width: {{ pct_medio }}%;"></div>{% endif %}
+        {% if pct_dificil > 0 %}<div class="vocab-proportion-segment vocab-rating-hard" style="width: {{ pct_dificil }}%;"></div>{% endif %}
+    </div>
+
+    <!-- Tabla de Registro -->
+    <div class="vocab-history-table-wrapper fade-in-section">
+        <table class="vocab-history-table">
+            <thead>
+                <tr>
+                    <th>Palabra</th>
+                    <th>Calificación</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr>
+                    <td>{{ r.palabraNombre }}</td>
+                    <td>
+                        {% if r.calificacion == 'facil' %}
+                        <span class="vocab-history-badge vocab-rating-easy">Fácil</span>
+                        {% elif r.calificacion == 'medio' %}
+                        <span class="vocab-history-badge vocab-rating-medium">Medio fácil</span>
+                        {% else %}
+                        <span class="vocab-history-badge vocab-rating-hard">Difícil</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_paginas > 1 %}
+    <div class="vocab-pagination fade-in-section">
+        <a href="{{ url_for('menu.vocabulario_historial', page=pagina - 1) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
+            <i class="bi bi-arrow-left"></i> Anterior
+        </a>
+        <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
+        <a href="{{ url_for('menu.vocabulario_historial', page=pagina + 1) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
+            Siguiente <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

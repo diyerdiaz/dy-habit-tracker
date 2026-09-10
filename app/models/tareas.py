@@ -8,4 +8,4 @@ class Tarea(db.Model):
     descripcion = db.Column(db.String(255), nullable=False)
     completada = db.Column(db.Boolean, default=False)
     fecha = db.Column(db.Date, nullable=False, default=date.today)
-    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    createdAt = db.Column(db.DateTime, default=datetime.now)

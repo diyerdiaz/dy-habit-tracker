@@ -28,33 +28,23 @@
             <span class="mark-all-read" id="markAllRead">Marcar como leídas</span>
         </div>
         <div class="notification-list">
+            {% for n in data.notificaciones %}
             <div class="notification-item unread" onclick="markAsRead(this)">
                 <div class="notification-icon">
-                    <i class="bi bi-book-half"></i>
+                    <i class="bi {{ n.icono }}" style="color: {{ n.color }};"></i>
                 </div>
                 <div class="notification-content">
-                    <p>Has completado tu hábito de <strong>lectura</strong>.</p>
-                    <span class="notification-time">Hace 10 min</span>
+                    <p>{{ n.mensaje }}</p>
+                    <span class="notification-time">Hoy</span>
                 </div>
             </div>
-            <div class="notification-item unread" onclick="markAsRead(this)">
-                <div class="notification-icon">
-                    <i class="bi bi-lightning-charge-fill" style="color: #ffc107;"></i>
-                </div>
+            {% else %}
+            <div class="notification-item">
                 <div class="notification-content">
-                    <p>¡Increíble! Llevas <strong>7 días de racha</strong> activa.</p>
-                    <span class="notification-time">Hace 2 horas</span>
+                    <p>No tienes notificaciones nuevas.</p>
                 </div>
             </div>
-            <div class="notification-item" onclick="markAsRead(this)">
-                <div class="notification-icon">
-                    <i class="bi bi-graph-up-arrow" style="color: #00bac6;"></i>
-                </div>
-                <div class="notification-content">
-                    <p>Meta semanal casi completada (68%).</p>
-                    <span class="notification-time">Ayer</span>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
@@ -83,11 +73,6 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
-                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
-            </a>
-        </li>
-        <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
             </a>
@@ -98,6 +83,17 @@
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('auth.logout') }}" class="sidebar-link"
                 style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
                 <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión

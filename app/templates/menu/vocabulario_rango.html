@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Mi Rango de Vocabulario{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle toggle-right">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('menu.vocabulario') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Vocabulario
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Tu Rango 🇺🇸</span>
+        <h1 class="ingles-title">Mi Rango de Vocabulario</h1>
+        <p class="ingles-desc">Cada palabra que agregas te acerca a tu siguiente rango.</p>
+    </div>
+
+    <!-- Tarjeta de Rango Actual -->
+    <p class="vocab-rank-subtitle fade-in-section">Tu rango de vocabulario</p>
+    <div class="vocab-rank-card fade-in-section">
+        <span class="vocab-rank-emoji">{{ rango_actual.emoji }}</span>
+        <h2 class="vocab-rank-name">{{ rango_actual.nombre }}</h2>
+        <p class="ingles-desc">Has agregado <strong>{{ total_palabras }}</strong> palabra{{ 's' if total_palabras != 1 else '' }}.</p>
+
+        {% if siguiente_rango %}
+        <div class="progress vocab-rank-progress" role="progressbar">
+            <div class="progress-bar" style="width: {{ pct_progreso }}%; background: linear-gradient(90deg, #0d6efd, #4dabff); border-radius: 10px;"></div>
+        </div>
+        <p class="vocab-rank-next">
+            Te falta{{ 'n' if faltan != 1 else '' }} <strong>{{ faltan }}</strong> palabra{{ 's' if faltan != 1 else '' }}
+            para llegar a <strong>{{ siguiente_rango.emoji }} {{ siguiente_rango.nombre }}</strong>
+        </p>
+        {% else %}
+        <p class="vocab-rank-next">¡Has alcanzado el rango máximo! Eres un verdadero <strong>Políglota</strong>. 🎉</p>
+        {% endif %}
+    </div>
+
+    <!-- Ruta de Rangos -->
+    <div class="vocab-rank-roadmap fade-in-section">
+        {% for r in rangos %}
+        <div class="vocab-rank-chip {{ 'achieved' if total_palabras >= r.umbral else '' }} {{ 'current' if r.nombre == rango_actual.nombre else '' }}">
+            <span class="vocab-rank-chip-emoji">{{ r.emoji }}</span>
+            <span class="vocab-rank-chip-name">{{ r.nombre }}</span>
+            <span class="vocab-rank-chip-umbral">{{ r.umbral }}+</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Rango de Dominio (porcentaje de palabras fáciles) -->
+    <p class="vocab-rank-subtitle fade-in-section">Tu rango de dominio</p>
+
+    {% if total_calificaciones == 0 %}
+    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
+        <p class="ingles-desc">
+            <i class="bi bi-graph-up" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            Aún no has calificado ninguna palabra. Ve a "Aprender Vocabulario" para empezar a ganar tu rango de dominio.
+        </p>
+    </div>
+    {% elif total_calificaciones < minimo_calificaciones_dominio %}
+    <div class="vocab-rank-card fade-in-section">
+        <span class="vocab-rank-emoji">🔒</span>
+        <h2 class="vocab-rank-name">Rango bloqueado</h2>
+        <p class="ingles-desc">
+            Necesitas calificar al menos <strong>{{ minimo_calificaciones_dominio }}</strong> palabras distintas
+            para que tu rango de dominio sea real y no un golpe de suerte.
+        </p>
+        <div class="progress vocab-rank-progress" role="progressbar">
+            <div class="progress-bar" style="width: {{ pct_progreso_dominio }}%; background: linear-gradient(90deg, #6b7280, #9ca3af); border-radius: 10px;"></div>
+        </div>
+        <p class="vocab-rank-next">
+            Llevas <strong>{{ total_calificaciones }}</strong> de <strong>{{ minimo_calificaciones_dominio }}</strong> palabras calificadas
+            (te falta{{ 'n' if faltan_calificaciones != 1 else '' }} <strong>{{ faltan_calificaciones }}</strong>)
+        </p>
+    </div>
+    {% else %}
+    <div class="vocab-rank-card fade-in-section">
+        <span class="vocab-rank-emoji">{{ rango_dominio.emoji }}</span>
+        <h2 class="vocab-rank-name">{{ rango_dominio.nombre }}</h2>
+        <p class="ingles-desc"><strong>{{ pct_dominio }}%</strong> de tus palabras calificadas te resultaron fáciles.</p>
+
+        {% if siguiente_dominio %}
+        <div class="progress vocab-rank-progress" role="progressbar">
+            <div class="progress-bar" style="width: {{ pct_progreso_dominio }}%; background: linear-gradient(90deg, #22c55e, #86efac); border-radius: 10px;"></div>
+        </div>
+        <p class="vocab-rank-next">
+            Te falta un <strong>{{ faltan_dominio }}%</strong>
+            para llegar a <strong>{{ siguiente_dominio.emoji }} {{ siguiente_dominio.nombre }}</strong>
+        </p>
+        {% else %}
+        <p class="vocab-rank-next">¡Has dominado tu vocabulario! Sigue así. 🎉</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if total_calificaciones > 0 %}
+    <div class="vocab-rank-roadmap fade-in-section">
+        {% for r in rangos_dominio %}
+        <div class="vocab-rank-chip {{ 'achieved' if total_calificaciones >= minimo_calificaciones_dominio and pct_dominio >= r.umbral else '' }} {{ 'current' if total_calificaciones >= minimo_calificaciones_dominio and r.nombre == rango_dominio.nombre else '' }}">
+            <span class="vocab-rank-chip-emoji">{{ r.emoji }}</span>
+            <span class="vocab-rank-chip-name">{{ r.nombre }}</span>
+            <span class="vocab-rank-chip-umbral">{{ r.umbral }}%+</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="vocab-stats-row fade-in-section">
+        <div class="ingles-card vocab-stat-card vocab-stat-easy">
+            <i class="bi bi-emoji-smile"></i>
+            <h3>{{ total_facil }}</h3>
+            <p>Fácil</p>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-medium">
+            <i class="bi bi-emoji-neutral"></i>
+            <h3>{{ total_medio }}</h3>
+            <p>Medio fácil</p>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-hard">
+            <i class="bi bi-emoji-frown"></i>
+            <h3>{{ total_dificil }}</h3>
+            <p>Difícil</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

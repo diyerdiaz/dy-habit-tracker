@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Calendario de Shadowing{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle toggle-right">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('menu.shadowing') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Shadowing
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Constancia 🇺🇸</span>
+        <h1 class="ingles-title">Calendario y Rachas</h1>
+        <p class="ingles-desc">Cada cuadro es un día. Míralo crecer conforme practiques shadowing.</p>
+    </div>
+
+    <div class="vocab-stats-row fade-in-section">
+        <div class="ingles-card vocab-stat-card vocab-stat-streak">
+            <i class="bi bi-fire"></i>
+            <h3>{{ racha_actual }}</h3>
+            <p>Racha Actual</p>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-streak-max">
+            <i class="bi bi-trophy-fill"></i>
+            <h3>{{ racha_maxima }}</h3>
+            <p>Racha Máxima</p>
+        </div>
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-calendar-check"></i>
+            <h3>{{ dias_activos }}</h3>
+            <p>Días Practicados</p>
+        </div>
+    </div>
+
+    <div class="vocab-cal-year-row fade-in-section">
+        {% for anio in anios_disponibles %}
+        <a href="{{ url_for('menu.shadowing_calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="vocab-cal-card fade-in-section">
+        <div class="vocab-cal-calendar" id="shadowCalScroll">
+            <div class="vocab-cal-months">
+                {% for semana in semanas %}
+                <span class="vocab-cal-month-label">{{ semana.mes }}</span>
+                {% endfor %}
+            </div>
+            <div class="vocab-cal-grid-row">
+                <div class="vocab-cal-weeks">
+                    {% for semana in semanas %}
+                    <div class="vocab-cal-week">
+                        {% for dia in semana.dias %}
+                        <div class="vocab-cal-day level-{{ dia.nivel }}{{ ' is-future' if dia.es_futuro else '' }}"
+                             data-fecha="{{ dia.fecha }}"
+                             data-label="{{ dia.label }}"
+                             data-minutos="{{ dia.minutos }}"
+                             title="{{ dia.label }}: {{ dia.minutos }} minuto{{ 's' if dia.minutos != 1 else '' }} de shadowing">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="vocab-day-popup" id="shadowDayPopup">
+                <div class="vocab-day-popup-title" id="shadowDayPopupTitle"></div>
+                <div class="vocab-day-popup-count" id="shadowDayPopupCount"></div>
+            </div>
+        </div>
+
+        <div class="vocab-cal-legend">
+            Menos
+            <span class="vocab-cal-day level-0"></span>
+            <span class="vocab-cal-day level-1"></span>
+            <span class="vocab-cal-day level-2"></span>
+            <span class="vocab-cal-day level-3"></span>
+            <span class="vocab-cal-day level-4"></span>
+            Más
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

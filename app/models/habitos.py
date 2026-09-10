@@ -10,7 +10,7 @@ class Habit(db.Model):
     habitFreq = db.Column(db.String(50), nullable=False)
     habitCategory = db.Column(db.String(50), nullable=False)
     habitState = db.Column(db.String(50), default='Activo')
-    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    createdAt = db.Column(db.DateTime, default=datetime.now)
 
     def to_dict(self):
         return {

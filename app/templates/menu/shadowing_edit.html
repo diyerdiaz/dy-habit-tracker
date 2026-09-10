@@ -1,0 +1,29 @@
+<!-- Modal: Editar Sesión de Shadowing -->
+<div class="modal fade" id="shadowEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-pencil text-vocab-accent"></i></div>
+                    Editar Sesión
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="shadowEditForm" method="POST" action="">
+                    <div class="shadow-manual-inputs">
+                        <div>
+                            <label class="form-label text-white-50">Minutos</label>
+                            <input type="number" name="minutos" id="shadowEditMinutos" min="0" class="form-control glass-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label text-white-50">Segundos</label>
+                            <input type="number" name="segundos" id="shadowEditSegundos" min="0" max="59" class="form-control glass-input" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -38,11 +38,6 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('menu.estadisticas') }}" class="sidebar-link">
-                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem;"></i> Estadísticas
-            </a>
-        </li>
-        <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
             </a>
@@ -53,6 +48,17 @@
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
                 <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
             </a>
@@ -101,13 +107,26 @@
         </div>
         {% endif %}
 
+        {% if data.bloqueado_por_habitos %}
+        <div class="nivel-bloqueo">
+            <i class="bi bi-lock-fill"></i>
+            Ya tienes la XP para subir, pero necesitas crear {{ data.habitos_para_subir }} {{ 'hábito' if data.habitos_para_subir == 1 else 'hábitos' }} más
+            (tienes {{ data.habitos_creados }}) para avanzar al nivel {{ data.nivel + 1 }}.
+        </div>
+        {% endif %}
+
         <div class="nivel-xp-bar">
             <div class="nivel-xp-fill" style="width: {{ data.pct_nivel }}%;"></div>
         </div>
         {% if data.es_nivel_maximo %}
         <p class="nivel-xp-texto">{{ data.xp }} XP &middot; ¡Alcanzaste el nivel máximo!</p>
         {% else %}
-        <p class="nivel-xp-texto">{{ data.xp_en_nivel }} / {{ data.xp_por_nivel }} XP &middot; te faltan {{ data.xp_para_subir }} XP para el nivel {{ data.nivel + 1 }}</p>
+        <p class="nivel-xp-texto">
+            {{ data.xp_en_nivel }} / {{ data.xp_por_nivel }} XP para el nivel {{ data.nivel + 1 }}
+            {% if data.habitos_para_subir > 0 %}
+            &middot; requiere {{ data.habitos_para_subir }} {{ 'hábito creado' if data.habitos_para_subir == 1 else 'hábitos creados' }} más
+            {% endif %}
+        </p>
         {% endif %}
 
         <div class="nivel-stats-row">
@@ -118,6 +137,10 @@
             <div class="nivel-stat">
                 <div class="nivel-stat-valor">{{ data.completados }}</div>
                 <div class="nivel-stat-label">Hábitos Completados</div>
+            </div>
+            <div class="nivel-stat">
+                <div class="nivel-stat-valor">{{ data.habitos_creados }}</div>
+                <div class="nivel-stat-label">Hábitos Creados</div>
             </div>
             <div class="nivel-stat">
                 <div class="nivel-stat-valor">{{ data.racha_max }}</div>
@@ -140,7 +163,10 @@
             <div class="nivel-camino-titulo">Camino al Nivel {{ data.nivel_maximo }} · {{ data.nivel_max_titulo }}</div>
             <div class="nivel-camino-texto">
                 Te faltan <strong>{{ data.xp_faltante_max }} XP</strong>
-                (unos <strong>{{ data.habitos_faltantes_max }}</strong> {{ 'hábito completado' if data.habitos_faltantes_max == 1 else 'hábitos completados' }} más)
+                (unos <strong>{{ data.habitos_completados_faltantes_max }}</strong> {{ 'hábito completado' if data.habitos_completados_faltantes_max == 1 else 'hábitos completados' }} más)
+                {% if data.habitos_creados_faltantes_max > 0 %}
+                y <strong>{{ data.habitos_creados_faltantes_max }}</strong> {{ 'hábito nuevo creado' if data.habitos_creados_faltantes_max == 1 else 'hábitos nuevos creados' }} (distintos, no solo completados)
+                {% endif %}
                 para llegar al nivel máximo.
             </div>
         </div>
@@ -152,7 +178,7 @@
         <h2 class="nivel-mapa-titulo">Mapa de Niveles</h2>
         <div class="nivel-mapa-lista">
             {% for n in data.niveles %}
-            <div class="nivel-mapa-item{{ ' actual' if n.actual else '' }}{{ ' alcanzado' if n.alcanzado and not n.actual else '' }}">
+            <div class="nivel-mapa-item{{ ' actual' if n.actual else '' }}{{ ' alcanzado' if n.alcanzado and not n.actual else '' }}{{ ' esperando-habitos' if n.xp_ok and not n.habitos_ok and not n.actual else '' }}">
                 <div class="nivel-mapa-num">
                     {% if n.alcanzado and not n.actual %}
                     <i class="bi bi-check-lg"></i>
@@ -162,10 +188,14 @@
                 </div>
                 <div class="nivel-mapa-info">
                     <div class="nivel-mapa-nombre">Nivel {{ n.nivel }} · {{ n.titulo }}</div>
-                    <div class="nivel-mapa-umbral">{{ n.umbral }} XP</div>
+                    <div class="nivel-mapa-umbral">
+                        {{ n.umbral }} XP &middot; {{ n.habitos_requeridos }} {{ 'hábito creado' if n.habitos_requeridos == 1 else 'hábitos creados' }}
+                    </div>
                 </div>
                 {% if n.actual %}
                 <span class="nivel-mapa-badge">Actual</span>
+                {% elif n.xp_ok and not n.habitos_ok %}
+                <i class="bi bi-exclamation-triangle-fill nivel-mapa-warning" title="Te falta crear hábitos"></i>
                 {% elif not n.alcanzado %}
                 <i class="bi bi-lock-fill nivel-mapa-lock"></i>
                 {% endif %}

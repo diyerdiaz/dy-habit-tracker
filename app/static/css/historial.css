@@ -94,40 +94,23 @@
 .hist-months {
     display: flex;
     gap: var(--cell-gap);
-    margin-left: 42px;
     margin-bottom: 8px;
 }
 
 .hist-month-label {
+    position: relative;
     flex: 1 1 0;
     min-width: 0;
     font-size: 0.78rem;
     color: rgba(255, 255, 255, 0.45);
     font-style: italic;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .hist-grid-row {
     display: flex;
     align-items: flex-start;
-}
-
-.hist-daylabels {
-    display: flex;
-    flex-direction: column;
-    gap: var(--cell-gap);
-    margin-right: 8px;
-    flex: 0 0 34px;
-}
-
-.hist-daylabels span {
-    flex: 1 1 0;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.4);
-    font-style: italic;
-    display: flex;
-    align-items: center;
 }
 
 .hist-weeks {

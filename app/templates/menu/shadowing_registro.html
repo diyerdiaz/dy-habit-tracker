@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Registro de Shadowing{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle toggle-right">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('menu.shadowing') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Shadowing
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Mis Sesiones 🇺🇸</span>
+        <h1 class="ingles-title">Registro de Sesiones</h1>
+        <p class="ingles-desc">Revisa, modifica o elimina tus sesiones de shadowing.</p>
+    </div>
+
+    {% if sesiones %}
+    <div class="vocab-history-table-wrapper fade-in-section">
+        <table class="vocab-history-table">
+            <thead>
+                <tr>
+                    <th>Duración</th>
+                    <th>Fecha</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sesiones %}
+                <tr>
+                    <td>{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s</td>
+                    <td>{{ s.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="vocab-row-btn vocab-row-edit"
+                            onclick="openShadowEditModal({{ s.idSesion }}, {{ s.duracionSegundos // 60 }}, {{ s.duracionSegundos % 60 }})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="vocab-row-btn vocab-row-delete"
+                            onclick="openShadowDeleteModal({{ s.idSesion }}, '{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_paginas > 1 %}
+    <div class="vocab-pagination fade-in-section">
+        <a href="{{ url_for('menu.shadowing_registro', page=pagina - 1) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
+            <i class="bi bi-arrow-left"></i> Anterior
+        </a>
+        <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
+        <a href="{{ url_for('menu.shadowing_registro', page=pagina + 1) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
+            Siguiente <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
+        <p class="ingles-desc">
+            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            Aún no tienes sesiones registradas. Ve al Temporizador y practica tu primera sesión de shadowing.
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+{% include 'menu/shadowing_edit.html' %}
+{% include 'menu/shadowing_delete.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

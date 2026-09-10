@@ -107,6 +107,48 @@ def dashboard():
         for h in habits
     ]
 
+    # ── Notificaciones reales, basadas en el estado actual del usuario ──
+    notificaciones = []
+    pendientes_hoy = total_habitos - completados_hoy
+
+    if total_habitos == 0:
+        notificaciones.append({
+            'tipo': 'info', 'icono': 'bi-info-circle-fill', 'color': '#00bac6',
+            'mensaje': 'Aún no tienes hábitos registrados. ¡Crea el primero!',
+        })
+    elif pendientes_hoy > 0:
+        notificaciones.append({
+            'tipo': 'warning', 'icono': 'bi-exclamation-triangle-fill', 'color': '#ffc107',
+            'mensaje': f"Tienes {pendientes_hoy} hábito{'s' if pendientes_hoy != 1 else ''} pendiente{'s' if pendientes_hoy != 1 else ''} por completar hoy.",
+        })
+    else:
+        notificaciones.append({
+            'tipo': 'success', 'icono': 'bi-check-circle-fill', 'color': '#00e676',
+            'mensaje': '¡Completaste todos tus hábitos de hoy!',
+        })
+
+    if total_habitos > 0 and racha_actual == 0:
+        notificaciones.append({
+            'tipo': 'warning', 'icono': 'bi-fire', 'color': '#ff5252',
+            'mensaje': 'Tu racha se reinició. ¡Retómala hoy mismo!',
+        })
+    elif racha_actual >= 3:
+        notificaciones.append({
+            'tipo': 'success', 'icono': 'bi-lightning-charge-fill', 'color': '#ffc107',
+            'mensaje': f'¡Llevas una racha activa de {racha_actual} días!',
+        })
+
+    if total_habitos > 0 and pct_consistencia < 50:
+        notificaciones.append({
+            'tipo': 'warning', 'icono': 'bi-graph-down-arrow', 'color': '#ff5252',
+            'mensaje': f'Tu consistencia semanal bajó a {pct_consistencia}%. ¡No te rindas!',
+        })
+    elif pct_consistencia >= 80:
+        notificaciones.append({
+            'tipo': 'info', 'icono': 'bi-graph-up-arrow', 'color': '#00bac6',
+            'mensaje': f'Tu consistencia semanal está en {pct_consistencia}%. ¡Vas muy bien!',
+        })
+
     data = {
         'habitos_hoy': habitos_hoy,
         'total_habitos': total_habitos,
@@ -123,6 +165,7 @@ def dashboard():
         'week_labels': week_labels,
         'week_data': week_data,
         'week_counts': week_counts,
+        'notificaciones': notificaciones,
     }
     return render_template("dashboard.html", data=data)
 

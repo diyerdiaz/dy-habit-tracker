@@ -1,0 +1,31 @@
+<!-- Modal: Editar Vocabulario -->
+<div class="modal fade" id="vocabEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-pencil text-vocab-accent"></i></div>
+                    Editar Palabra
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="vocabEditForm" method="POST" action="">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Nombre</label>
+                        <input type="text" name="nombre" id="vocabEditNombre" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Significado</label>
+                        <input type="text" name="significado" id="vocabEditSignificado" class="form-control glass-input" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-white-50">Ejemplos</label>
+                        <textarea name="ejemplos" id="vocabEditEjemplos" class="form-control glass-input" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

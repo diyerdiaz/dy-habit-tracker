@@ -129,6 +129,21 @@
     font-size: 1rem;
 }
 
+.nivel-mapa-warning {
+    flex-shrink: 0;
+    color: #ffb700;
+    font-size: 1rem;
+}
+
+.nivel-mapa-item.esperando-habitos {
+    border-color: rgba(255, 183, 0, 0.25);
+    background: rgba(255, 183, 0, 0.05);
+}
+
+.nivel-mapa-item.esperando-habitos .nivel-mapa-nombre {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .nivel-mapa-badge {
     flex-shrink: 0;
     background: linear-gradient(135deg, #8a28ff, #e100ff);
@@ -242,6 +257,28 @@
     flex-shrink: 0;
     font-size: 1.1rem;
     color: #ff6666;
+}
+
+.nivel-bloqueo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(255, 183, 0, 0.1);
+    border: 1px solid rgba(255, 183, 0, 0.35);
+    color: #ffcf70;
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.nivel-bloqueo i {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    color: #ffb700;
 }
 
 /* ── Racha / Llama ── */

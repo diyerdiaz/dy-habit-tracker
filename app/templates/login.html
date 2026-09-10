@@ -8,7 +8,7 @@
     <div class="lightning-flash flash-2"></div>
     <div class="lightning-flash flash-3"></div>
 </div>
-<div class="sakura">
+<div class="login-bokeh">
     <span></span>
     <span></span>
     <span></span>
@@ -28,7 +28,22 @@
                 <i class="bi bi-briefcase-fill"></i> Mi Portafolio
             </a>
             <h1>Bienvenido</h1>
-            <p>Accede a tu cuenta para continuar disfrutando de todos nuestros servicios y funcionalidades exclusivas.</p>
+            <p>Retoma el control de tus hábitos y acelera tu aprendizaje diario con DY Habit Tracker &amp; English.</p>
+
+            <div class="login-features">
+                <div class="login-feature">
+                    <div class="login-feature-icon login-feature-habits">
+                        <i class="bi bi-fire"></i>
+                    </div>
+                    <span>Habits</span>
+                </div>
+                <div class="login-feature">
+                    <div class="login-feature-icon login-feature-english">
+                        <i class="bi bi-translate"></i>
+                    </div>
+                    <span>English</span>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -49,11 +64,16 @@
                         </div>
                         <div class="form-group mb-4">
                             <label for="passwordUser" class="form-label">Contraseña</label>
-                            <input type="password" name="passwordUser" id="passwordUser" class="form-control" placeholder="Tu contraseña" required>
+                            <div class="password-field">
+                                <input type="password" name="passwordUser" id="passwordUser" class="form-control" placeholder="Tu contraseña" required>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordUser', this)" tabindex="-1">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="d-grid gap-3">
                             <button type="submit" class="btn btn-primary btn-block">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                                <i class="bi bi-lock-fill"></i> Iniciar Sesión
                             </button>
                             <a href="javascript:void(0)" onclick="toggleForms('register')" class="forgot-link text-center w-100 d-block mt-3" style="text-align: center;">
                                 <i class="bi bi-person-plus"></i> Crear Cuenta Nueva
@@ -77,11 +97,21 @@
                         </div>
                         <div class="form-group mb-3">
                             <label for="regPasswordUser" class="form-label">Contraseña</label>
-                            <input type="password" name="passwordUser" id="regPasswordUser" class="form-control" placeholder="Crea una contraseña" required onkeyup="checkPasswordMatch()">
+                            <div class="password-field">
+                                <input type="password" name="passwordUser" id="regPasswordUser" class="form-control" placeholder="Crea una contraseña" required onkeyup="checkPasswordMatch()">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordUser', this)" tabindex="-1">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-group mb-4">
                             <label for="regPasswordConfirm" class="form-label">Confirmar Contraseña</label>
-                            <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Repite tu contraseña" required onkeyup="checkPasswordMatch()">
+                            <div class="password-field">
+                                <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Repite tu contraseña" required onkeyup="checkPasswordMatch()">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordConfirm', this)" tabindex="-1">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             <div id="passwordError" style="color: #ff0077; font-size: 0.85rem; font-style: italic; margin-top: 8px; display: none;">
                                 <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.
                             </div>
