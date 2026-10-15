@@ -14,18 +14,21 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# Usuario sin privilegios (uid 1000, el mismo del usuario normal en Linux, para
-# poder montar la carpeta instance/ del equipo sin problemas de permisos).
+# Usuario sin privilegios para la app (uid 1000, el mismo del usuario normal en Linux).
 # instance/ guarda la base de datos, la clave secreta y los archivos subidos.
+# El contenedor arranca como root solo para que docker-entrypoint.sh le dé esa
+# carpeta a appuser (Coolify la crea con dueño root); gunicorn corre como appuser.
 RUN useradd --uid 1000 --create-home appuser \
     && mkdir -p /app/instance \
-    && chown -R appuser:appuser /app/instance
-USER appuser
+    && chown -R appuser:appuser /app/instance \
+    && chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 4000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/', timeout=4)" || exit 1
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # --preload: crea/actualiza las tablas una sola vez antes de arrancar los workers
 CMD ["gunicorn", "run:app", \
