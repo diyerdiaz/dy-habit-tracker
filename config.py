@@ -39,6 +39,10 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     REMEMBER_COOKIE_HTTPONLY = True
+    # Con HTTPS (en internet) pon SESSION_COOKIE_SECURE=1 para que la cookie
+    # de sesión nunca viaje sin cifrar. En local por http debe quedar en 0.
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '0') == '1'
+    REMEMBER_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
     # Archivos de apuntes subidos (instance/ no se versiona) y tamaño máximo por petición
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', os.path.join(INSTANCE_DIR, 'uploads'))

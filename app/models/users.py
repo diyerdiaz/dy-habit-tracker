@@ -16,6 +16,8 @@ class User(db.Model, UserMixin):
     nameUser = db.Column(db.String(80), unique=True, nullable=False)
     # Guarda el HASH de la contraseña, nunca el texto plano
     passwordUser = db.Column(db.String(255), nullable=False)
+    # Nombre del archivo de la foto de perfil (en UPLOAD_FOLDER/avatars); NULL = sin foto
+    avatar = db.Column(db.String(64), nullable=True)
 
     def __init__(self, nameUser, password=None, **kwargs):
         # Compatibilidad: User(nameUser=..., passwordUser=...) también hashea

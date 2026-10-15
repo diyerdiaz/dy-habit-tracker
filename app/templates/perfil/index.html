@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Mi Perfil{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/perfil.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 24px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link active">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="perfil-wrapper">
+    <!-- ── Tarjeta de perfil ── -->
+    <div class="perfil-card perfil-resumen">
+        <form class="perfil-foto-form" method="POST" action="{{ url_for('perfil.subir_foto') }}" enctype="multipart/form-data" id="formFoto">
+            <label class="perfil-avatar" for="inputFoto" title="Cambiar foto de perfil">
+                {% if current_user.avatar %}
+                <img src="{{ url_for('perfil.ver_foto', v=current_user.avatar) }}" alt="Foto de perfil de {{ current_user.nameUser }}">
+                {% else %}
+                <span aria-hidden="true">{{ current_user.nameUser[:1]|upper }}</span>
+                {% endif %}
+                <span class="perfil-avatar-camara"><i class="bi bi-camera-fill"></i></span>
+            </label>
+            <input type="file" name="foto" id="inputFoto" class="perfil-foto-input" accept=".png,.jpg,.jpeg,.gif,.webp" aria-label="Elegir foto de perfil">
+        </form>
+        <div class="perfil-foto-acciones">
+            <label for="inputFoto" class="perfil-foto-btn"><i class="bi bi-image"></i> {{ 'Cambiar foto' if current_user.avatar else 'Subir foto' }}</label>
+            {% if current_user.avatar %}
+            <form method="POST" action="{{ url_for('perfil.quitar_foto') }}">
+                <button type="submit" class="perfil-foto-btn perfil-foto-quitar"><i class="bi bi-trash3"></i> Quitar</button>
+            </form>
+            {% endif %}
+        </div>
+        <h1 class="perfil-nombre">{{ current_user.nameUser }}</h1>
+        <p class="perfil-titulo"><i class="bi bi-award-fill"></i> Nivel {{ progreso.nivel }} · {{ progreso.titulo }}</p>
+        <div class="perfil-datos">
+            <div><strong>{{ xp }}</strong><span>XP</span></div>
+            <div><strong>{{ racha }}</strong><span>{{ 'día' if racha == 1 else 'días' }} de racha</span></div>
+            <div><strong>{{ habitos }}</strong><span>hábitos</span></div>
+            <div><strong>{{ medallas_ganadas }}/{{ medallas_total }}</strong><span>medallas</span></div>
+        </div>
+    </div>
+
+    <div class="perfil-formularios">
+        <!-- ── Cambiar usuario ── -->
+        <form class="perfil-card" method="POST" action="{{ url_for('perfil.cambiar_usuario') }}">
+            <h2 class="perfil-subtitulo"><i class="bi bi-person-badge"></i> Cambiar usuario</h2>
+            <p class="perfil-ayuda">Con este nombre inicias sesión.</p>
+            <label class="perfil-label" for="nuevo_usuario">Nuevo nombre de usuario</label>
+            <input type="text" name="nuevo_usuario" id="nuevo_usuario" class="perfil-input" maxlength="80"
+                autocomplete="username" placeholder="{{ current_user.nameUser }}" required>
+                <label class="perfil-label" for="contrasena_actual_usuario">Tu contraseña actual</label>
+                <div class="perfil-campo">
+                    <input type="password" name="contrasena_actual" id="contrasena_actual_usuario" class="perfil-input" autocomplete="current-password" required>
+                    <button type="button" class="perfil-ver" data-ver="contrasena_actual_usuario" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
+                </div>
+            <button type="submit" class="perfil-btn">Guardar usuario</button>
+        </form>
+
+        <!-- ── Cambiar contraseña ── -->
+        <form class="perfil-card" method="POST" action="{{ url_for('perfil.cambiar_contrasena') }}" id="formContrasena">
+            <h2 class="perfil-subtitulo"><i class="bi bi-shield-lock"></i> Cambiar contraseña</h2>
+            <p class="perfil-ayuda">Mínimo {{ min_password }} caracteres.</p>
+                <label class="perfil-label" for="contrasena_actual">Contraseña actual</label>
+                <div class="perfil-campo">
+                    <input type="password" name="contrasena_actual" id="contrasena_actual" class="perfil-input" autocomplete="current-password" required>
+                    <button type="button" class="perfil-ver" data-ver="contrasena_actual" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
+                </div>
+                <label class="perfil-label" for="nueva_contrasena">Nueva contraseña</label>
+                <div class="perfil-campo">
+                    <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="perfil-input" autocomplete="new-password" required minlength="{{ min_password }}">
+                    <button type="button" class="perfil-ver" data-ver="nueva_contrasena" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
+                </div>
+                <label class="perfil-label" for="confirmar_contrasena">Repite la nueva contraseña</label>
+                <div class="perfil-campo">
+                    <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="perfil-input" autocomplete="new-password" required minlength="{{ min_password }}">
+                    <button type="button" class="perfil-ver" data-ver="confirmar_contrasena" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
+                </div>
+            <p class="perfil-error" id="errorContrasena" hidden><i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.</p>
+            <button type="submit" class="perfil-btn">Guardar contraseña</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script>
+// La foto se sube apenas eliges el archivo
+document.getElementById('inputFoto').addEventListener('change', function () {
+    if (!this.files.length) return;
+    if (this.files[0].size > 8 * 1024 * 1024) {
+        alert('La foto pesa demasiado. El máximo es 8 MB.');
+        this.value = '';
+        return;
+    }
+    document.querySelector('.perfil-avatar').classList.add('subiendo');
+    document.getElementById('formFoto').submit();
+});
+
+// Mostrar / ocultar contraseñas
+document.querySelectorAll('.perfil-ver').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var input = document.getElementById(btn.dataset.ver);
+        var mostrar = input.type === 'password';
+        input.type = mostrar ? 'text' : 'password';
+        btn.innerHTML = mostrar ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+        btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+});
+
+// Avisa antes de enviar si la confirmación no coincide
+(function () {
+    var form = document.getElementById('formContrasena');
+    var nueva = document.getElementById('nueva_contrasena');
+    var confirmar = document.getElementById('confirmar_contrasena');
+    var error = document.getElementById('errorContrasena');
+    function revisar() {
+        var distintas = confirmar.value && nueva.value !== confirmar.value;
+        error.hidden = !distintas;
+        return !distintas;
+    }
+    nueva.addEventListener('input', revisar);
+    confirmar.addEventListener('input', revisar);
+    form.addEventListener('submit', function (e) { if (!revisar()) e.preventDefault(); });
+})();
+</script>
+{% endblock %}

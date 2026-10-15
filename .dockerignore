@@ -1,0 +1,15 @@
+# No copiar a la imagen: datos reales, entornos locales ni archivos de git.
+# La carpeta instance/ (base de datos, clave secreta, subidas) se monta como volumen.
+instance/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+.gitignore
+.claude/
+*.sqlite
+*.sqlite.bak*
+librerias/
+.DS_Store

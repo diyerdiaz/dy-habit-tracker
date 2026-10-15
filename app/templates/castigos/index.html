@@ -62,7 +62,7 @@
                 <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
-        <li class="sidebar-item" style="margin-top: 50px;">
+        <li class="sidebar-item" style="margin-top: 24px;">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
@@ -72,6 +72,11 @@
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+            </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">

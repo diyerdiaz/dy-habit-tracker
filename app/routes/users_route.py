@@ -28,6 +28,11 @@ def _delete_user_data(idUser):
     from app.models.vocabulario_registro import VocabularioRegistro
     from app.models.vocabulario import Vocabulario
     from app.models.shadowing_sesion import ShadowingSesion
+    from app.models.metodo_estudio import MetodoEstudio
+    from app.routes.metodos_route import _borrar_archivos
+    for metodo in MetodoEstudio.query.filter_by(idUser=idUser).all():
+        _borrar_archivos([a for t in metodo.tarjetas for a in t.apuntes])
+        db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     for model in (HistHabit, Habit, Castigo, Tarea, UserProgress,
                   VocabularioRegistro, Vocabulario, ShadowingSesion):
         model.query.filter_by(idUser=idUser).delete(synchronize_session=False)
@@ -114,6 +119,8 @@ def detail(id):
 @login_required
 def delete(id):
     user = _own_user_or_403(id)
+    from app.routes.perfil_route import borrar_foto
+    borrar_foto(user)
     _delete_user_data(user.idUser)
     logout_user()
     db.session.delete(user)
