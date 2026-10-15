@@ -7,10 +7,8 @@ services:
     ports:
       - "4000:4000"
     environment:
-      # Pon 1 cuando la publiques en internet detrás de HTTPS
+      
       SESSION_COOKIE_SECURE: "0"
     volumes:
-      # Base de datos, clave secreta, fotos y apuntes: viven fuera del
-      # contenedor para no perderse al reconstruirlo o reiniciarlo.
-      # (":z" es para Linux con SELinux, como Fedora; en otros sistemas no afecta)
+     
       - ./instance:/app/instance:z
