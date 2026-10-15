@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Métodos de Estudio{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/metodos.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link active">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="metodos-wrapper">
+    <div class="metodos-header">
+        <div>
+            <h1 class="metodos-titulo">Métodos de Estudio</h1>
+            <p class="metodos-subtitulo">Cada método tiene su propio tablero Kanban para organizar lo que vas a estudiar.</p>
+        </div>
+        <button type="button" class="metodos-btn-nuevo" data-accion="nuevo-metodo">
+            <i class="bi bi-plus-lg"></i> Nuevo método
+        </button>
+    </div>
+
+    {% if metodos %}
+    <div class="metodos-grid">
+        {% for m in metodos %}
+        {% set conteo = m.conteo_por_columna() %}
+        <div class="metodo-card" style="--color: {{ m.color }};">
+            <div class="metodo-card-top">
+                <div class="metodo-icono"><i class="bi {{ m.icono }}"></i></div>
+                <div class="metodo-acciones">
+                    <button type="button" class="metodo-accion" title="Editar" aria-label="Editar {{ m.nombre }}"
+                        data-accion="editar-metodo"
+                        data-url="{{ url_for('metodos.editar', metodo_id=m.idMetodo) }}"
+                        data-nombre="{{ m.nombre }}" data-descripcion="{{ m.descripcion or '' }}"
+                        data-icono="{{ m.icono }}" data-color="{{ m.color }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="metodo-accion metodo-accion-eliminar" title="Eliminar" aria-label="Eliminar {{ m.nombre }}"
+                        data-accion="eliminar"
+                        data-url="{{ url_for('metodos.eliminar', metodo_id=m.idMetodo) }}"
+                        data-nombre="{{ m.nombre }}"
+                        data-aviso="También se borrarán sus {{ m.tarjetas|length }} tarjetas del tablero.">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </div>
+            <h3 class="metodo-nombre">{{ m.nombre }}</h3>
+            <p class="metodo-descripcion">{{ m.descripcion or 'Sin descripción.' }}</p>
+            <div class="metodo-conteo">
+                <span><i class="bi bi-circle"></i> {{ conteo.pendiente }} por hacer</span>
+                <span><i class="bi bi-hourglass-split"></i> {{ conteo.progreso }} en progreso</span>
+                <span><i class="bi bi-check-circle-fill"></i> {{ conteo.hecho }} hechas</span>
+                {% set apuntes = m.total_apuntes() %}
+                {% if apuntes %}<span><i class="bi bi-paperclip"></i> {{ apuntes }} {{ 'apunte' if apuntes == 1 else 'apuntes' }}</span>{% endif %}
+            </div>
+            <div class="metodo-progreso"><div class="metodo-progreso-fill" style="width: {{ m.pct_hecho() }}%;"></div></div>
+            <a href="{{ url_for('metodos.tablero', metodo_id=m.idMetodo) }}" class="metodo-abrir">
+                <i class="bi bi-kanban"></i> Abrir tablero
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="metodos-vacio">
+        <i class="bi bi-journal-bookmark"></i>
+        <p>Aún no tienes métodos de estudio.</p>
+        <p class="text-white-50 small">Crea el tuyo o empieza con algunos de los más conocidos.</p>
+        <form method="POST" action="{{ url_for('metodos.agregar_sugeridos') }}">
+            <button type="submit" class="metodos-btn-nuevo"><i class="bi bi-stars"></i> Agregar métodos sugeridos</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal: Crear / Editar método -->
+<div class="modal fade" id="metodoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-journal-plus text-purple"></i></div>
+                    <span id="metodoModalTitulo">Nuevo método</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="metodoForm" method="POST" action="{{ url_for('metodos.crear') }}" data-crear="{{ url_for('metodos.crear') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50" for="metodoNombre">Nombre del método</label>
+                        <input type="text" name="nombre" id="metodoNombre" class="form-control glass-input" placeholder="Ej: Pomodoro" maxlength="120" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50" for="metodoDescripcion">Descripción</label>
+                        <textarea name="descripcion" id="metodoDescripcion" class="form-control glass-input" rows="2" maxlength="500" placeholder="¿Cómo lo aplicas?"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Ícono</label>
+                        <div class="metodo-opciones">
+                            {% for icono in iconos %}
+                            <input type="radio" class="metodo-radio" name="icono" value="{{ icono }}" id="icono{{ loop.index }}"{{ ' checked' if loop.first else '' }}>
+                            <label class="metodo-icono-opcion" for="icono{{ loop.index }}"><i class="bi {{ icono }}"></i></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-white-50">Color</label>
+                        <div class="metodo-opciones">
+                            {% for color in colores %}
+                            <input type="radio" class="metodo-radio" name="color" value="{{ color }}" id="color{{ loop.index }}"{{ ' checked' if loop.first else '' }}>
+                            <label class="metodo-color-opcion" for="color{{ loop.index }}" style="background: {{ color }};" title="{{ color }}"></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-purple fw-bold" id="metodoSubmit">Guardar método</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-body p-4 text-center text-white">
+                <i class="bi bi-trash3 metodo-eliminar-icono"></i>
+                <p class="mt-3 mb-1">¿Eliminar <strong id="eliminarNombre"></strong>?</p>
+                <p class="text-white-50 small" id="eliminarAviso"></p>
+                <form id="eliminarForm" method="POST" action="">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger w-50">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/metodos.js') }}"></script>
+{% endblock %}

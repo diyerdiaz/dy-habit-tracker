@@ -38,8 +38,28 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
                 <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
@@ -176,13 +196,13 @@
                                 <button type="button" class="btn btn-sm btn-outline-info rounded-circle" title="Ver" onclick="openViewModal({{ castigo.idCastigo }})">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ castigo.idCastigo }}, '{{ castigo.castigoName|escape }}', '{{ castigo.castigoDesc|escape }}', '{{ castigo.castigoCategory }}', '{{ castigo.castigoCategory }}')">
+                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ castigo.idCastigo }}, {{ (castigo.castigoName)|tojson|forceescape }}, {{ (castigo.castigoDesc or '')|tojson|forceescape }}, {{ castigo.castigoCategory|tojson|forceescape }}, {{ castigo.castigoCategory|tojson|forceescape }})">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-success rounded-circle" title="Cambiar Estado" onclick="openStateModal({{ castigo.idCastigo }}, '{{ castigo.castigoState }}', '{{ castigo.castigoName|escape }}')">
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-circle" title="Cambiar Estado" onclick="openStateModal({{ castigo.idCastigo }}, {{ castigo.castigoState|tojson|forceescape }}, {{ castigo.castigoName|tojson|forceescape }})">
                                     <i class="bi bi-arrow-repeat"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ castigo.idCastigo }}, '{{ castigo.castigoName|escape }}')">
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ castigo.idCastigo }}, {{ (castigo.castigoName)|tojson|forceescape }})">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>

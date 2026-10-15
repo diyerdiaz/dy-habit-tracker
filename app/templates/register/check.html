@@ -43,8 +43,28 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
                 <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
@@ -103,7 +123,7 @@
 
     <div class="check-card">
         {% for habit in habits %}
-        <div class="check-item{{ ' done' if habit.idHabit in marcados_hoy else '' }}" data-id="{{ habit.idHabit }}">
+        <div class="check-item{{ ' done' if habit.idHabit in marcados_hoy else '' }}{{ ' descanso' if habit.idHabit not in tocan_hoy else '' }}" data-id="{{ habit.idHabit }}">
             <div class="check-icon cat-{{ habit.habitCategory }}">
                 {% if habit.habitCategory == 'salud' %}
                     <i class="bi bi-heart-pulse"></i>
@@ -117,17 +137,30 @@
             </div>
             <div class="check-body">
                 <div class="check-name">{{ habit.habitName }}</div>
-                <div class="check-meta">{{ habit.habitCategory|capitalize }} &middot; {{ habit.habitFreq|capitalize }}</div>
+                <div class="check-meta">
+                    {{ habit.habitCategory|capitalize }} &middot; {{ habit.habitFreq|capitalize }} &middot; {{ habit.dias_texto() }}
+                </div>
             </div>
             <div class="check-circle"><i class="bi bi-check-lg"></i></div>
         </div>
         {% else %}
         <div class="check-empty">
+            {% if descansan_hoy %}
+            <i class="bi bi-cup-hot"></i>
+            <span>Hoy no te toca ningún hábito. ¡Disfruta tu descanso!</span>
+            {% else %}
             <i class="bi bi-inbox"></i>
             <span>Aún no has registrado ningún hábito.</span>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
+    {% if descansan_hoy and habits %}
+    <p class="check-descanso-nota">
+        <i class="bi bi-cup-hot"></i>
+        {{ descansan_hoy }} {{ 'hábito descansa' if descansan_hoy == 1 else 'hábitos descansan' }} hoy
+    </p>
+    {% endif %}
 </div>
 
 {% endblock %}

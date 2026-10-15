@@ -5,6 +5,7 @@ from app.models.hist_habits import HistHabit
 from app import db
 from app.gamificacion import registrar_toggle_habito
 from datetime import date
+from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('habits', __name__)
 
@@ -25,6 +26,7 @@ def register_habit():
             habitCategory=habit_category,
             habitState='Activo'
         )
+        new_habit.set_dias(request.form.getlist('diasSemana'))
         db.session.add(new_habit)
         db.session.commit()
         
@@ -37,17 +39,25 @@ def register_habit():
 @bp.route('/habitos/check')
 @login_required
 def habits_check():
+    hoy = date.today()
     habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.habitName).all()
     marcados_hoy = {
-        h.idHabit for h in HistHabit.query.filter_by(idUser=current_user.idUser, fecha=date.today()).all()
+        h.idHabit for h in HistHabit.query.filter_by(idUser=current_user.idUser, fecha=hoy).all()
     }
-    total_habitos = len(habits)
-    completados_hoy = sum(1 for h in habits if h.idHabit in marcados_hoy)
+    # Solo se muestran y cuentan los hábitos que tocan hoy; los demás descansan.
+    # (Si uno que descansa ya se marcó hoy, se sigue mostrando para poder desmarcarlo)
+    tocan_hoy = {h.idHabit for h in habits if h.toca_el(hoy)}
+    descansan_hoy = sum(1 for h in habits if h.idHabit not in tocan_hoy and h.idHabit not in marcados_hoy)
+    habits = [h for h in habits if h.idHabit in tocan_hoy or h.idHabit in marcados_hoy]
+    total_habitos = len(tocan_hoy)
+    completados_hoy = sum(1 for h in tocan_hoy if h in marcados_hoy)
     pct_hoy = round((completados_hoy / total_habitos * 100)) if total_habitos > 0 else 0
     return render_template(
         "register/check.html",
         habits=habits,
         marcados_hoy=marcados_hoy,
+        tocan_hoy=tocan_hoy,
+        descansan_hoy=descansan_hoy,
         total_habitos=total_habitos,
         completados_hoy=completados_hoy,
         pct_hoy=pct_hoy,
@@ -67,6 +77,7 @@ def habit_edit(habit_id):
     habit.habitDesc = request.form.get('habitDesc', habit.habitDesc)
     habit.habitFreq = request.form.get('habitFreq', habit.habitFreq)
     habit.habitCategory = request.form.get('habitCategory', habit.habitCategory)
+    habit.set_dias(request.form.getlist('diasSemana'))
     db.session.commit()
     flash(f"Hábito '{habit.habitName}' actualizado correctamente.", "success")
     return redirect(url_for('habits.register_habit'))
@@ -94,7 +105,12 @@ def habit_toggle_today(habit_id):
     else:
         db.session.add(HistHabit(idUser=current_user.idUser, idHabit=habit.idHabit, fecha=hoy))
         done = True
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        # Doble clic muy rápido: el registro de hoy ya existía, no se suma XP dos veces
+        db.session.rollback()
+        return jsonify({'success': True, 'done': True, 'duplicado': True})
 
     progress = registrar_toggle_habito(current_user.idUser, done)
     return jsonify({'success': True, 'done': done, 'xpTotal': progress.xpTotal})

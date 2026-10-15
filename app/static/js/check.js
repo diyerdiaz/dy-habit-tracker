@@ -4,8 +4,9 @@ const progressText = document.querySelector('.check-progress-text');
 
 function updateProgress() {
     if (!progressText) return;
-    const total = checkItems.length;
-    const done = document.querySelectorAll('.check-item.done').length;
+    // Los hábitos en día de descanso no cuentan en el progreso del día
+    const total = document.querySelectorAll('.check-item[data-id]:not(.descanso)').length;
+    const done = document.querySelectorAll('.check-item.done:not(.descanso)').length;
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
     if (progressFill) progressFill.style.width = pct + '%';
     progressText.textContent = `${done} / ${total} completados hoy`;

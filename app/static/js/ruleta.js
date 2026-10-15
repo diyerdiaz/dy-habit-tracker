@@ -1,3 +1,9 @@
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
+}
+
 // ----- DATA -----
 const castigos_data = window.CASTIGOS_DATA || [];
 
@@ -132,12 +138,12 @@ function renderList(filtered) {
         col.innerHTML = `
             <div class="castigo-card card shadow-lg border-0 rounded-lg" style="width: 100%; padding: 22px; text-align: center; background: rgba(255,255,255,0.04); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;">
                 <i class="bi bi-shield-exclamation" style="font-size: 2rem; color: #ff6666; margin-bottom: 10px;"></i>
-                <h5 style="color: #fff; font-style: italic; font-weight: 600; margin: 0 0 4px 0; font-size: 1.05rem;">${c.castigoName}</h5>
-                <p style="color: rgba(255,255,255,0.45); font-size: 0.8rem; margin: 0 0 10px 0; font-style: italic;">${c.castigoDesc || 'Sin descripción'}</p>
+                <h5 style="color: #fff; font-style: italic; font-weight: 600; margin: 0 0 4px 0; font-size: 1.05rem;">${escapeHtml(c.castigoName)}</h5>
+                <p style="color: rgba(255,255,255,0.45); font-size: 0.8rem; margin: 0 0 10px 0; font-style: italic;">${escapeHtml(c.castigoDesc || 'Sin descripción')}</p>
                 <div style="margin-bottom: 8px;">
-                    <span class="badge rounded-pill" style="background: rgba(255,102,102,0.2); border: 1px solid rgba(255,102,102,0.3); font-style: normal; font-size: 0.7rem; padding: 3px 10px; color: #ff6666;">${c.castigoCategory}</span>
+                    <span class="badge rounded-pill" style="background: rgba(255,102,102,0.2); border: 1px solid rgba(255,102,102,0.3); font-style: normal; font-size: 0.7rem; padding: 3px 10px; color: #ff6666;">${escapeHtml(c.castigoCategory)}</span>
                 </div>
-                <span class="badge rounded-pill" style="background: ${sc.bg}; border: 1px solid ${sc.border}; font-style: normal; font-size: 0.75rem; padding: 4px 14px; color: ${sc.text};">${status}</span>
+                <span class="badge rounded-pill" style="background: ${sc.bg}; border: 1px solid ${sc.border}; font-style: normal; font-size: 0.75rem; padding: 4px 14px; color: ${sc.text};">${escapeHtml(status)}</span>
             </div>
         `;
         listEl.appendChild(col);

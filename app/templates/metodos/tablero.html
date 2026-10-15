@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Tablero · {{ metodo.nombre }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/metodos.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link active">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="metodos-wrapper metodos-wrapper-tablero" style="--color: {{ metodo.color }};">
+    <a href="{{ url_for('metodos.index') }}" class="tablero-volver"><i class="bi bi-arrow-left"></i> Métodos de estudio</a>
+
+    <div class="tablero-header">
+        <div class="metodo-icono"><i class="bi {{ metodo.icono }}"></i></div>
+        <div class="tablero-header-info">
+            <h1 class="metodos-titulo">{{ metodo.nombre }}</h1>
+            {% if metodo.descripcion %}<p class="metodos-subtitulo">{{ metodo.descripcion }}</p>{% endif %}
+        </div>
+        <button type="button" class="metodo-accion" title="Editar método" aria-label="Editar método"
+            data-accion="editar-metodo"
+            data-url="{{ url_for('metodos.editar', metodo_id=metodo.idMetodo) }}"
+            data-nombre="{{ metodo.nombre }}" data-descripcion="{{ metodo.descripcion or '' }}"
+            data-icono="{{ metodo.icono }}" data-color="{{ metodo.color }}">
+            <i class="bi bi-pencil"></i>
+        </button>
+    </div>
+
+    <p class="tablero-ayuda"><i class="bi bi-arrows-move"></i> Arrastra las tarjetas entre columnas o usa las flechas.</p>
+
+    <div class="kanban" id="kanban">
+        {% for col in columnas %}
+        <section class="kanban-columna kanban-{{ col.clave }}" data-columna="{{ col.clave }}">
+            <header class="kanban-columna-header">
+                <i class="bi {{ col.icono }}"></i>
+                <h2>{{ col.nombre }}</h2>
+                <span class="kanban-contador" data-contador="{{ col.clave }}">{{ col.tarjetas|length }}</span>
+            </header>
+            <div class="kanban-lista" data-columna="{{ col.clave }}">
+                {% for t in col.tarjetas %}
+                <article class="kanban-tarjeta" draggable="true" data-id="{{ t.idTarjeta }}"
+                    data-mover-url="{{ url_for('metodos.tarjeta_mover', tarjeta_id=t.idTarjeta) }}">
+                    <h3 class="kanban-tarjeta-titulo">{{ t.titulo }}</h3>
+                    {% if t.descripcion %}<p class="kanban-tarjeta-desc">{{ t.descripcion }}</p>{% endif %}
+                    {% if t.apuntes %}
+                    <ul class="kanban-apuntes">
+                        {% for a in t.apuntes %}
+                        <li class="kanban-apunte">
+                            <i class="bi {{ a.icono }}"></i>
+                            <a href="{{ url_for('metodos.apunte_ver', apunte_id=a.idApunte) }}" target="_blank" rel="noopener" title="Abrir {{ a.nombreOriginal }}">{{ a.nombreOriginal }}</a>
+                            <span class="kanban-apunte-tamano">{{ a.tamano_texto() }}</span>
+                            <a href="{{ url_for('metodos.apunte_ver', apunte_id=a.idApunte, descargar=1) }}" class="kanban-apunte-btn" title="Descargar" aria-label="Descargar {{ a.nombreOriginal }}"><i class="bi bi-download"></i></a>
+                            <button type="button" class="kanban-apunte-btn kanban-btn-eliminar" title="Eliminar apunte" aria-label="Eliminar {{ a.nombreOriginal }}"
+                                data-accion="eliminar"
+                                data-url="{{ url_for('metodos.apunte_eliminar', apunte_id=a.idApunte) }}"
+                                data-nombre="{{ a.nombreOriginal }}" data-aviso="El archivo se borrará para siempre.">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    <button type="button" class="kanban-subir" data-accion="subir-apuntes"
+                        data-url="{{ url_for('metodos.apunte_subir', tarjeta_id=t.idTarjeta) }}" data-titulo="{{ t.titulo }}">
+                        <i class="bi bi-paperclip"></i> Subir apuntes
+                    </button>
+                    <div class="kanban-tarjeta-acciones">
+                        <button type="button" class="kanban-btn" data-accion="mover" data-direccion="-1" title="Mover a la izquierda" aria-label="Mover a la izquierda"><i class="bi bi-chevron-left"></i></button>
+                        <button type="button" class="kanban-btn" data-accion="mover" data-direccion="1" title="Mover a la derecha" aria-label="Mover a la derecha"><i class="bi bi-chevron-right"></i></button>
+                        <span class="kanban-espacio"></span>
+                        <button type="button" class="kanban-btn" title="Editar" aria-label="Editar tarjeta"
+                            data-accion="editar-tarjeta"
+                            data-url="{{ url_for('metodos.tarjeta_editar', tarjeta_id=t.idTarjeta) }}"
+                            data-titulo="{{ t.titulo }}" data-descripcion="{{ t.descripcion or '' }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="kanban-btn kanban-btn-eliminar" title="Eliminar" aria-label="Eliminar tarjeta"
+                            data-accion="eliminar"
+                            data-url="{{ url_for('metodos.tarjeta_eliminar', tarjeta_id=t.idTarjeta) }}"
+                            data-nombre="{{ t.titulo }}" data-aviso="Esta tarjeta se borrará del tablero.">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <button type="button" class="kanban-agregar" data-accion="nueva-tarjeta" data-columna="{{ col.clave }}">
+                <i class="bi bi-plus-lg"></i> Agregar tarjeta
+            </button>
+        </section>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal: Subir apuntes -->
+<div class="modal fade" id="apuntesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-paperclip text-purple"></i></div>
+                    Subir apuntes
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-white-50 mb-3">¡Terminaste <strong class="text-white" id="apuntesTarjeta"></strong>! Guarda aquí tus apuntes para repasarlos después.</p>
+                <form id="apuntesForm" method="POST" action="" enctype="multipart/form-data" data-max-mb="{{ tamano_maximo_mb }}">
+                    <label class="apuntes-zona" for="apuntesArchivos">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <span id="apuntesElegidos">Toca para elegir archivos o arrástralos aquí</span>
+                        <small>PDF, Word, PowerPoint, Excel, imágenes o texto · máx. {{ tamano_maximo_mb }} MB</small>
+                    </label>
+                    <input type="file" name="archivos" id="apuntesArchivos" class="apuntes-input" multiple required
+                        accept="{% for e in extensiones %}.{{ e }}{{ ',' if not loop.last }}{% endfor %}">
+                    <p class="apuntes-error" id="apuntesError" hidden></p>
+                    <button type="submit" class="btn w-100 btn-purple fw-bold mt-3">Subir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear / Editar tarjeta -->
+<div class="modal fade" id="tarjetaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-card-text text-purple"></i></div>
+                    <span id="tarjetaModalTitulo">Nueva tarjeta</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="tarjetaForm" method="POST" action="{{ url_for('metodos.tarjeta_crear', metodo_id=metodo.idMetodo) }}"
+                    data-crear="{{ url_for('metodos.tarjeta_crear', metodo_id=metodo.idMetodo) }}">
+                    <input type="hidden" name="columna" id="tarjetaColumna" value="pendiente">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50" for="tarjetaTitulo">Título</label>
+                        <input type="text" name="titulo" id="tarjetaTitulo" class="form-control glass-input" placeholder="Ej: Repasar capítulo 3" maxlength="150" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-white-50" for="tarjetaDescripcion">Detalles</label>
+                        <textarea name="descripcion" id="tarjetaDescripcion" class="form-control glass-input" rows="3" maxlength="500" placeholder="Opcional"></textarea>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-purple fw-bold" id="tarjetaSubmit">Guardar tarjeta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear / Editar método -->
+<div class="modal fade" id="metodoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-journal-plus text-purple"></i></div>
+                    <span id="metodoModalTitulo">Nuevo método</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="metodoForm" method="POST" action="{{ url_for('metodos.crear') }}" data-crear="{{ url_for('metodos.crear') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50" for="metodoNombre">Nombre del método</label>
+                        <input type="text" name="nombre" id="metodoNombre" class="form-control glass-input" placeholder="Ej: Pomodoro" maxlength="120" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50" for="metodoDescripcion">Descripción</label>
+                        <textarea name="descripcion" id="metodoDescripcion" class="form-control glass-input" rows="2" maxlength="500" placeholder="¿Cómo lo aplicas?"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Ícono</label>
+                        <div class="metodo-opciones">
+                            {% for icono in iconos %}
+                            <input type="radio" class="metodo-radio" name="icono" value="{{ icono }}" id="icono{{ loop.index }}"{{ ' checked' if loop.first else '' }}>
+                            <label class="metodo-icono-opcion" for="icono{{ loop.index }}"><i class="bi {{ icono }}"></i></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-white-50">Color</label>
+                        <div class="metodo-opciones">
+                            {% for color in colores %}
+                            <input type="radio" class="metodo-radio" name="color" value="{{ color }}" id="color{{ loop.index }}"{{ ' checked' if loop.first else '' }}>
+                            <label class="metodo-color-opcion" for="color{{ loop.index }}" style="background: {{ color }};" title="{{ color }}"></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn w-100 btn-purple fw-bold" id="metodoSubmit">Guardar método</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-body p-4 text-center text-white">
+                <i class="bi bi-trash3 metodo-eliminar-icono"></i>
+                <p class="mt-3 mb-1">¿Eliminar <strong id="eliminarNombre"></strong>?</p>
+                <p class="text-white-50 small" id="eliminarAviso"></p>
+                <form id="eliminarForm" method="POST" action="">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger w-50">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/metodos.js') }}"></script>
+{% endblock %}

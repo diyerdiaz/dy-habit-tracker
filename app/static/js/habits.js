@@ -130,12 +130,15 @@ function goToPage(page, event) {
 
 // ── LÓGICA DE MODALES ──
 
-function openEditModal(id, name, desc, freq, category) {
+function openEditModal(id, name, desc, freq, category, dias) {
     document.getElementById('editForm').action = `/habit/${id}/edit`;
     document.getElementById('editName').value = name;
     document.getElementById('editDesc').value = desc !== 'None' ? desc : '';
     document.getElementById('editFreq').value = freq;
     document.getElementById('editCategory').value = category;
+    for (let d = 0; d < 7; d++) {
+        document.getElementById('editDia' + d).checked = !dias || dias.includes(d);
+    }
     var modal = new bootstrap.Modal(document.getElementById('editModal'));
     modal.show();
 }
@@ -162,7 +165,7 @@ function openViewModal(id) {
             document.getElementById('viewName').textContent = data.habitName;
             document.getElementById('viewState').textContent = data.habitState;
             document.getElementById('viewCategory').textContent = data.habitCategory.charAt(0).toUpperCase() + data.habitCategory.slice(1);
-            document.getElementById('viewFreq').textContent = data.habitFreq.charAt(0).toUpperCase() + data.habitFreq.slice(1);
+            document.getElementById('viewFreq').textContent = data.habitFreq.charAt(0).toUpperCase() + data.habitFreq.slice(1) + ' · ' + data.diasTexto;
             document.getElementById('viewDesc').textContent = data.habitDesc || 'No se proporcionó descripción.';
             document.getElementById('viewDate').textContent = data.createdAt;
 

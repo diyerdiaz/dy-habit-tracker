@@ -29,3 +29,27 @@
 .glass-input::placeholder { color: rgba(255,255,255,0.4) !important; }
 .glass-input:focus { border-color: #d966ff !important; box-shadow: 0 0 10px rgba(217,102,255,0.3) !important; }
 .glass-input option { background: #250035; color: white; }
+
+/* ── Selector de días de la semana ── */
+.dias-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.dia-check { position: absolute; opacity: 0; pointer-events: none; }
+.dia-chip {
+    min-width: 46px;
+    padding: 6px 0;
+    text-align: center;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+.dia-check:checked + .dia-chip {
+    background: rgba(138, 40, 255, 0.45);
+    border-color: #d966ff;
+    color: #fff;
+}
+.dia-check:focus-visible + .dia-chip { box-shadow: 0 0 0 2px #d966ff; }
+.dias-ayuda { display: block; margin-top: 6px; color: rgba(255,255,255,0.45); font-size: 0.78rem; }

@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         badge.style.border = '1px solid rgba(138, 40, 255, 0.8)';
                         badge.style.color = '';
                     } else {
-                        badge.textContent = 'Pendiente';
+                        badge.textContent = item.dataset.descanso ? 'Descanso' : 'Pendiente';
                         badge.style.background = 'rgba(255, 255, 255, 0.05)';
                         badge.style.border = '1px solid rgba(255, 255, 255, 0.2)';
                         badge.style.color = 'rgba(255,255,255,0.6)';

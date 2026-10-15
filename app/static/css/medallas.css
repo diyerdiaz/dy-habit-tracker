@@ -1,0 +1,439 @@
+.medallas-wrapper {
+    width: 95%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 10vh 20px 60px 20px;
+    box-sizing: border-box;
+}
+
+/* ── Resumen ── */
+.medallas-resumen {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 35px;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.medallas-resumen-icono {
+    font-size: 3rem;
+    color: #ffd700;
+    filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.5));
+}
+
+.medallas-titulo {
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 6px 0;
+    text-shadow: 0 0 12px rgba(138, 40, 255, 0.4);
+}
+
+.medallas-contador {
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+    margin-bottom: 14px;
+}
+
+.medallas-contador strong {
+    color: #ffd700;
+    font-size: 1.3rem;
+}
+
+.medallas-barra {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.medallas-barra-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8a28ff, #d966ff, #ffd700);
+    border-radius: 10px;
+    transition: width 0.8s ease;
+}
+
+.medallas-siguiente {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+    background: rgba(138, 40, 255, 0.1);
+    border: 1px solid rgba(217, 102, 255, 0.3);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-top: 22px;
+}
+
+.medallas-siguiente > i {
+    flex-shrink: 0;
+    font-size: 1.8rem;
+    color: #ffd700;
+}
+
+.medallas-siguiente-titulo {
+    color: #fff;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.medallas-siguiente-texto {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.88rem;
+    font-style: italic;
+}
+
+/* ── Filtros ── */
+.medallas-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 30px 0 24px;
+}
+
+.medallas-filtro {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.75);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.medallas-filtro:hover {
+    border-color: rgba(217, 102, 255, 0.5);
+    color: #fff;
+}
+
+.medallas-filtro.activo {
+    background: rgba(138, 40, 255, 0.35);
+    border-color: #d966ff;
+    color: #fff;
+}
+
+/* ── Tarjetas ── */
+.medallas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.medalla-card {
+    --color: #cd7f32;
+    --brillo: rgba(205, 127, 50, 0.35);
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--color);
+    border-radius: 18px;
+    padding: 28px 20px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.medalla-card[hidden] {
+    display: none;
+}
+
+.medalla-card:hover {
+    transform: translateY(-6px);
+}
+
+.rareza-bronce   { --color: #cd7f32; --brillo: rgba(205, 127, 50, 0.35); }
+.rareza-plata    { --color: #c0c8d8; --brillo: rgba(192, 200, 216, 0.35); }
+.rareza-oro      { --color: #ffd700; --brillo: rgba(255, 215, 0, 0.35); }
+.rareza-diamante { --color: #5ce1ff; --brillo: rgba(92, 225, 255, 0.4); }
+
+.medalla-card.desbloqueada {
+    box-shadow: 0 0 22px var(--brillo);
+    border-color: var(--color);
+}
+
+.medalla-card.desbloqueada:hover {
+    box-shadow: 0 8px 30px var(--brillo);
+}
+
+.medalla-rareza {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color);
+    opacity: 0.85;
+}
+
+.medalla-icono {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.3rem;
+    color: var(--color);
+    background: radial-gradient(circle, var(--brillo) 0%, transparent 70%);
+    border: 2px solid var(--color);
+    margin-bottom: 14px;
+}
+
+.medalla-card.desbloqueada .medalla-icono {
+    animation: medalla-pulso 2.8s ease-in-out infinite;
+}
+
+@keyframes medalla-pulso {
+    0%, 100% { box-shadow: 0 0 10px var(--brillo); }
+    50%      { box-shadow: 0 0 26px var(--color); }
+}
+
+.medalla-card.bloqueada .medalla-icono {
+    filter: grayscale(1);
+    opacity: 0.45;
+}
+
+.medalla-candado {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1a1025;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.medalla-nombre {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0 0 6px;
+}
+
+.medalla-descripcion {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin: 0 0 8px;
+}
+
+.medalla-frase {
+    color: #d966ff;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin: 0 0 16px;
+    flex-grow: 1;
+}
+
+.medalla-card.bloqueada .medalla-frase {
+    color: rgba(217, 102, 255, 0.6);
+}
+
+.medalla-progreso {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.medalla-progreso-fill {
+    height: 100%;
+    background: var(--color);
+    border-radius: 6px;
+}
+
+.medalla-progreso-texto {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.medalla-card.desbloqueada .medalla-progreso-texto {
+    color: var(--color);
+    font-weight: 600;
+}
+
+.medallas-vacio {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 20px;
+}
+
+@media (max-width: 576px) {
+    .medallas-wrapper {
+        padding: 12vh 4px 40px;
+        width: 100%;
+    }
+
+    .medallas-resumen {
+        padding: 24px 18px;
+    }
+
+    .medallas-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .medalla-card {
+        padding: 24px 12px 14px;
+    }
+
+    .medalla-icono {
+        width: 64px;
+        height: 64px;
+        font-size: 1.7rem;
+    }
+}
+
+/* ── Nivel actual ── */
+.medallas-nivel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin: -6px 0 14px;
+}
+
+.medallas-nivel i,
+.medallas-nivel strong {
+    color: #ffd700;
+}
+
+/* ── Rareza mítica (Rango V) ── */
+.rareza-mitica { --color: #ff4d6d; --brillo: rgba(255, 77, 109, 0.45); }
+
+.rareza-mitica.desbloqueada {
+    background: linear-gradient(145deg, rgba(255, 77, 109, 0.14), rgba(255, 215, 0, 0.08), rgba(138, 40, 255, 0.14));
+}
+
+.rareza-mitica .medalla-rareza {
+    background: linear-gradient(90deg, #ff4d6d, #ffd700, #d966ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+    opacity: 1;
+}
+
+/* ── Secciones por rango ── */
+.medallas-seccion {
+    margin-bottom: 36px;
+}
+
+.medallas-seccion[hidden] {
+    display: none;
+}
+
+.medallas-seccion-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(138, 40, 255, 0.1);
+    border: 1px solid rgba(217, 102, 255, 0.3);
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.medallas-seccion-icono {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #00e676;
+    background: rgba(0, 230, 118, 0.12);
+    border: 1px solid rgba(0, 230, 118, 0.4);
+}
+
+.medallas-seccion.cerrada .medallas-seccion-icono {
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.medallas-seccion-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.medallas-seccion-info h2 {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0;
+}
+
+.medallas-seccion-info p {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.82rem;
+    font-style: italic;
+    margin: 2px 0 0;
+}
+
+.medallas-seccion-conteo {
+    color: #ffd700;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.medallas-seccion-requiere {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #ffc107;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.medallas-seccion-requiere small {
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 400;
+}
+
+/* Un rango cerrado se ve, pero apagado: muestra lo que viene */
+.medallas-seccion.cerrada .medalla-card {
+    opacity: 0.55;
+}
+
+.medallas-seccion.cerrada .medalla-card:hover {
+    opacity: 0.85;
+}
+
+@media (max-width: 576px) {
+    .medallas-seccion-header {
+        flex-wrap: wrap;
+    }
+
+    .medallas-seccion-estado {
+        width: 100%;
+    }
+
+    .medallas-seccion-requiere {
+        align-items: flex-start;
+    }
+}

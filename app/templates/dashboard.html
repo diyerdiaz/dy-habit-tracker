@@ -78,8 +78,28 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
                 <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
@@ -151,12 +171,12 @@
                 <ul class="list-group list-group-flush bg-transparent" style="padding-left: 0; margin-bottom: 0;" id="dashboardHabitsList">
                     {% for habit in data.habitos_hoy %}
                     <li class="list-group-item bg-transparent text-white border-bottom border-light p-3 dashboard-habit-item"
-                        data-id="{{ habit.id }}"
+                        data-id="{{ habit.id }}"{% if habit.descanso %} data-descanso="1"{% endif %}
                         style="font-size: 1.2rem; font-style: italic; display: flex; justify-content: space-between; align-items: center; border-color: rgba(255,255,255,0.1) !important; transition: 0.3s; cursor: pointer;">
                         <div><i class="bi bi-star-fill"
                                 style="color: #d966ff; margin-right: 12px; font-size: 1rem;"></i>{{ habit.name }}</div>
                         <span class="badge rounded-pill dashboard-habit-badge"
-                            style="{{ 'background: rgba(138, 40, 255, 0.4); border: 1px solid rgba(138, 40, 255, 0.8);' if habit.done else 'background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255,255,255,0.6);' }} font-style: normal; font-size: 0.9rem; padding: 8px 16px;">{{ 'Completado' if habit.done else 'Pendiente' }}</span>
+                            style="{{ 'background: rgba(138, 40, 255, 0.4); border: 1px solid rgba(138, 40, 255, 0.8);' if habit.done else 'background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255,255,255,0.6);' }} font-style: normal; font-size: 0.9rem; padding: 8px 16px;">{{ 'Completado' if habit.done else ('Descanso' if habit.descanso else 'Pendiente') }}</span>
                     </li>
                     {% else %}
                     <li class="list-group-item bg-transparent text-white p-3" style="font-style: italic; text-align: center; color: rgba(255,255,255,0.5);">

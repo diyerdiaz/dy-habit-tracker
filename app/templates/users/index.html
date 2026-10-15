@@ -27,7 +27,7 @@
                 <tr>
                     <td>{{ user.idUser }}</td>
                     <td>{{ user.nameUser }}</td>
-                    <td>{{ user.passwordUser }}</td>
+                    <td>••••••</td>
                     <td>
                         <a href="{{ url_for('user.detail', id=user.idUser) }}" class="btn btn-success btn-sm mb-1">
                             <i class="bi bi-person"></i>
@@ -35,9 +35,10 @@
                         <a href="{{ url_for('user.edit', id=user.idUser) }}" class="btn btn-primary btn-sm mb-1">
                             <i class="bi bi-pencil-square"></i>
                         </a>
-                        <a href="{{ url_for('user.delete', id=user.idUser) }}" class="btn btn-danger btn-sm mb-1">
-                            <i class="bi bi-trash"></i>
-                        </a>
+                        <form method="post" action="{{ url_for('user.delete', id=user.idUser) }}" class="d-inline" onsubmit="return confirm('¿Eliminar tu cuenta y todos tus datos? Esta acción no se puede deshacer.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-danger btn-sm mb-1"><i class="bi bi-trash"></i></button>
+                        </form>
                         <button type="button" class="btn btn-info btn-sm mb-1" data-bs-toggle="modal" data-bs-target="#qrModal{{ user.idUser }}">
                             <i class="bi bi-qr-code"></i>
                         </button>

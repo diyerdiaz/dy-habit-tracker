@@ -44,8 +44,28 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
                 <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
@@ -124,11 +144,11 @@
                     </td>
                     <td style="text-align: right; white-space: nowrap;">
                         <button type="button" class="vocab-row-btn vocab-row-edit"
-                            onclick="openVocabEditModal({{ p.idVocab }}, '{{ p.nombre|escape }}', '{{ p.significado|escape }}', '{{ (p.ejemplos or '')|escape }}')">
+                            onclick="openVocabEditModal({{ p.idVocab }}, {{ (p.nombre)|tojson|forceescape }}, {{ (p.significado)|tojson|forceescape }}, {{ ((p.ejemplos or ''))|tojson|forceescape }})">
                             <i class="bi bi-pencil"></i>
                         </button>
                         <button type="button" class="vocab-row-btn vocab-row-delete"
-                            onclick="openVocabDeleteModal({{ p.idVocab }}, '{{ p.nombre|escape }}')">
+                            onclick="openVocabDeleteModal({{ p.idVocab }}, {{ (p.nombre)|tojson|forceescape }})">
                             <i class="bi bi-trash"></i>
                         </button>
                     </td>

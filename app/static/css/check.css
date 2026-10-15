@@ -188,3 +188,16 @@
 .check-empty span {
     font-size: 1.1rem;
 }
+
+/* ── Hábito en día de descanso: se puede marcar, pero no cuenta ── */
+.check-item.descanso:not(.done) {
+    opacity: 0.55;
+}
+
+.check-descanso-nota {
+    text-align: center;
+    margin-top: 14px;
+    color: rgba(0, 186, 198, 0.8);
+    font-size: 0.85rem;
+    font-style: italic;
+}

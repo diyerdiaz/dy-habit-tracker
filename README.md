@@ -100,9 +100,11 @@ mi proyecto personal/
 │   ├── level_config.py  # Configuración pura de niveles (umbrales, bonos)
 │   └── __init__.py      # App factory + registro de blueprints
 ├── instance/
-│   └── flaskdb.sqlite   # Base de datos SQLite (no versionar cambios de datos reales)
+│   ├── flaskdb.sqlite   # Base de datos SQLite (no se versiona)
+│   └── secret_key       # Clave de sesión generada automáticamente (no se versiona)
 ├── config.py             # Configuración de Flask/SQLAlchemy
 ├── create_user.py        # Script para crear un usuario inicial
+├── migrar_passwords.py   # Convierte contraseñas antiguas en texto plano a hash
 ├── run.py                # Punto de entrada de la app
 └── requirements.txt
 ```
@@ -118,6 +120,7 @@ mi proyecto personal/
   <img src="https://img.shields.io/badge/Flask-3.1.0-ec4899?style=flat-square&logo=flask&logoColor=white">
   <img src="https://img.shields.io/badge/Flask--Login-0.6.3-a855f7?style=flat-square">
   <img src="https://img.shields.io/badge/Flask--SQLAlchemy-3.1.1-3b82f6?style=flat-square">
+  <img src="https://img.shields.io/badge/Flask--WTF-1.2.2-a855f7?style=flat-square">
   <img src="https://img.shields.io/badge/SQLAlchemy-2.0.37-3b82f6?style=flat-square">
   <img src="https://img.shields.io/badge/Jinja2-3.1.5-f59e0b?style=flat-square">
   <img src="https://img.shields.io/badge/qrcode-8.0-22c55e?style=flat-square">
@@ -141,11 +144,13 @@ source venv/bin/activate      # En Windows: venv\Scripts\activate
 # 3. Instala las dependencias
 pip install -r requirements.txt
 
-# 4. (Opcional) crea un usuario de prueba: diyer / 123456
-python create_user.py
+# 4. (Opcional) crea un usuario desde la terminal (te pide la contraseña)
+python create_user.py tu_usuario
 
-# 5. Levanta la app
+# 5. Levanta la app (solo accesible desde tu equipo, sin depurador)
 python run.py
+#    Modo desarrollo con recarga automática:   FLASK_DEBUG=1 python run.py
+#    Abrirla desde el celular en tu red wifi:  APP_HOST=0.0.0.0 python run.py
 ```
 
 La app queda disponible en **http://localhost:5000** 🎉
@@ -157,6 +162,20 @@ La app queda disponible en **http://localhost:5000** 🎉
 ```bash
 pytest app/test
 ```
+
+Los tests usan una base de datos **en memoria**, así que nunca tocan tus datos reales.
+
+<br>
+
+## 🔒 Seguridad
+
+- Las contraseñas se guardan con hash (`scrypt`, vía Werkzeug). Si tienes una base de datos
+  antigua con contraseñas en texto plano, ejecuta `python migrar_passwords.py` (hace una copia
+  de seguridad antes) o simplemente inicia sesión: se convierten solas.
+- Todos los formularios y peticiones `fetch` llevan token **CSRF** (Flask-WTF + `static/js/csrf.js`).
+- La `SECRET_KEY` se lee de la variable de entorno `SECRET_KEY` o se genera una sola vez en
+  `instance/secret_key`.
+- La carpeta `instance/` (base de datos y clave) **no se versiona**.
 
 <br>
 

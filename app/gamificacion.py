@@ -2,13 +2,14 @@
 
 from datetime import date, timedelta
 from app import db
+from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.user_progress import UserProgress
 from app.level_config import XP_POR_HABITO, XP_BONUS_RACHA_SEMANAL, PENALIZACION_POR_DIA_PERDIDO
 
 
 def get_or_create_progress(idUser):
-    progress = UserProgress.query.get(idUser)
+    progress = db.session.get(UserProgress, idUser)
     if not progress:
         progress = UserProgress(idUser=idUser)
         db.session.add(progress)
@@ -16,31 +17,36 @@ def get_or_create_progress(idUser):
     return progress
 
 
+def dias_programados(idUser):
+    """Días de la semana (0-6) en que el usuario tiene al menos un hábito activo.
+    Los días que no aparecen aquí son de descanso: no rompen la racha ni restan XP."""
+    dias = set()
+    for habit in Habit.query.filter_by(idUser=idUser, habitState='Activo').all():
+        dias.update(habit.dias_lista())
+    return dias
+
+
 def calcular_racha(idUser):
-    """Racha actual y máxima, derivadas de los días con al menos un hábito marcado."""
-    dias = sorted({h.fecha for h in HistHabit.query.filter_by(idUser=idUser).all()})
+    """Racha actual y máxima, derivadas de los días con al menos un hábito marcado.
+    Los días de descanso (sin hábitos programados) no cortan la racha."""
+    dias = {h.fecha for h in HistHabit.query.filter_by(idUser=idUser).all()}
     if not dias:
         return 0, 0
 
+    programados = dias_programados(idUser)
+    hoy = date.today()
     racha_maxima = racha_temp = 0
-    for i, dia in enumerate(dias):
-        if i == 0 or (dia - dias[i - 1]).days == 1:
+    cursor = min(dias)
+    while cursor <= hoy:
+        if cursor in dias:
             racha_temp += 1
             racha_maxima = max(racha_maxima, racha_temp)
-        else:
-            racha_temp = 1
+        elif cursor != hoy and cursor.weekday() in programados:
+            # Día que tocaba y no se hizo nada. Hoy aún no cuenta: queda tiempo.
+            racha_temp = 0
+        cursor += timedelta(days=1)
 
-    racha_actual = 0
-    hoy = date.today()
-    ultimo_dia = dias[-1]
-    if (hoy - ultimo_dia).days <= 1:
-        dias_set = set(dias)
-        cursor = ultimo_dia
-        while cursor in dias_set:
-            racha_actual += 1
-            cursor -= timedelta(days=1)
-
-    return racha_actual, racha_maxima
+    return racha_temp, racha_maxima
 
 
 def aplicar_penalizaciones_pendientes(progress):
@@ -48,6 +54,7 @@ def aplicar_penalizaciones_pendientes(progress):
     Resta XP por cada día completo transcurrido sin actividad desde la última
     vez que se revisó. Se apoya en `ultimaFechaPenalizada` para no penalizar
     el mismo día dos veces, y en HistHabit para saber qué días sí tuvieron actividad.
+    Los días de descanso (sin hábitos programados) nunca restan XP.
     """
     if not progress.ultimaFechaActividad:
         return False
@@ -56,11 +63,12 @@ def aplicar_penalizaciones_pendientes(progress):
     dias_con_actividad = {
         h.fecha for h in HistHabit.query.filter_by(idUser=progress.idUser).all()
     }
+    programados = dias_programados(progress.idUser)
 
     cursor = (progress.ultimaFechaPenalizada or progress.ultimaFechaActividad) + timedelta(days=1)
     penalizado = False
     while cursor < hoy:
-        if cursor not in dias_con_actividad:
+        if cursor not in dias_con_actividad and cursor.weekday() in programados:
             progress.xpTotal = max(0, progress.xpTotal - PENALIZACION_POR_DIA_PERDIDO)
             penalizado = True
         progress.ultimaFechaPenalizada = cursor

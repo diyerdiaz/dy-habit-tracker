@@ -9,8 +9,8 @@
     </div>
    
     <div class="form-group mb-3">
-        <label for="passwordUser" class="form-label">Contraseña:</label>
-        <input type="password" id="passwordUser" name="passwordUser" value="{{ user.passwordUser }}" required class="form-control">
+        <label for="passwordUser" class="form-label">Nueva contraseña (déjala vacía para no cambiarla):</label>
+        <input type="password" id="passwordUser" name="passwordUser" minlength="6" autocomplete="new-password" class="form-control">
     </div>
     
     <button type="submit" class="btn btn-primary">Actualizar Usuario</button>

@@ -6,7 +6,13 @@ venv/
 __pycache__/
 *.pyc
 
-# Base de datos local
+# Base de datos local y clave secreta (datos reales: no versionar)
+instance/
+*.sqlite
+*.sqlite.bak*
 
 # Editor / OS
 .DS_Store
+
+# Tests
+.pytest_cache/

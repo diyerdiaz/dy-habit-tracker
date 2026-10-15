@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Estadísticas de Hábitos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/estadisticas_habitos.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link active">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="est-wrapper">
+    <h1 class="est-titulo">Estadísticas de Hábitos</h1>
+    <p class="est-subtitulo">Porcentaje de cumplimiento de cada hábito en el mes. Solo cuentan los días que te tocaba.</p>
+
+    <!-- ── Filtro por mes ── -->
+    <form class="est-filtro" method="GET" action="{{ url_for('estadisticas.index') }}">
+        {% if mes_anterior %}
+        <a class="est-flecha" href="{{ url_for('estadisticas.index', mes=mes_anterior) }}" title="Mes anterior" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></a>
+        {% else %}
+        <span class="est-flecha deshabilitada" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+        {% endif %}
+        <label class="visually-hidden" for="estMes">Mes</label>
+        <select name="mes" id="estMes" class="est-select" onchange="this.form.submit()">
+            {% for m in meses %}
+            <option value="{{ m.valor }}"{{ ' selected' if m.valor == mes_actual else '' }}>{{ m.nombre }}</option>
+            {% endfor %}
+        </select>
+        <noscript><button type="submit" class="est-select">Ver</button></noscript>
+        {% if mes_siguiente %}
+        <a class="est-flecha" href="{{ url_for('estadisticas.index', mes=mes_siguiente) }}" title="Mes siguiente" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></a>
+        {% else %}
+        <span class="est-flecha deshabilitada" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+        {% endif %}
+    </form>
+
+    {% if stats.habitos %}
+    <!-- ── Resumen del mes ── -->
+    <div class="est-resumen">
+        <div class="est-dato">
+            <div class="est-dato-valor nivel-{{ stats.nivel_promedio }}">{{ stats.promedio if stats.promedio is not none else '—' }}{% if stats.promedio is not none %}%{% endif %}</div>
+            <div class="est-dato-label">Promedio del mes</div>
+        </div>
+        <div class="est-dato">
+            <div class="est-dato-valor">{{ stats.total_cumplidos }}</div>
+            <div class="est-dato-label">Hábitos cumplidos</div>
+        </div>
+        <div class="est-dato">
+            <div class="est-dato-valor">{{ stats.dias_activos }}<small>/{{ stats.dias_del_mes }}</small></div>
+            <div class="est-dato-label">Días con actividad</div>
+        </div>
+        {% if stats.mejor %}
+        <div class="est-dato">
+            <div class="est-dato-valor est-dato-texto"><i class="bi bi-trophy-fill"></i> {{ stats.mejor.nombre }}</div>
+            <div class="est-dato-label">Mejor hábito ({{ stats.mejor.pct }}%)</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Barras verticales por hábito ── -->
+    <div class="est-grafico-card">
+        <h2 class="est-grafico-titulo">{{ mes_nombre }}{% if es_mes_en_curso %} <span class="est-en-curso">(en curso)</span>{% endif %}</h2>
+        <div class="est-grafico" role="list" aria-label="Porcentaje de cumplimiento por hábito">
+            <div class="est-guias" aria-hidden="true">
+                <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+            </div>
+            <div class="est-barras">
+                {% for h in stats.habitos %}
+                <div class="est-columna" role="listitem"
+                    title="{{ h.nombre }}: {{ h.cumplidos }} de {{ h.programados }} días{% if h.extra %} (+{{ h.extra }} en días de descanso){% endif %}">
+                    <div class="est-pct nivel-{{ h.nivel }}">{{ h.pct ~ '%' if h.pct is not none else '—' }}</div>
+                    <div class="est-barra-pista">
+                        <div class="est-barra nivel-{{ h.nivel }}" style="--alto: {{ h.pct or 0 }}%; --retraso: {{ loop.index0 * 60 }}ms;"></div>
+                    </div>
+                    <div class="est-nombre">{{ h.nombre }}</div>
+                    <div class="est-dias">{{ h.cumplidos }}/{{ h.programados }} días</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="est-leyenda">
+            <span><i class="est-punto nivel-alto"></i> 80% o más</span>
+            <span><i class="est-punto nivel-medio"></i> 50% a 79%</span>
+            <span><i class="est-punto nivel-bajo"></i> Menos de 50%</span>
+        </div>
+    </div>
+
+    {% if stats.a_mejorar and stats.a_mejorar.pct < 80 %}
+    <div class="est-consejo">
+        <i class="bi bi-lightbulb-fill"></i>
+        <div>
+            <strong>{{ stats.a_mejorar.nombre }}</strong> es el hábito que más te cuesta este mes ({{ stats.a_mejorar.pct }}%).
+            Intenta hacerlo a primera hora o reduce su versión mínima para no saltártelo.
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="est-vacio">
+        <i class="bi bi-bar-chart"></i>
+        <p>No hay hábitos con datos en {{ mes_nombre }}.</p>
+        <a href="{{ url_for('habits.register_habit') }}" class="est-vacio-btn">Ir a Gestión de Hábitos</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+{% endblock %}

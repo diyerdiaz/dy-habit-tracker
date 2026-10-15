@@ -23,6 +23,21 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
                 <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
             </a>
@@ -40,6 +55,11 @@
         <li class="sidebar-item">
             <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
                 <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
             </a>
         </li>
         <li class="sidebar-item">

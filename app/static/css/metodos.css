@@ -1,0 +1,588 @@
+.metodos-wrapper {
+    width: 95%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 10vh 20px 60px 20px;
+    box-sizing: border-box;
+}
+
+.metodos-wrapper-tablero {
+    max-width: 1250px;
+    /* El tablero se adapta al espacio que realmente tiene, no solo a la ventana */
+    container-type: inline-size;
+}
+
+/* ── Encabezado ── */
+.metodos-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.metodos-titulo {
+    color: #b366ff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 0;
+    text-shadow: 0 0 12px rgba(138, 40, 255, 0.4);
+}
+
+.metodos-subtitulo {
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin: 4px 0 0;
+}
+
+.metodos-btn-nuevo {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    border: none;
+    color: #fff;
+    border-radius: 22px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metodos-btn-nuevo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(155, 89, 182, 0.45);
+}
+
+/* ── Tarjetas de métodos ── */
+.metodos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.metodo-card {
+    --color: #d966ff;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--color);
+    border-radius: 18px;
+    padding: 22px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.metodo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 26px color-mix(in srgb, var(--color) 30%, transparent);
+}
+
+.metodo-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.metodo-icono {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    color: var(--color);
+    border: 2px solid var(--color);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color) 25%, transparent), transparent 70%);
+}
+
+.metodo-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+.metodo-accion {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.metodo-accion:hover {
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+.metodo-accion-eliminar:hover {
+    color: #ff6666;
+    border-color: #ff6666;
+}
+
+.metodo-nombre {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-style: italic;
+    margin: 0 0 6px;
+}
+
+.metodo-descripcion {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.88rem;
+    flex-grow: 1;
+    margin: 0 0 14px;
+}
+
+.metodo-conteo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 10px;
+}
+
+.metodo-conteo i {
+    color: var(--color);
+}
+
+.metodo-progreso {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.metodo-progreso-fill {
+    height: 100%;
+    background: var(--color);
+    border-radius: 6px;
+}
+
+.metodo-abrir {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid var(--color);
+    background: color-mix(in srgb, var(--color) 20%, transparent);
+    border-radius: 12px;
+    padding: 9px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.metodo-abrir:hover {
+    color: #fff;
+    background: color-mix(in srgb, var(--color) 40%, transparent);
+}
+
+.metodos-vacio {
+    text-align: center;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 50px 20px;
+}
+
+.metodos-vacio > i {
+    font-size: 3rem;
+    color: #d966ff;
+}
+
+/* ── Selector de ícono y color (modal) ── */
+.metodo-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.metodo-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.metodo-icono-opcion {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.metodo-color-opcion {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.metodo-radio:checked + .metodo-icono-opcion {
+    background: rgba(138, 40, 255, 0.45);
+    border-color: #d966ff;
+    color: #fff;
+}
+
+.metodo-radio:checked + .metodo-color-opcion {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.metodo-radio:focus-visible + label {
+    outline: 2px solid #d966ff;
+    outline-offset: 2px;
+}
+
+.metodo-eliminar-icono {
+    font-size: 2.2rem;
+    color: #ff6666;
+}
+
+/* ── Tablero ── */
+.tablero-volver {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    margin-bottom: 16px;
+}
+
+.tablero-volver:hover {
+    color: #d966ff;
+}
+
+.tablero-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.tablero-header-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.tablero-ayuda {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.82rem;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.kanban {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.kanban-columna {
+    --col: #d966ff;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 3px solid var(--col);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-pendiente { --col: #ffc107; }
+.kanban-progreso  { --col: #00bac6; }
+.kanban-hecho     { --col: #00e676; }
+
+.kanban-columna-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--col);
+    margin-bottom: 12px;
+}
+
+.kanban-columna-header h2 {
+    flex-grow: 1;
+    margin: 0;
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-style: italic;
+}
+
+.kanban-contador {
+    min-width: 28px;
+    text-align: center;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    color: #fff;
+    background: color-mix(in srgb, var(--col) 30%, transparent);
+}
+
+.kanban-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 80px;
+    border-radius: 12px;
+    padding: 4px;
+    transition: background 0.2s ease;
+}
+
+.kanban-lista.sobre {
+    background: color-mix(in srgb, var(--col) 12%, transparent);
+    outline: 1px dashed var(--col);
+}
+
+.kanban-tarjeta {
+    background: rgba(30, 0, 45, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid var(--col);
+    border-radius: 12px;
+    padding: 12px 12px 8px;
+    cursor: grab;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kanban-tarjeta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.kanban-tarjeta.arrastrando {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.kanban-hecho .kanban-tarjeta-titulo {
+    text-decoration: line-through;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.kanban-tarjeta-titulo {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    word-break: break-word;
+}
+
+.kanban-tarjeta-desc {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin: 0 0 6px;
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.kanban-tarjeta-acciones {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.kanban-espacio {
+    flex-grow: 1;
+}
+
+.kanban-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.kanban-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.kanban-btn-eliminar:hover {
+    color: #ff6666;
+}
+
+.kanban-pendiente .kanban-btn[data-direccion="-1"],
+.kanban-hecho .kanban-btn[data-direccion="1"] {
+    visibility: hidden;
+}
+
+.kanban-agregar {
+    margin-top: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kanban-agregar:hover {
+    border-color: var(--col);
+    color: #fff;
+    background: color-mix(in srgb, var(--col) 10%, transparent);
+}
+
+@container (max-width: 760px) {
+    .kanban {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .metodos-wrapper {
+        padding: 12vh 4px 40px;
+        width: 100%;
+    }
+
+    .metodos-titulo {
+        font-size: 1.6rem;
+    }
+}
+
+/* ── Apuntes de tarjetas terminadas ── */
+.kanban-apuntes {
+    list-style: none;
+    margin: 4px 0 8px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kanban-apunte {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 0.78rem;
+    min-width: 0;
+}
+
+.kanban-apunte > i {
+    color: var(--col);
+    flex-shrink: 0;
+}
+
+.kanban-apunte > a:first-of-type {
+    flex-grow: 1;
+    min-width: 0;
+    color: #fff;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kanban-apunte > a:first-of-type:hover {
+    text-decoration: underline;
+}
+
+.kanban-apunte-tamano {
+    color: rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+}
+
+.kanban-apunte-btn {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 2px;
+    cursor: pointer;
+}
+
+.kanban-apunte-btn:hover {
+    color: #fff;
+}
+
+/* El botón de subir solo se ve cuando la tarjeta está en "Hecho" */
+.kanban-subir {
+    display: none;
+    width: 100%;
+    margin: 2px 0 6px;
+    border: 1px dashed color-mix(in srgb, var(--col) 60%, transparent);
+    background: color-mix(in srgb, var(--col) 10%, transparent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.kanban-hecho .kanban-subir {
+    display: block;
+}
+
+.kanban-subir:hover {
+    background: color-mix(in srgb, var(--col) 25%, transparent);
+}
+
+.apuntes-zona {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    color: #fff;
+    border: 2px dashed rgba(217, 102, 255, 0.45);
+    border-radius: 16px;
+    padding: 28px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.apuntes-zona > i {
+    font-size: 2.4rem;
+    color: #d966ff;
+}
+
+.apuntes-zona small {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.apuntes-zona:hover,
+.apuntes-zona.sobre {
+    background: rgba(138, 40, 255, 0.15);
+    border-color: #d966ff;
+}
+
+.apuntes-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.apuntes-error {
+    color: #ff6666;
+    font-size: 0.85rem;
+    margin: 10px 0 0;
+}

@@ -6,7 +6,7 @@ from app.models.vocabulario import Vocabulario
 from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app import db
-from app.gamificacion import get_or_create_progress, aplicar_penalizaciones_pendientes, sincronizar_racha
+from app.gamificacion import get_or_create_progress, aplicar_penalizaciones_pendientes, sincronizar_racha, calcular_racha
 from app.level_config import NIVEL_MAXIMO, NIVELES, XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO, calcular_progreso
 from collections import defaultdict
 from datetime import datetime, date, timedelta
@@ -29,19 +29,12 @@ def estadisticas():
     # Días registrados: rango desde el primer hábito hasta hoy
     fechas = [h.createdAt for h in habits]
     if fechas:
-        dias_registrados = (datetime.utcnow() - min(fechas)).days + 1
+        dias_registrados = (datetime.now() - min(fechas)).days + 1
     else:
         dias_registrados = 0
 
-    # Racha más larga (días consecutivos con al menos un hábito creado)
-    dias_con_habito = sorted(set(h.createdAt.date() for h in habits))
-    racha_max = racha_actual = 0
-    for i, dia in enumerate(dias_con_habito):
-        if i == 0 or (dia - dias_con_habito[i-1]).days == 1:
-            racha_actual += 1
-            racha_max = max(racha_max, racha_actual)
-        else:
-            racha_actual = 1
+    # Racha más larga: días consecutivos con al menos un hábito CUMPLIDO
+    _, racha_max = calcular_racha(current_user.idUser)
 
     # ── Radar por Categoría (activos por categoría) ──
     categorias = ['salud', 'mente', 'finanzas', 'espiritual']
@@ -53,7 +46,7 @@ def estadisticas():
     radar_data = [cat_count.get(c, 0) for c in categorias]
 
     # ── Barras: hábitos creados por día (últimos 7 días) ──
-    today = datetime.utcnow().date()
+    today = datetime.now().date()
     week_labels = []
     week_data = []
     day_names = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -241,6 +234,7 @@ def nivel():
         'nivel_max_titulo': nivel_max_info['titulo'],
     }
     return render_template('menu/nivel.html', data=data)
+
 
 from app.models.ruleta_castigo import Castigo
 from app.models.habitos import Habit as HabitModel

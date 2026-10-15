@@ -6,16 +6,18 @@ from app.models.hist_habits import HistHabit
 from app import db
 from datetime import date, timedelta
 from collections import defaultdict
+from app.gamificacion import calcular_racha, dias_programados
 
 bp = Blueprint('auth', __name__)
 
 @bp.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        nameUser = request.form['nameUser']
-        passwordUser = request.form['passwordUser']
-        
-        if (user := User.query.filter_by(nameUser=nameUser, passwordUser=passwordUser).first()):
+        nameUser = (request.form.get('nameUser') or '').strip()
+        passwordUser = request.form.get('passwordUser') or ''
+
+        user = User.query.filter_by(nameUser=nameUser).first()
+        if user and user.check_password(passwordUser):
             login_user(user)
             flash("Login successful!", "success")
             return redirect(url_for('auth.dashboard'))
@@ -39,8 +41,10 @@ def dashboard():
 
     total_habitos = len(habits)
     activos = sum(1 for h in habits if h.habitState == 'Activo')
-    completados_hoy = sum(1 for h in habits if h.idHabit in marcados_hoy)
-    pct_hoy = round((completados_hoy / total_habitos * 100)) if total_habitos > 0 else 0
+    # Solo cuentan los hábitos que tocan hoy; los demás son día de descanso
+    tocan_hoy = [h for h in habits if h.toca_el(hoy)]
+    completados_hoy = sum(1 for h in tocan_hoy if h.idHabit in marcados_hoy)
+    pct_hoy = round((completados_hoy / len(tocan_hoy) * 100)) if tocan_hoy else 0
 
     if pct_hoy >= 80:
         mensaje_meta = '¡Consistencia sólida esta semana!'
@@ -51,17 +55,9 @@ def dashboard():
     else:
         mensaje_meta = 'Aún no marcas nada hoy.'
 
-    # ── Racha actual (días consecutivos con actividad hasta hoy) ──
-    dias_con_actividad = sorted(set(h.fecha for h in todos_hist))
-    racha_actual = 0
-    if dias_con_actividad:
-        ultimo_dia = dias_con_actividad[-1]
-        if (hoy - ultimo_dia).days <= 1:
-            dias_set = set(dias_con_actividad)
-            cursor = ultimo_dia
-            while cursor in dias_set:
-                racha_actual += 1
-                cursor -= timedelta(days=1)
+    # ── Racha actual (los días de descanso no la cortan) ──
+    dias_con_actividad = set(h.fecha for h in todos_hist)
+    racha_actual, _ = calcular_racha(current_user.idUser)
 
     if racha_actual >= 7:
         disciplina_label = 'Alta'
@@ -71,16 +67,19 @@ def dashboard():
         disciplina_label = 'Baja'
     disciplina_pct = min(100, racha_actual * 10)
 
-    # ── Consistencia: % de los últimos 7 días con alguna actividad ──
-    dias_activos_semana = sum(1 for i in range(7) if (hoy - timedelta(days=i)) in dias_con_actividad)
-    pct_consistencia = round(dias_activos_semana / 7 * 100)
+    # ── Consistencia: % de los días que tocaba algo (últimos 7) con actividad ──
+    programados = dias_programados(current_user.idUser)
+    dias_semana = [hoy - timedelta(days=i) for i in range(7)]
+    dias_que_tocaban = [d for d in dias_semana if d.weekday() in programados]
+    dias_activos_semana = sum(1 for d in dias_que_tocaban if d in dias_con_actividad)
+    pct_consistencia = round(dias_activos_semana / len(dias_que_tocaban) * 100) if dias_que_tocaban else 100
 
     # ── Radar: % de cumplimiento hoy por categoría ──
     categorias = ['salud', 'mente', 'finanzas', 'espiritual']
     radar_labels = ['Salud', 'Mente', 'Finanzas', 'Espiritual']
     radar_data = []
     for cat in categorias:
-        habs_cat = [h for h in habits if h.habitCategory == cat]
+        habs_cat = [h for h in tocan_hoy if h.habitCategory == cat]
         if habs_cat:
             done_cat = sum(1 for h in habs_cat if h.idHabit in marcados_hoy)
             radar_data.append(round(done_cat / len(habs_cat) * 100))
@@ -103,18 +102,26 @@ def dashboard():
     week_data = [round(c / max_count * 100) for c in week_counts]
 
     habitos_hoy = [
-        {'id': h.idHabit, 'name': h.habitName, 'done': h.idHabit in marcados_hoy}
+        {'id': h.idHabit, 'name': h.habitName, 'done': h.idHabit in marcados_hoy,
+         'descanso': not h.toca_el(hoy)}
         for h in habits
+        # Los que no tocan hoy no se muestran (salvo que ya se hayan marcado)
+        if h.toca_el(hoy) or h.idHabit in marcados_hoy
     ]
 
     # ── Notificaciones reales, basadas en el estado actual del usuario ──
     notificaciones = []
-    pendientes_hoy = total_habitos - completados_hoy
+    pendientes_hoy = len(tocan_hoy) - completados_hoy
 
     if total_habitos == 0:
         notificaciones.append({
             'tipo': 'info', 'icono': 'bi-info-circle-fill', 'color': '#00bac6',
             'mensaje': 'Aún no tienes hábitos registrados. ¡Crea el primero!',
+        })
+    elif not tocan_hoy:
+        notificaciones.append({
+            'tipo': 'info', 'icono': 'bi-cup-hot-fill', 'color': '#00bac6',
+            'mensaje': 'Hoy es tu día de descanso: no tienes hábitos programados.',
         })
     elif pendientes_hoy > 0:
         notificaciones.append({
@@ -177,12 +184,3 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 
-
-@bp.route('/pruebajs')
-def pruebajs():
-    example_data = {
-        'title': 'Bienvenido a Flet',
-        'message': 'Este es un mensaje desde Flask.'
-    }
-    import json
-    return json.dumps(example_data)

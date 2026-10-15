@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Motivación{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/motivacion.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link active">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="motivacion-wrapper">
+    <p class="motivacion-fecha"><i class="bi bi-calendar-heart"></i> {{ fecha_texto }}</p>
+    <h1 class="motivacion-titulo">Frase del día</h1>
+
+    <!-- ── Frase de hoy ── -->
+    <div class="motivacion-card">
+        <div class="motivacion-icono"><i class="bi {{ frase.icono }}"></i></div>
+        <i class="bi bi-quote motivacion-comillas"></i>
+        <blockquote class="motivacion-frase">{{ frase.texto }}</blockquote>
+        <div class="motivacion-autor">
+            <span class="motivacion-personaje">{{ frase.personaje }}</span>
+            <span class="motivacion-anime">{{ frase.anime }}</span>
+        </div>
+    </div>
+
+    <!-- ── Reto del día ── -->
+    <div class="motivacion-reto">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <div>
+            <div class="motivacion-reto-titulo">Tu reto de hoy</div>
+            <div class="motivacion-reto-texto">{{ reto }}</div>
+        </div>
+        <a href="{{ url_for('habits.habits_check') }}" class="motivacion-reto-btn">Ir al check</a>
+    </div>
+
+    <!-- ── Días anteriores ── -->
+    <h2 class="motivacion-subtitulo">Frases de días anteriores</h2>
+    <div class="motivacion-anteriores">
+        {% for f in anteriores %}
+        <div class="motivacion-mini">
+            <div class="motivacion-mini-fecha">{{ f.fecha_texto }}</div>
+            <p class="motivacion-mini-frase">“{{ f.texto }}”</p>
+            <div class="motivacion-mini-autor">{{ f.personaje }} · {{ f.anime }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <p class="motivacion-nota">Mañana tendrás una frase nueva. ¡Vuelve a buscarla!</p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Mis Medallas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/medallas.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link active">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 50px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="medallas-wrapper">
+    <!-- ── Resumen ── -->
+    <div class="medallas-resumen">
+        <div class="medallas-resumen-icono"><i class="bi bi-trophy-fill"></i></div>
+        <h1 class="medallas-titulo">Mis Medallas</h1>
+        <p class="medallas-contador"><strong>{{ desbloqueadas }}</strong> de {{ total }} desbloqueadas</p>
+        <p class="medallas-nivel">
+            <i class="bi bi-award-fill"></i> Tu nivel: <strong>{{ nivel }} · {{ titulo_nivel }}</strong>
+            {% if proximo_rango %}
+            &middot; Llega al nivel {{ proximo_rango.nivel }} para abrir el Rango {{ proximo_rango.nombre }}
+            {% endif %}
+        </p>
+        <div class="medallas-barra"><div class="medallas-barra-fill" style="width: {{ pct_total }}%;"></div></div>
+
+        {% if siguiente %}
+        <div class="medallas-siguiente">
+            <i class="bi {{ siguiente.icono }}"></i>
+            <div>
+                <div class="medallas-siguiente-titulo">Tu próxima medalla: {{ siguiente.nombre }}</div>
+                <div class="medallas-siguiente-texto">
+                    {{ siguiente.descripcion }} Llevas {{ siguiente.actual }} de {{ siguiente.meta }}. ¡Ya casi!
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="medallas-siguiente">
+            <i class="bi bi-stars"></i>
+            <div>
+                <div class="medallas-siguiente-titulo">¡Conseguiste las {{ total }} medallas!</div>
+                <div class="medallas-siguiente-texto">Eres un ejemplo de disciplina. Sigue así.</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Filtros ── -->
+    <div class="medallas-filtros" role="group" aria-label="Filtrar medallas">
+        <button type="button" class="medallas-filtro activo" data-filtro="todas">Todas</button>
+        {% for clave, cat in categorias.items() %}
+        <button type="button" class="medallas-filtro" data-filtro="{{ clave }}">
+            <i class="bi {{ cat.icono }}"></i> {{ cat.nombre }}
+        </button>
+        {% endfor %}
+        <button type="button" class="medallas-filtro" data-filtro="ganadas">
+            <i class="bi bi-unlock-fill"></i> Ganadas
+        </button>
+    </div>
+
+    <!-- ── Secciones: básicas y rangos por nivel ── -->
+    {% for sec in secciones %}
+    <section class="medallas-seccion{{ '' if sec.abierto else ' cerrada' }}" data-seccion="{{ sec.clave }}">
+        <header class="medallas-seccion-header">
+            <div class="medallas-seccion-icono">
+                <i class="bi {{ 'bi-unlock-fill' if sec.abierto else 'bi-lock-fill' }}"></i>
+            </div>
+            <div class="medallas-seccion-info">
+                <h2>{{ sec.titulo }}</h2>
+                <p>{{ sec.lema }}</p>
+            </div>
+            <div class="medallas-seccion-estado">
+                {% if sec.abierto %}
+                <span class="medallas-seccion-conteo">{{ sec.ganadas }}/{{ sec.medallas|length }}</span>
+                {% else %}
+                <span class="medallas-seccion-requiere">Requiere nivel {{ sec.nivel }}<small>{{ sec.titulo_nivel }}</small></span>
+                {% endif %}
+            </div>
+        </header>
+        <div class="medallas-grid">
+            {% for m in sec.medallas %}
+            <div class="medalla-card rareza-{{ m.rareza }}{{ ' desbloqueada' if m.desbloqueada else ' bloqueada' }}"
+                 data-categoria="{{ m.categoria }}" data-ganada="{{ 'si' if m.desbloqueada else 'no' }}">
+                <span class="medalla-rareza">{{ 'Mítica' if m.rareza == 'mitica' else m.rareza|capitalize }}</span>
+                <div class="medalla-icono">
+                    <i class="bi {{ m.icono }}"></i>
+                    {% if not m.desbloqueada %}<span class="medalla-candado"><i class="bi bi-lock-fill"></i></span>{% endif %}
+                </div>
+                <h3 class="medalla-nombre">{{ m.nombre }}</h3>
+                <p class="medalla-descripcion">{{ m.descripcion }}</p>
+                <p class="medalla-frase">“{{ m.frase }}”</p>
+                <div class="medalla-progreso">
+                    <div class="medalla-progreso-fill" style="width: {{ m.pct }}%;"></div>
+                </div>
+                <div class="medalla-progreso-texto">
+                    {% if m.desbloqueada %}
+                    <i class="bi bi-check-circle-fill"></i> ¡Conseguida!
+                    {% elif m.falta_nivel and m.pct == 100 %}
+                    <i class="bi bi-lock-fill"></i> Meta cumplida · falta nivel {{ m.nivel_requerido }}
+                    {% else %}
+                    {{ m.actual }} / {{ m.meta }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+    <p class="medallas-vacio" id="medallasVacio" hidden>Aún no tienes medallas en esta sección. ¡Tu primera está cerca!</p>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script>
+document.querySelectorAll('.medallas-filtro').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.medallas-filtro').forEach(function (b) { b.classList.remove('activo'); });
+        btn.classList.add('activo');
+        var filtro = btn.dataset.filtro;
+        var visibles = 0;
+        document.querySelectorAll('.medalla-card').forEach(function (card) {
+            var mostrar = filtro === 'todas'
+                || (filtro === 'ganadas' && card.dataset.ganada === 'si')
+                || card.dataset.categoria === filtro;
+            card.hidden = !mostrar;
+            if (mostrar) visibles++;
+        });
+        // Oculta las secciones que quedaron sin tarjetas visibles
+        document.querySelectorAll('.medallas-seccion').forEach(function (sec) {
+            sec.hidden = !sec.querySelector('.medalla-card:not([hidden])');
+        });
+        document.getElementById('medallasVacio').hidden = visibles > 0;
+    });
+});
+</script>
+{% endblock %}

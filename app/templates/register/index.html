@@ -43,8 +43,28 @@
             </a>
         </li>
         <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
                 <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 50px;">
@@ -161,16 +181,17 @@
                         </td>
                         <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); background: transparent; text-align: center;">
                             {{ habit.habitFreq|capitalize }}
+                            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5);">{{ habit.dias_texto() }}</div>
                         </td>
                         <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
                             <div class="d-flex justify-content-end gap-2" style="white-space: nowrap;">
                                 <button type="button" class="btn btn-sm btn-outline-info rounded-circle" title="Ver" onclick="openViewModal({{ habit.idHabit }})">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ habit.idHabit }}, '{{ habit.habitName|escape }}', '{{ habit.habitDesc|escape }}', '{{ habit.habitFreq }}', '{{ habit.habitCategory }}')">
+                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }}, {{ (habit.habitDesc or '')|tojson|forceescape }}, {{ habit.habitFreq|tojson|forceescape }}, {{ habit.habitCategory|tojson|forceescape }}, {{ habit.dias_lista()|tojson|forceescape }})">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, '{{ habit.habitName|escape }}')">
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }})">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
