@@ -9,6 +9,7 @@ services:
     environment:
       
       SESSION_COOKIE_SECURE: "0"
+      TZ: America/Bogota
     volumes:
      
       - ./instance:/app/instance:z

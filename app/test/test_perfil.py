@@ -157,3 +157,27 @@ def test_borrar_cuenta_borra_la_foto(logged_client, user, carpeta_subidas):
 
 def test_efecto_del_mouse_en_todas_las_paginas(client):
     assert 'js/cursor.js' in client.get('/').get_data(as_text=True)
+
+
+# ── Logo, título e instalación como app ──
+
+def test_titulo_y_logo_en_la_pestana(logged_client):
+    html = logged_client.get('/tareas/').get_data(as_text=True)
+    assert '<title>Tareas del Día · Habits</title>' in html
+    assert 'img/logo.svg' in html and '/manifest.webmanifest' in html
+
+
+def test_manifiesto_y_service_worker(client):
+    m = client.get('/manifest.webmanifest')
+    assert m.mimetype == 'application/manifest+json'
+    datos = m.get_json(force=True)
+    assert datos['name'] == 'Habits' and datos['display'] == 'standalone'
+    assert any(i.get('purpose') == 'maskable' for i in datos['icons'])
+
+    sw = client.get('/sw.js')
+    assert sw.status_code == 200 and sw.headers['Service-Worker-Allowed'] == '/'
+    sw.close()
+    assert client.get('/offline').status_code == 200
+    fav = client.get('/favicon.ico')
+    assert fav.status_code == 200
+    fav.close()

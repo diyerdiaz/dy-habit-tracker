@@ -1,7 +1,10 @@
 # Imagen de producción de la app (Flask + gunicorn) en el puerto 4000.
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
+# Zona horaria de la app: el "día" (check diario, rachas, XP, frase del día)
+# cambia a medianoche de esta zona. Sin esto el contenedor usa UTC (5 h antes).
+ENV TZ=America/Bogota \
+    PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo_pagina %}Bienvenido a mi aplicativo{% endblock %}
+{% block titulo_pagina %}Iniciar sesión{% endblock %}
 
 {% block content %}
 <div class="lightning-storm">
@@ -36,6 +36,11 @@
                     <span>English</span>
                 </div>
             </div>
+            <a href="{{ url_for('pwa.descargar_android') }}" class="login-descarga">
+                <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="28" height="28">
+                <span>Descargar app para Android</span>
+                <i class="bi bi-download"></i>
+            </a>
         </div>
     </div>
     

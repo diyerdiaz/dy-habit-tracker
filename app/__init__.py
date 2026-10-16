@@ -53,7 +53,7 @@ def create_app(config_overrides=None):
     from app.routes import (
         users_route, auth, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, metodos_route, estadisticas_route,
-        perfil_route,
+        perfil_route, pwa_route,
     )
 
     app.register_blueprint(auth.bp)
@@ -67,6 +67,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(metodos_route.bp)
     app.register_blueprint(estadisticas_route.bp)
     app.register_blueprint(perfil_route.bp)
+    app.register_blueprint(pwa_route.bp)
 
     def _wants_json():
         return (request.is_json

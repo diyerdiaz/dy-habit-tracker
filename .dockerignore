@@ -13,3 +13,6 @@ __pycache__/
 *.sqlite.bak*
 librerias/
 .DS_Store
+
+# App de Android (Flutter): no hace falta dentro de la imagen del servidor
+app_movil/

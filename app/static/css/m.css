@@ -1281,3 +1281,29 @@ body {
     height: 200px;
     background: radial-gradient(circle, rgba(217, 102, 255, 0.24) 0%, rgba(217, 102, 255, 0.08) 40%, transparent 70%);
 }
+
+/* Botón de descarga del APK en el login */
+.login-descarga {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 9px 18px 9px 10px;
+    border-radius: 16px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    background: rgba(138, 40, 255, 0.18);
+    border: 1px solid rgba(217, 102, 255, 0.45);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.login-descarga img {
+    border-radius: 8px;
+}
+
+.login-descarga:hover {
+    color: #fff;
+    background: rgba(138, 40, 255, 0.4);
+    transform: translateY(-2px);
+}
