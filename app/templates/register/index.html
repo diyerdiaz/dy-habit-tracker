@@ -67,6 +67,16 @@
                 <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
         <li class="sidebar-item" style="margin-top: 24px;">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
@@ -80,7 +90,7 @@
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">
@@ -109,10 +119,10 @@
 <div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
     
     <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; max-width: none !important; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
-        <h1 style="text-align: center; margin-top: 20px; color: #b366ff; font-style: italic; font-weight: 700; text-shadow: 0 0 18px rgba(138, 40, 255, 0.5);">Gestión de Hábitos</h1>
+        <h1 style="text-align: center; margin-top: 20px; color: var(--tema-vivo, #b366ff); font-style: italic; font-weight: 700; text-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);">Gestión de Hábitos</h1>
         <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Administra tus hábitos, filtra por categorías y realiza un seguimiento de tus metas.</p>
         
-        <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#habitModal" style="background: linear-gradient(135deg, #9b59b6, #8e44ad); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+        <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#habitModal" style="background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad)); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <i class="bi bi-plus-circle" style="margin-right: 8px;"></i> Registrar un Nuevo Hábito
         </button>
     </div>
@@ -162,7 +172,7 @@
                     <tr class="habit-row" data-id="{{ habit.idHabit }}" data-name="{{ habit.habitName|lower }}" data-category="{{ habit.habitCategory }}" data-state="{{ habit.habitState }}" data-desc="{{ habit.habitDesc or '' }}" style="background: rgba(255, 255, 255, 0.02); transition: background 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.02)'">
                         <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
                             <div class="d-flex align-items-center">
-                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(155, 89, 182, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(var(--tema-vivo-rgb, 155, 89, 182), 0.2); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     {% if habit.habitCategory == 'salud' %}
                                         <i class="bi bi-heart-pulse text-info" style="font-size: 1.2rem;"></i>
                                     {% elif habit.habitCategory == 'mente' %}
@@ -205,7 +215,7 @@
                     {% else %}
                     <tr id="emptyRow">
                         <td colspan="4" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
-                            <i class="bi bi-inbox" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5; color: #9b59b6;"></i>
+                            <i class="bi bi-inbox" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5; color: var(--tema-vivo, #9b59b6);"></i>
                             <span style="font-size: 1.1rem;">Aún no has registrado ningún hábito. ¡Comienza ahora!</span>
                         </td>
                     </tr>

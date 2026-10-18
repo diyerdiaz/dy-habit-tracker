@@ -2,7 +2,13 @@
 
 {% block titulo_pagina %}Iniciar sesión{% endblock %}
 
+{% block extra_css %}
+{# Colores del personaje que salió: m.css los usa en el fondo, pétalos, rayos, tarjeta y botón #}
+<style>:root { {% for nombre, valor in personaje.tema.items() %}--tema-{{ nombre }}: {{ valor }}; {% endfor %}}</style>
+{% endblock %}
+
 {% block content %}
+<div class="login-fondo"></div>
 <div class="lightning-storm">
     <div class="lightning-flash flash-1"></div>
     <div class="lightning-flash flash-2"></div>
@@ -13,12 +19,9 @@
     <span></span><span></span><span></span><span></span><span></span>
 </div>
 
-<div class="login-wrapper">
+<div class="login-wrapper login-portada">
     <div class="login-left">
         <div class="login-brand">
-            <a href="#" class="portfolio-badge">
-                <i class="bi bi-briefcase-fill"></i> Mi Portafolio
-            </a>
             <h1>Bienvenido</h1>
             <p>Retoma el control de tus hábitos y acelera tu aprendizaje diario con DY Habit Tracker &amp; English.</p>
 
@@ -36,12 +39,9 @@
                     <span>English</span>
                 </div>
             </div>
-            <a href="{{ url_for('pwa.descargar_android') }}" class="login-descarga">
-                <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" width="28" height="28">
-                <span>Descargar app para Android</span>
-                <i class="bi bi-download"></i>
-            </a>
         </div>
+        <!-- Personaje (ilustración propia en SVG): el borde de abajo se funde con el fondo -->
+        <img src="{{ url_for('static', filename='img/' ~ personaje.archivo) }}" alt="" class="login-personaje" aria-hidden="true">
     </div>
     
     <div class="login-right">

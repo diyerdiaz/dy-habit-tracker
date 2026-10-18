@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Vision Board{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vision.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link active">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 24px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="vision-wrapper">
+    <!-- Filtro por categoría -->
+    <div class="vision-filtros">
+        <a href="{{ url_for('vision.index') }}" class="vision-filtro{{ ' activo' if not filtro else '' }}">Todas</a>
+        {% for c in categorias %}
+        <a href="{{ url_for('vision.index', categoria=c.clave) }}" class="vision-filtro{{ ' activo' if filtro == c.clave else '' }}" style="--color: {{ c.color }};">
+            <i class="bi {{ c.icono }}"></i> {{ c.nombre }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Collage: las fotos alrededor del título, como un tablero de recortes -->
+    <div class="vision-board{{ ' vision-board-pocas' if metas | length < 4 else '' }}">
+        <div class="vision-centro">
+            <h1 class="vision-titulo">Vision Board</h1>
+            <p class="vision-subtitulo">
+                <span>{{ total }} {{ 'meta' if total == 1 else 'metas' }}</span> ·
+                <span class="vision-logradas">{{ cumplidas }} {{ 'lograda' if cumplidas == 1 else 'logradas' }}</span>
+            </p>
+            <button type="button" class="vision-btn-agregar" id="btnNuevaMeta">
+                <i class="bi bi-plus-lg"></i> Agregar meta
+            </button>
+        </div>
+
+        {% for m in metas %}
+        {% set cat = m.info_categoria %}
+        {% set dias = m.dias_restantes() %}
+        {% set src = url_for('vision.imagen', meta_id=m.idMeta) %}
+        <figure class="vision-meta vision-forma-{{ m.forma }}{{ ' cumplida' if m.cumplida else '' }}" style="--color: {{ cat.color }};" tabindex="0">
+            <!-- La foto se ve completa; la copia borrosa de atrás rellena los bordes que sobren -->
+            <div class="vision-meta-marco">
+                <img src="{{ src }}" alt="" class="vision-meta-fondo" loading="lazy" aria-hidden="true">
+                <img src="{{ src }}" alt="{{ m.titulo }}" class="vision-meta-img" loading="lazy">
+            </div>
+
+            {% if m.cumplida %}
+            <div class="vision-sello"><i class="bi bi-patch-check-fill"></i> ¡Lograda!</div>
+            {% elif m.fechaObjetivo %}
+            <span class="vision-meta-fecha{{ ' vencida' if dias < 0 else '' }}">
+                <i class="bi bi-calendar-event"></i>
+                {% if dias > 0 %}{{ dias }} {{ 'día' if dias == 1 else 'días' }}
+                {% elif dias == 0 %}¡Hoy!
+                {% else %}Venció{% endif %}
+            </span>
+            {% endif %}
+
+            <!-- Detalle y acciones: aparecen al pasar el mouse (o tocar en el celular) -->
+            <div class="vision-meta-detalle">
+                <span class="vision-meta-cat"><i class="bi {{ cat.icono }}"></i> {{ cat.nombre }}</span>
+                {% if m.descripcion %}<p class="vision-meta-desc">{{ m.descripcion }}</p>{% endif %}
+                <div class="vision-meta-acciones">
+                    <form method="POST" action="{{ url_for('vision.alternar_cumplida', meta_id=m.idMeta) }}">
+                        <button type="submit" class="vision-accion vision-accion-ok" title="{{ 'Marcar como pendiente' if m.cumplida else 'Marcar como lograda' }}">
+                            <i class="bi {{ 'bi-arrow-counterclockwise' if m.cumplida else 'bi-check2-circle' }}"></i>
+                        </button>
+                    </form>
+                    <button type="button" class="vision-accion" title="Editar" data-editar
+                        data-url="{{ url_for('vision.editar', meta_id=m.idMeta) }}"
+                        data-titulo="{{ m.titulo }}" data-descripcion="{{ m.descripcion or '' }}"
+                        data-categoria="{{ m.categoria }}"
+                        data-fecha="{{ m.fechaObjetivo.isoformat() if m.fechaObjetivo else '' }}"
+                        data-imagen="{{ url_for('vision.imagen', meta_id=m.idMeta) }}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="vision-accion vision-accion-borrar" title="Eliminar" data-eliminar
+                        data-url="{{ url_for('vision.eliminar', meta_id=m.idMeta) }}" data-titulo="{{ m.titulo }}">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Etiqueta tipo recorte de papel -->
+            <figcaption class="vision-etiqueta">{{ m.titulo }}</figcaption>
+        </figure>
+        {% endfor %}
+
+        <!-- Recuadro vacío para seguir agregando -->
+        <button type="button" class="vision-meta vision-meta-nueva" data-nueva-meta>
+            <i class="bi bi-plus-circle-dotted"></i>
+            <span>{{ 'Tu primera meta' if not total else ('Nueva meta' if not filtro else 'No hay metas aquí · agregar') }}</span>
+        </button>
+    </div>
+</div>
+
+<!-- Modal: Nueva / editar meta -->
+<div class="modal fade" id="metaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content vision-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="metaModalTitulo">Nueva meta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <form id="metaForm" method="POST" enctype="multipart/form-data"
+                    action="{{ url_for('vision.crear') }}" data-crear="{{ url_for('vision.crear') }}">
+                    <label class="vision-dropzone" for="metaImagen">
+                        <img id="metaPreview" alt="" hidden>
+                        <span id="metaDropTexto"><i class="bi bi-cloud-arrow-up"></i><br>Toca o arrastra una imagen aquí</span>
+                    </label>
+                    <input type="file" name="imagen" id="metaImagen" class="d-none"
+                        accept="{% for e in extensiones %}.{{ e }}{{ ',' if not loop.last }}{% endfor %}" required>
+                    <p class="vision-ayuda">png, jpg, gif o webp · máximo {{ tamano_maximo_mb }} MB</p>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="metaTitulo">Meta</label>
+                        <input type="text" name="titulo" id="metaTitulo" class="form-control vision-input" maxlength="120" placeholder="Ej: Viajar a Japón" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="metaDescripcion">¿Por qué es importante para ti?</label>
+                        <textarea name="descripcion" id="metaDescripcion" class="form-control vision-input" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <label class="form-label" for="metaCategoria">Categoría</label>
+                            <select name="categoria" id="metaCategoria" class="form-select vision-input">
+                                {% for c in categorias %}<option value="{{ c.clave }}">{{ c.nombre }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="metaFecha">Fecha objetivo</label>
+                            <input type="date" name="fechaObjetivo" id="metaFecha" class="form-control vision-input">
+                        </div>
+                    </div>
+                    <button type="submit" class="vision-btn-agregar w-100" id="metaSubmit">Guardar meta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal fade" id="eliminarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content vision-modal">
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-trash3 vision-eliminar-icono"></i>
+                <p class="mt-3">¿Eliminar <strong id="eliminarTitulo"></strong>?</p>
+                <form id="eliminarForm" method="POST" action="">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-light w-50" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger w-50">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vision.js') }}"></script>
+{% endblock %}

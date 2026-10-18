@@ -67,6 +67,16 @@
                 <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
         <li class="sidebar-item" style="margin-top: 24px;">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
@@ -80,7 +90,7 @@
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link active">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">

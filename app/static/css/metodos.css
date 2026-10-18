@@ -23,12 +23,12 @@
 }
 
 .metodos-titulo {
-    color: #b366ff;
+    color: var(--tema-vivo, #b366ff);
     font-style: italic;
     font-weight: 700;
     font-size: 2rem;
     margin: 0;
-    text-shadow: 0 0 12px rgba(138, 40, 255, 0.4);
+    text-shadow: 0 0 12px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.4);
 }
 
 .metodos-subtitulo {
@@ -38,7 +38,7 @@
 }
 
 .metodos-btn-nuevo {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad));
     border: none;
     color: #fff;
     border-radius: 22px;
@@ -50,7 +50,7 @@
 
 .metodos-btn-nuevo:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(155, 89, 182, 0.45);
+    box-shadow: 0 6px 20px rgba(var(--tema-vivo-rgb, 155, 89, 182), 0.45);
 }
 
 /* ── Tarjetas de métodos ── */
@@ -61,7 +61,7 @@
 }
 
 .metodo-card {
-    --color: #d966ff;
+    --color: var(--tema-vivo, #d966ff);
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.05);
@@ -199,7 +199,7 @@
 
 .metodos-vacio > i {
     font-size: 3rem;
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
 }
 
 /* ── Selector de ícono y color (modal) ── */
@@ -238,8 +238,8 @@
 }
 
 .metodo-radio:checked + .metodo-icono-opcion {
-    background: rgba(138, 40, 255, 0.45);
-    border-color: #d966ff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.45);
+    border-color: var(--tema-vivo, #d966ff);
     color: #fff;
 }
 
@@ -249,7 +249,7 @@
 }
 
 .metodo-radio:focus-visible + label {
-    outline: 2px solid #d966ff;
+    outline: 2px solid var(--tema-vivo, #d966ff);
     outline-offset: 2px;
 }
 
@@ -267,7 +267,7 @@
 }
 
 .tablero-volver:hover {
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
 }
 
 .tablero-header {
@@ -297,7 +297,7 @@
 }
 
 .kanban-columna {
-    --col: #d966ff;
+    --col: var(--tema-vivo, #d966ff);
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-top: 3px solid var(--col);
@@ -354,7 +354,7 @@
 }
 
 .kanban-tarjeta {
-    background: rgba(30, 0, 45, 0.75);
+    background: rgba(var(--tema-oscuro-rgb, 30, 0, 45), 0.75);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-left: 3px solid var(--col);
     border-radius: 12px;
@@ -552,7 +552,7 @@
     gap: 6px;
     text-align: center;
     color: #fff;
-    border: 2px dashed rgba(217, 102, 255, 0.45);
+    border: 2px dashed rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
     border-radius: 16px;
     padding: 28px 16px;
     cursor: pointer;
@@ -561,7 +561,7 @@
 
 .apuntes-zona > i {
     font-size: 2.4rem;
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
 }
 
 .apuntes-zona small {
@@ -570,8 +570,8 @@
 
 .apuntes-zona:hover,
 .apuntes-zona.sobre {
-    background: rgba(138, 40, 255, 0.15);
-    border-color: #d966ff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.15);
+    border-color: var(--tema-vivo, #d966ff);
 }
 
 .apuntes-input {

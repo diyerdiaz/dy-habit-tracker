@@ -1,3 +1,5 @@
+import re
+from app.models.personajes_login import PERSONAJES, elegir_personaje, tema_del_sitio
 from app.test.conftest import TEST_PASSWORD
 
 
@@ -46,3 +48,110 @@ def test_login_already_authenticated(logged_client):
     response = logged_client.get('/', follow_redirects=True)
     assert response.status_code == 200
     assert "Hábitos de Hoy".encode() in response.data
+
+
+def test_login_sin_portafolio_ni_descarga_de_apk(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'Iniciar sesión' in html
+    assert 'Mi Portafolio' not in html
+    assert 'Descargar app para Android' not in html
+
+
+def test_login_muestra_personaje_anime(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'class="login-personaje"' in html
+    for p in PERSONAJES:
+        assert client.get('/static/img/' + p['archivo']).status_code == 200
+
+
+def test_personaje_cambia_en_cada_recarga(client):
+    anterior = None
+    vistos = set()
+    for _ in range(30):
+        html = client.get('/').get_data(as_text=True)
+        actual = re.search(r'img/(personajes/personaje-\d\.svg)', html).group(1)
+        assert actual != anterior
+        vistos.add(actual)
+        anterior = actual
+    assert len(vistos) > 1
+
+
+def test_elegir_personaje_nunca_repite_el_anterior():
+    for anterior in range(len(PERSONAJES)):
+        for _ in range(20):
+            assert elegir_personaje(anterior) != anterior
+    assert 0 <= elegir_personaje(None) < len(PERSONAJES)
+
+
+def test_animacion_de_cueva_solo_despues_de_iniciar_sesion(client, user):
+    resp = client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD},
+                       follow_redirects=True)
+    html = resp.get_data(as_text=True)
+    assert 'id="entradaCueva"' in html
+    assert f'Bienvenido, {user.nameUser}' in html
+    # Al volver al dashboard ya no se repite
+    assert 'id="entradaCueva"' not in client.get('/dashboard').get_data(as_text=True)
+
+
+def test_login_fallido_no_muestra_animacion(client, user):
+    client.post('/', data={'nameUser': user.nameUser, 'passwordUser': 'mala'})
+    assert client.get('/dashboard').status_code == 302
+    with client.session_transaction() as s:
+        assert 'entrada_cueva' not in s
+
+
+def test_cada_personaje_trae_su_paleta_completa():
+    vivos = set()
+    for p in PERSONAJES:
+        vivos.add(p['tema']['vivo'])
+    assert len(vivos) == len(PERSONAJES)  # cada uno de un color distinto
+
+
+def test_el_fondo_del_login_usa_el_color_del_personaje(client):
+    for _ in range(5):
+        html = client.get('/').get_data(as_text=True)
+        archivo = re.search(r'img/(personajes/personaje-\d\.svg)', html).group(1)
+        personaje = next(p for p in PERSONAJES if p['archivo'] == archivo)
+        assert f"--tema-vivo: {personaje['tema']['vivo']};" in html
+        assert 'class="login-fondo"' in html
+
+
+def _personaje_del_login(client):
+    html = client.get('/').get_data(as_text=True)
+    archivo = re.search(r'img/(personajes/personaje-\d\.svg)', html).group(1)
+    return next(p for p in PERSONAJES if p['archivo'] == archivo)
+
+
+def test_toda_la_app_toma_el_color_del_personaje_del_login(client, user):
+    personaje = _personaje_del_login(client)
+    client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD})
+    color = f"--tema-vivo: {personaje['tema']['vivo']};"
+    for pagina in ['/dashboard', '/vision/', '/motivacion/', '/metodos/', '/estadisticas/']:
+        assert color in client.get(pagina).get_data(as_text=True), pagina
+
+
+def test_sin_sesion_no_hay_tema_del_sitio(client):
+    assert '--tema-grad-1-rgb' not in client.get('/offline').get_data(as_text=True)
+
+
+def test_tema_del_sitio_con_indice_invalido():
+    assert tema_del_sitio(None) is None
+    assert tema_del_sitio(99) is None
+    assert tema_del_sitio('2') is None
+    assert tema_del_sitio(0) == PERSONAJES[0]['tema']
+
+
+def test_cada_tema_trae_todas_las_claves_que_usan_los_css():
+    claves = {'vivo', 'vivo-rgb', 'fuerte-rgb', 'claro-rgb', 'fondo-rgb', 'grad-1', 'grad-2',
+              'grad-1-rgb', 'grad-2-rgb', 'oscuro', 'oscuro-2', 'oscuro-rgb'}
+    for p in PERSONAJES:
+        assert set(p['tema']) == claves
+
+
+def test_luz_del_mouse_azul_en_ingles(client):
+    m = client.get('/static/css/m.css').get_data(as_text=True)
+    assert 'var(--cursor-rgb, var(--tema-vivo-rgb' in m  # fuera de Inglés: color del tema
+    for hoja in ['ingles', 'vocabulario', 'shadowing']:
+        css = client.get(f'/static/css/{hoja}.css').get_data(as_text=True)
+        assert '--cursor-rgb: 77, 171, 255;' in css
+        assert '--tema-vivo: #4dabff;' in css  # el menú y los botones también azules

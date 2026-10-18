@@ -19,6 +19,8 @@ def actualizar_esquema():
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
         'users': {'avatar': 'VARCHAR(64)'},
+        'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
+        'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
     }
     inspector = inspect(db.engine)
     for tabla, columnas in columnas_nuevas.items():
@@ -53,7 +55,7 @@ def create_app(config_overrides=None):
     from app.routes import (
         users_route, auth, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, metodos_route, estadisticas_route,
-        perfil_route, pwa_route,
+        perfil_route, pwa_route, vision_route, temas_route,
     )
 
     app.register_blueprint(auth.bp)
@@ -68,6 +70,14 @@ def create_app(config_overrides=None):
     app.register_blueprint(estadisticas_route.bp)
     app.register_blueprint(perfil_route.bp)
     app.register_blueprint(pwa_route.bp)
+    app.register_blueprint(vision_route.bp)
+    app.register_blueprint(temas_route.bp)
+
+    @app.context_processor
+    def tema_de_la_app():
+        from flask import session
+        from app.models.personajes_login import tema_del_sitio
+        return {'tema_sitio': tema_del_sitio(session.get('tema_sitio'))}
 
     def _wants_json():
         return (request.is_json

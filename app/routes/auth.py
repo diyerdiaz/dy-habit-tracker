@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.users import User
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
+from app.models.personajes_login import PERSONAJES, elegir_personaje
 from app import db
 from datetime import date, timedelta
 from collections import defaultdict
@@ -19,6 +20,10 @@ def login():
         user = User.query.filter_by(nameUser=nameUser).first()
         if user and user.check_password(passwordUser):
             login_user(user)
+            # El dashboard muestra una sola vez la animación de entrada a la cueva
+            session['entrada_cueva'] = True
+            # Toda la app toma el color del personaje que salió en el login
+            session['tema_sitio'] = session.get('personaje_login', 0)
             flash("Login successful!", "success")
             return redirect(url_for('auth.dashboard'))
         
@@ -26,7 +31,10 @@ def login():
     
     if current_user.is_authenticated:
         return redirect(url_for('auth.dashboard'))
-    return render_template("login.html")
+    # Cada vez que se carga el login aparece un personaje distinto al anterior
+    indice = elegir_personaje(session.get('personaje_login'))
+    session['personaje_login'] = indice
+    return render_template("login.html", personaje=PERSONAJES[indice])
 
 @bp.route('/dashboard')
 @login_required
@@ -174,7 +182,7 @@ def dashboard():
         'week_counts': week_counts,
         'notificaciones': notificaciones,
     }
-    return render_template("dashboard.html", data=data)
+    return render_template("dashboard.html", data=data, entrada_cueva=session.pop('entrada_cueva', False))
 
 
 @bp.route('/logout')

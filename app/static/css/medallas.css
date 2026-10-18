@@ -25,12 +25,12 @@
 }
 
 .medallas-titulo {
-    color: #b366ff;
+    color: var(--tema-vivo, #b366ff);
     font-style: italic;
     font-weight: 700;
     font-size: 2rem;
     margin: 6px 0;
-    text-shadow: 0 0 12px rgba(138, 40, 255, 0.4);
+    text-shadow: 0 0 12px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.4);
 }
 
 .medallas-contador {
@@ -53,7 +53,7 @@
 
 .medallas-barra-fill {
     height: 100%;
-    background: linear-gradient(90deg, #8a28ff, #d966ff, #ffd700);
+    background: linear-gradient(90deg, var(--tema-grad-1, #8a28ff), var(--tema-vivo, #d966ff), #ffd700);
     border-radius: 10px;
     transition: width 0.8s ease;
 }
@@ -63,8 +63,8 @@
     align-items: center;
     gap: 16px;
     text-align: left;
-    background: rgba(138, 40, 255, 0.1);
-    border: 1px solid rgba(217, 102, 255, 0.3);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.1);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
     border-radius: 16px;
     padding: 16px 20px;
     margin-top: 22px;
@@ -109,13 +109,13 @@
 }
 
 .medallas-filtro:hover {
-    border-color: rgba(217, 102, 255, 0.5);
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
     color: #fff;
 }
 
 .medallas-filtro.activo {
-    background: rgba(138, 40, 255, 0.35);
-    border-color: #d966ff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35);
+    border-color: var(--tema-vivo, #d966ff);
     color: #fff;
 }
 
@@ -236,7 +236,7 @@
 }
 
 .medalla-frase {
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
     font-size: 0.8rem;
     font-style: italic;
     margin: 0 0 16px;
@@ -244,7 +244,7 @@
 }
 
 .medalla-card.bloqueada .medalla-frase {
-    color: rgba(217, 102, 255, 0.6);
+    color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6);
 }
 
 .medalla-progreso {
@@ -321,11 +321,11 @@
 .rareza-mitica { --color: #ff4d6d; --brillo: rgba(255, 77, 109, 0.45); }
 
 .rareza-mitica.desbloqueada {
-    background: linear-gradient(145deg, rgba(255, 77, 109, 0.14), rgba(255, 215, 0, 0.08), rgba(138, 40, 255, 0.14));
+    background: linear-gradient(145deg, rgba(255, 77, 109, 0.14), rgba(255, 215, 0, 0.08), rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.14));
 }
 
 .rareza-mitica .medalla-rareza {
-    background: linear-gradient(90deg, #ff4d6d, #ffd700, #d966ff);
+    background: linear-gradient(90deg, #ff4d6d, #ffd700, var(--tema-vivo, #d966ff));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -346,8 +346,8 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    background: rgba(138, 40, 255, 0.1);
-    border: 1px solid rgba(217, 102, 255, 0.3);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.1);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
     border-radius: 16px;
     padding: 14px 18px;
     margin-bottom: 18px;

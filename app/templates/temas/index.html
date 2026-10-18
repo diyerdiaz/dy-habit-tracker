@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Temas Aleatorios{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/temas.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link active">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 24px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="temas-wrapper">
+    <h1 class="temas-titulo"><i class="bi bi-shuffle"></i> Temas Aleatorios</h1>
+    <p class="temas-subtitulo">Saca un tema al azar y explícalo con tus propias palabras antes de que se acabe el tiempo.</p>
+
+    <div class="temas-resumen">
+        <div class="temas-stat"><span>{{ temas | length }}</span> por explicar</div>
+        <div class="temas-stat"><span>{{ estudiados | length }}</span> {{ 'explicado' if estudiados | length == 1 else 'explicados' }}</div>
+        <div class="temas-stat"><span>{{ total_sesiones }}</span> {{ 'explicación' if total_sesiones == 1 else 'explicaciones' }}</div>
+        <div class="temas-stat"><span>{{ total_minutos }}</span> min hablados</div>
+    </div>
+
+    <!-- ── Ruleta y temporizador ── -->
+    <section class="temas-ruleta" id="ruleta"
+        data-girar="{{ url_for('temas.girar') }}" data-sesion="{{ url_for('temas.guardar_sesion') }}">
+
+        <div class="temas-tiempos" role="radiogroup" aria-label="Tiempo para explicar">
+            <span class="temas-etiqueta"><i class="bi bi-stopwatch"></i> Tiempo</span>
+            {% for m in tiempos %}
+            <input type="radio" class="temas-radio" name="minutos" value="{{ m }}" id="min{{ m }}"{{ ' checked' if m == 2 else '' }}>
+            <label class="temas-chip" for="min{{ m }}">{{ m }} min</label>
+            {% endfor %}
+            <input type="number" class="temas-otro" id="minutosOtro" min="1" max="{{ minutos_maximos }}" placeholder="Otro" aria-label="Otros minutos">
+        </div>
+
+        <div class="temas-pantalla" id="pantalla">
+            <div class="temas-espera" id="espera">
+                <i class="bi bi-question-diamond"></i>
+                <p>{% if temas %}Pulsa el botón y te saldrá un tema{% elif estudiados %}¡Ya explicaste todos tus temas! Agrega más aquí abajo{% else %}Primero agrega tus temas aquí abajo{% endif %}</p>
+            </div>
+
+            <div class="temas-resultado" id="resultado" hidden>
+                <p class="temas-salio">Te tocó explicar:</p>
+                <h2 class="temas-tema" id="temaTitulo"></h2>
+                <p class="temas-notas" id="temaNotas" hidden></p>
+
+                <div class="temas-reloj" id="reloj">
+                    <svg viewBox="0 0 120 120" aria-hidden="true">
+                        <circle class="temas-reloj-fondo" cx="60" cy="60" r="52"/>
+                        <circle class="temas-reloj-avance" id="relojAvance" cx="60" cy="60" r="52"/>
+                    </svg>
+                    <span class="temas-reloj-tiempo" id="relojTiempo">2:00</span>
+                </div>
+
+                <div class="temas-controles">
+                    <button type="button" class="temas-btn temas-btn-principal" id="btnEmpezar"><i class="bi bi-mic-fill"></i> Empezar a explicar</button>
+                    <button type="button" class="temas-btn" id="btnPausa" hidden><i class="bi bi-pause-fill"></i> Pausa</button>
+                    <button type="button" class="temas-btn" id="btnTerminar" hidden><i class="bi bi-check2-circle"></i> Ya terminé</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="temas-btn-girar" id="btnGirar"{{ ' disabled' if not temas else '' }}>
+            <i class="bi bi-shuffle"></i> <span>Sacar tema al azar</span>
+        </button>
+    </section>
+
+    <!-- ── Mis temas ── -->
+    <section class="temas-seccion">
+        <h2 class="temas-seccion-titulo"><i class="bi bi-collection"></i> Mis temas</h2>
+        <form method="POST" action="{{ url_for('temas.crear') }}" class="temas-agregar">
+            <textarea name="titulos" rows="3" class="form-control temas-input" maxlength="5000"
+                placeholder="Escribe uno o varios temas, uno por línea&#10;Ej: Cómo funciona un volcán&#10;Ej: Mi meta para este año" required></textarea>
+            <button type="submit" class="temas-btn temas-btn-principal"><i class="bi bi-plus-lg"></i> Agregar</button>
+        </form>
+
+        {% if temas %}
+        <ul class="temas-lista">
+            {% for t in temas %}
+            <li class="temas-item">
+                <div class="temas-item-texto">
+                    <span class="temas-item-titulo">{{ t.titulo }}</span>
+                    {% if t.notas %}<span class="temas-item-notas">{{ t.notas }}</span>{% endif %}
+                </div>
+                <span class="temas-item-veces" title="Veces que ha salido"><i class="bi bi-arrow-repeat"></i> {{ t.vecesSalido }}</span>
+                <button type="button" class="temas-icono" title="Editar" data-editar
+                    data-url="{{ url_for('temas.editar', tema_id=t.idTema) }}" data-titulo="{{ t.titulo }}" data-notas="{{ t.notas or '' }}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <form method="POST" action="{{ url_for('temas.eliminar', tema_id=t.idTema) }}" data-confirmar="¿Eliminar el tema «{{ t.titulo }}»?">
+                    <button type="submit" class="temas-icono temas-icono-borrar" title="Eliminar"><i class="bi bi-trash3"></i></button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="temas-vacio">
+            <p>Todavía no tienes temas. Escribe los tuyos o empieza con algunos sugeridos.</p>
+            <form method="POST" action="{{ url_for('temas.agregar_sugeridos') }}">
+                <button type="submit" class="temas-btn"><i class="bi bi-stars"></i> Agregar temas sugeridos</button>
+            </form>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ── Temas ya explicados ── -->
+    {% if estudiados %}
+    <section class="temas-seccion">
+        <details class="temas-estudiados">
+            <summary class="temas-seccion-titulo"><i class="bi bi-check2-all"></i> Ya explicados ({{ estudiados | length }})</summary>
+            <p class="temas-ayuda">Estos ya no salen en la ruleta. Si quieres practicar alguno otra vez, devuélvelo a la lista.</p>
+            <ul class="temas-lista">
+                {% for t in estudiados %}
+                <li class="temas-item temas-item-estudiado">
+                    <div class="temas-item-texto">
+                        <span class="temas-item-titulo"><i class="bi bi-check-circle-fill"></i> {{ t.titulo }}</span>
+                        {% if t.fechaEstudiado %}<span class="temas-item-notas">Explicado el {{ t.fechaEstudiado.strftime('%d/%m/%Y') }}</span>{% endif %}
+                    </div>
+                    <form method="POST" action="{{ url_for('temas.restaurar', tema_id=t.idTema) }}">
+                        <button type="submit" class="temas-btn temas-btn-chico" title="Volver a la lista"><i class="bi bi-arrow-counterclockwise"></i> Volver a la lista</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('temas.eliminar', tema_id=t.idTema) }}" data-confirmar="¿Eliminar el tema «{{ t.titulo }}» y su historial?">
+                        <button type="submit" class="temas-icono temas-icono-borrar" title="Eliminar"><i class="bi bi-trash3"></i></button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </section>
+    {% endif %}
+
+    <!-- ── Últimas explicaciones ── -->
+    {% if sesiones %}
+    <section class="temas-seccion">
+        <h2 class="temas-seccion-titulo"><i class="bi bi-clock-history"></i> Últimas explicaciones</h2>
+        <ul class="temas-historial">
+            {% for s in sesiones %}
+            <li>
+                <span class="temas-hist-tema">{{ s.tema.titulo }}</span>
+                <span class="temas-hist-tiempo"><i class="bi bi-stopwatch"></i> {{ s.tiempo_texto() }} / {{ s.segundosObjetivo // 60 }} min</span>
+                <span class="temas-hist-estrellas" aria-label="{{ s.calificacion or 0 }} de 5 estrellas">
+                    {% for i in range(1, 6) %}<i class="bi {{ 'bi-star-fill' if s.calificacion and i <= s.calificacion else 'bi-star' }}"></i>{% endfor %}
+                </span>
+                <span class="temas-hist-fecha">{{ s.fecha.strftime('%d/%m %H:%M') }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Modal: ¿cómo te fue? -->
+<div class="modal fade" id="calificarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content temas-modal">
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-trophy-fill temas-modal-icono"></i>
+                <h5 class="modal-title mt-2">¿Cómo te fue explicando?</h5>
+                <p class="temas-modal-tiempo" id="calificarTiempo"></p>
+                <div class="temas-estrellas" id="estrellas">
+                    {% for i in range(1, 6) %}<button type="button" data-valor="{{ i }}" aria-label="{{ i }} estrellas"><i class="bi bi-star"></i></button>{% endfor %}
+                </div>
+                <button type="button" class="temas-btn temas-btn-principal w-100 mt-3" id="btnGuardarSesion">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: editar tema -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content temas-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Editar tema</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <form method="POST" id="editarForm">
+                    <label class="form-label" for="editarTitulo">Tema</label>
+                    <input type="text" name="titulo" id="editarTitulo" class="form-control temas-input mb-3" maxlength="150" required>
+                    <label class="form-label" for="editarNotas">Pistas (opcional): ideas que no se te pueden olvidar</label>
+                    <textarea name="notas" id="editarNotas" rows="3" class="form-control temas-input mb-3" maxlength="500"></textarea>
+                    <button type="submit" class="temas-btn temas-btn-principal w-100">Guardar cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/temas.js') }}"></script>
+{% endblock %}

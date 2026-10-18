@@ -1,5 +1,5 @@
 .glass-modal {
-    background: rgba(30, 0, 45, 0.85);
+    background: rgba(var(--tema-oscuro-rgb, 30, 0, 45), 0.85);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
@@ -16,9 +16,9 @@
     display: flex; align-items: center; justify-content: center;
     margin-right: 12px;
 }
-.text-purple { color: #d966ff; }
-.btn-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; border: none; }
-.btn-purple:hover { background: linear-gradient(135deg, #8e44ad, #732d91); color: white; }
+.text-purple { color: var(--tema-vivo, #d966ff); }
+.btn-purple { background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad)); color: white; border: none; }
+.btn-purple:hover { background: linear-gradient(135deg, var(--tema-grad-1, #8e44ad), var(--tema-grad-1, #732d91)); color: white; }
 
 .glass-input {
     background: rgba(255, 255, 255, 0.05) !important;
@@ -27,8 +27,8 @@
     box-shadow: none !important;
 }
 .glass-input::placeholder { color: rgba(255,255,255,0.4) !important; }
-.glass-input:focus { border-color: #d966ff !important; box-shadow: 0 0 10px rgba(217,102,255,0.3) !important; }
-.glass-input option { background: #250035; color: white; }
+.glass-input:focus { border-color: var(--tema-vivo, #d966ff) !important; box-shadow: 0 0 10px rgba(var(--tema-vivo-rgb, 217, 102, 255),0.3) !important; }
+.glass-input option { background: var(--tema-oscuro, #250035); color: white; }
 
 /* ── Selector de días de la semana ── */
 .dias-picker { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -47,9 +47,10 @@
     transition: all 0.2s ease;
 }
 .dia-check:checked + .dia-chip {
-    background: rgba(138, 40, 255, 0.45);
-    border-color: #d966ff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.45);
+    border-color: var(--tema-vivo, #d966ff);
     color: #fff;
 }
-.dia-check:focus-visible + .dia-chip { box-shadow: 0 0 0 2px #d966ff; }
+.dia-check:focus-visible + .dia-chip { box-shadow: 0 0 0 2px var(--tema-vivo, #d966ff); }
 .dias-ayuda { display: block; margin-top: 6px; color: rgba(255,255,255,0.45); font-size: 0.78rem; }
+
