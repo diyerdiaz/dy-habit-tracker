@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // ── RADAR ──
         const rCtx = document.getElementById('radarChart').getContext('2d');
         const rGrad = rCtx.createLinearGradient(0, 0, 0, 340);
-        rGrad.addColorStop(0, 'rgba(225, 0, 255, 0.35)');
-        rGrad.addColorStop(1, 'rgba(138, 40, 255, 0.05)');
+        rGrad.addColorStop(0, temaRgba('grad-2', 0.35));
+        rGrad.addColorStop(1, temaRgba('grad-1', 0.05));
 
         new Chart(rCtx, {
             type: 'radar',
@@ -91,11 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     label: 'Hábitos Activos',
                     data: stats.radar_data,
                     backgroundColor: rGrad,
-                    borderColor: '#e100ff',
-                    pointBackgroundColor: 'rgba(20,0,40,0.95)',
-                    pointBorderColor: '#e100ff',
+                    borderColor: temaColor('grad-2'),
+                    pointBackgroundColor: temaRgba('oscuro', 0.95),
+                    pointBorderColor: temaColor('grad-2'),
                     pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#e100ff',
+                    pointHoverBorderColor: temaColor('grad-2'),
                     borderWidth: 2.5,
                     pointBorderWidth: 2,
                     pointRadius: 5,
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 plugins: {
                     legend: { labels: { color: '#fff', font: { ...chartFont, size: 13 }, usePointStyle: true, padding: 20 }, position: 'bottom' },
-                    tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)', borderColor: 'rgba(225,0,255,0.4)', borderWidth: 1, padding: 12 }
+                    tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)', borderColor: temaRgba('grad-2', 0.4), borderWidth: 1, padding: 12 }
                 }
             }
         });
@@ -125,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // ── BAR ──
         const bCtx = document.getElementById('barChart').getContext('2d');
         const bGrad = bCtx.createLinearGradient(0, 280, 0, 0);
-        bGrad.addColorStop(0, 'rgba(138, 40, 255, 0.8)');
-        bGrad.addColorStop(1, 'rgba(225, 0, 255, 0.8)');
+        bGrad.addColorStop(0, temaRgba('grad-1', 0.8));
+        bGrad.addColorStop(1, temaRgba('grad-2', 0.8));
 
         new Chart(bCtx, {
             type: 'bar',
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     label: 'Hábitos Creados',
                     data: stats.week_data,
                     backgroundColor: bGrad,
-                    borderColor: 'rgba(225, 0, 255, 0.6)',
+                    borderColor: temaRgba('grad-2', 0.6),
                     borderWidth: 1,
                     borderRadius: 8,
                     borderSkipped: false,
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 plugins: {
                     legend: { labels: { color: '#fff', font: { ...chartFont, size: 13 }, usePointStyle: true, padding: 20 }, position: 'bottom' },
-                    tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)', borderColor: 'rgba(225,0,255,0.4)', borderWidth: 1, padding: 12 }
+                    tooltip: { backgroundColor: 'rgba(0,0,0,0.85)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)', borderColor: temaRgba('grad-2', 0.4), borderWidth: 1, padding: 12 }
                 }
             }
         });
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fill: true,
                     backgroundColor: lGrad,
                     borderColor: '#00bac6',
-                    pointBackgroundColor: 'rgba(20,0,40,0.95)',
+                    pointBackgroundColor: temaRgba('oscuro', 0.95),
                     pointBorderColor: '#00ffab',
                     pointHoverBackgroundColor: '#fff',
                     pointHoverBorderColor: '#00bac6',

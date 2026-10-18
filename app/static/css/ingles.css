@@ -1,3 +1,14 @@
+/* La sección de Inglés tiene su propio color azul: la luz del mouse, el menú y
+   los botones no usan el color del tema de hábitos (se carga después del tema, así gana) */
+:root {
+    --cursor-rgb: 77, 171, 255;
+    --tema-vivo: #4dabff; --tema-vivo-rgb: 77, 171, 255;
+    --tema-fuerte-rgb: 13, 110, 253; --tema-claro-rgb: 169, 209, 255; --tema-fondo-rgb: 0, 40, 90;
+    --tema-grad-1: #0d6efd; --tema-grad-2: #4dabff;
+    --tema-grad-1-rgb: 13, 110, 253; --tema-grad-2-rgb: 77, 171, 255;
+    --tema-oscuro: #001833; --tema-oscuro-2: #001226; --tema-oscuro-rgb: 0, 24, 51;
+}
+
 .ingles-wrapper {
     padding-top: 10vh;
     min-height: 85vh;

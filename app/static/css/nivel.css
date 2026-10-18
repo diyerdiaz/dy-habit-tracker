@@ -20,8 +20,8 @@
     display: flex;
     align-items: center;
     gap: 18px;
-    background: rgba(138, 40, 255, 0.1);
-    border: 1px solid rgba(217, 102, 255, 0.3);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.1);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
     border-radius: 20px;
     padding: 22px 26px;
     margin-top: 24px;
@@ -49,7 +49,7 @@
 }
 
 .nivel-camino-texto strong {
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
     font-weight: 700;
 }
 
@@ -64,12 +64,12 @@
 
 .nivel-mapa-titulo {
     text-align: center;
-    color: #b366ff;
+    color: var(--tema-vivo, #b366ff);
     font-style: italic;
     font-weight: 700;
     font-size: 1.5rem;
     margin: 0 0 22px 0;
-    text-shadow: 0 0 12px rgba(138, 40, 255, 0.4);
+    text-shadow: 0 0 12px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.4);
 }
 
 .nivel-mapa-lista {
@@ -146,14 +146,14 @@
 
 .nivel-mapa-badge {
     flex-shrink: 0;
-    background: linear-gradient(135deg, #8a28ff, #e100ff);
+    background: linear-gradient(135deg, var(--tema-grad-1, #8a28ff), var(--tema-grad-2, #e100ff));
     color: #fff;
     font-size: 0.72rem;
     font-weight: 700;
     font-style: italic;
     padding: 5px 12px;
     border-radius: 20px;
-    box-shadow: 0 0 12px rgba(225, 0, 255, 0.4);
+    box-shadow: 0 0 12px rgba(var(--tema-grad-2-rgb, 225, 0, 255), 0.4);
 }
 
 .nivel-mapa-item.alcanzado {
@@ -171,8 +171,8 @@
 }
 
 .nivel-mapa-item.actual {
-    background: rgba(138, 40, 255, 0.15);
-    border-color: rgba(217, 102, 255, 0.5);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.15);
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
 }
 
 .nivel-mapa-item.actual .nivel-mapa-num {
@@ -399,7 +399,7 @@
 
 .nivel-stat-valor {
     font-size: 2rem;
-    color: #e100ff;
+    color: var(--tema-grad-2, #e100ff);
     font-weight: bold;
     font-style: italic;
 }

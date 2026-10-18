@@ -1,0 +1,448 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
+
+.vision-wrapper {
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 7vh 8px 60px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    container-type: inline-size;
+}
+
+/* ── Filtros ── */
+.vision-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 26px;
+}
+
+.vision-filtro {
+    --color: var(--tema-vivo, #d966ff);
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.04);
+    transition: all 0.2s;
+}
+
+.vision-filtro i { color: var(--color); }
+
+.vision-filtro:hover,
+.vision-filtro.activo {
+    color: #fff;
+    border-color: var(--color);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color) 40%, transparent);
+}
+
+/* ── Tablero ── */
+.vision-board {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* cada fila mide 3/4 del ancho de una columna: un recuadro normal es 4:3,
+       uno alto es vertical y uno ancho es panorámico, como las fotos */
+    --columnas: 4;
+    --relleno: 122px;
+    grid-auto-rows: calc((100cqw - var(--relleno)) / var(--columnas) * 0.75);
+    grid-auto-flow: dense;
+    gap: 26px 22px;
+    padding: 34px 28px 40px;
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at 50% 45%, rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.22), transparent 55%),
+        linear-gradient(160deg, rgba(var(--tema-oscuro-rgb, 40, 10, 70), 0.55), rgba(10, 0, 20, 0.7));
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.28);
+    box-shadow: 0 0 50px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.2), inset 0 0 60px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.08);
+}
+
+/* Título en el centro del collage, como en un tablero de recortes */
+.vision-centro {
+    grid-column: 2 / 4;
+    grid-row: 2 / span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+}
+
+.vision-board-pocas { grid-template-rows: auto; }
+
+.vision-board-pocas .vision-centro {
+    grid-column: 1 / -1;
+    grid-row: 1;
+}
+
+.vision-titulo {
+    font-family: 'Kaushan Script', cursive;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    line-height: 1.1;
+    white-space: nowrap;
+    margin: 0 0 6px;
+    padding: 0 0.25em;
+    background: linear-gradient(90deg, var(--tema-vivo, #d966ff), #ff6fb5, var(--tema-vivo, #b366ff));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 12px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.55));
+}
+
+.vision-subtitulo {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Caveat', cursive;
+    font-size: 1.45rem;
+    margin-bottom: 12px;
+}
+
+.vision-logradas { color: #00e676; }
+
+.vision-btn-agregar {
+    border: none;
+    border-radius: 999px;
+    padding: 9px 22px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--tema-grad-1, #8a28ff), var(--tema-vivo, #d966ff));
+    box-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.45);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vision-btn-agregar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 26px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.65);
+}
+
+/* ── Fotos del collage ── */
+.vision-meta {
+    --color: var(--tema-vivo, #d966ff);
+    --rot: -2deg;
+    position: relative;
+    margin: 0;
+    padding: 7px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--color) 55%, transparent);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 18px color-mix(in srgb, var(--color) 28%, transparent);
+    transform: rotate(var(--rot));
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: vision-entrada 0.6s ease both;
+    outline: none;
+}
+
+/* Cada foto con su propia inclinación y tamaño, para que no parezca una cuadrícula */
+.vision-meta:nth-of-type(4n+1) { --rot: -3deg; }
+.vision-meta:nth-of-type(4n+2) { --rot: 2.2deg; }
+.vision-meta:nth-of-type(4n+3) { --rot: -1.2deg; }
+.vision-meta:nth-of-type(4n)   { --rot: 3deg; }
+.vision-forma-alta  { grid-row: span 2; }
+.vision-forma-ancha { grid-column: span 2; }
+
+.vision-meta:hover,
+.vision-meta:focus-within {
+    transform: rotate(0deg) scale(1.04);
+    z-index: 5;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 30px color-mix(in srgb, var(--color) 55%, transparent);
+}
+
+@keyframes vision-entrada {
+    from { opacity: 0; transform: translateY(18px) rotate(var(--rot)); }
+    to   { opacity: 1; transform: rotate(var(--rot)); }
+}
+
+/* Cinta adhesiva neón que "pega" la foto al tablero */
+.vision-meta::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 70px;
+    height: 22px;
+    transform: translateX(-50%) rotate(calc(var(--rot) * -2));
+    background: color-mix(in srgb, var(--color) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 70%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--color) 40%, transparent);
+    backdrop-filter: blur(2px);
+    z-index: 3;
+}
+
+.vision-meta-marco {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #0a0014;
+}
+
+.vision-meta-fondo,
+.vision-meta-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Copia borrosa que rellena el espacio sobrante */
+.vision-meta-fondo {
+    object-fit: cover;
+    filter: blur(14px) brightness(0.55);
+    transform: scale(1.15);
+}
+
+/* La foto real nunca se recorta */
+.vision-meta-img { object-fit: contain; }
+
+.vision-meta.cumplida .vision-meta-marco { filter: saturate(0.55) brightness(0.75); }
+
+/* Etiqueta de recorte de papel con el nombre de la meta */
+.vision-etiqueta {
+    position: absolute;
+    left: 50%;
+    bottom: -14px;
+    width: max-content;
+    max-width: 105%;
+    transform: translateX(-50%) rotate(calc(var(--rot) * -1));
+    padding: 3px 18px 5px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+    text-align: center;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    background: rgba(20, 5, 35, 0.92);
+    border: 1px solid color-mix(in srgb, var(--color) 70%, transparent);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--color) 45%, transparent);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--color) 70%, transparent);
+    /* bordes rasgados */
+    clip-path: polygon(0% 8%, 6% 0%, 14% 6%, 24% 1%, 35% 7%, 47% 0%, 58% 6%, 70% 1%, 81% 7%, 92% 0%, 100% 8%,
+                       98% 50%, 100% 92%, 93% 100%, 82% 94%, 70% 100%, 58% 93%, 46% 100%, 34% 94%, 22% 100%, 10% 93%, 0% 100%, 2% 50%);
+    z-index: 4;
+}
+
+.vision-sello,
+.vision-meta-fecha {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    z-index: 3;
+}
+
+.vision-sello {
+    color: #000;
+    background: #00e676;
+    box-shadow: 0 0 14px rgba(0, 230, 118, 0.6);
+}
+
+.vision-meta-fecha {
+    color: #ffd700;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 215, 0, 0.5);
+}
+
+.vision-meta-fecha.vencida { color: #ff6666; border-color: rgba(255, 102, 102, 0.5); }
+
+/* Detalle que aparece encima de la foto */
+.vision-meta-detalle {
+    position: absolute;
+    inset: 7px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 12px 12px 26px;
+    border-radius: 3px;
+    background: linear-gradient(to top, rgba(10, 0, 20, 0.92) 15%, rgba(10, 0, 20, 0.35) 70%, transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+    z-index: 2;
+}
+
+.vision-meta:hover .vision-meta-detalle,
+.vision-meta:focus-within .vision-meta-detalle { opacity: 1; }
+
+.vision-meta-cat {
+    color: var(--color);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.vision-meta-desc {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+    margin: 0;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.vision-meta-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+.vision-meta-acciones form { margin: 0; }
+
+.vision-accion {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.55);
+    color: rgba(255, 255, 255, 0.9);
+    transition: all 0.2s;
+}
+
+.vision-accion:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.vision-accion-ok:hover { border-color: #00e676; color: #00e676; }
+.vision-accion-borrar:hover { border-color: #ff6666; color: #ff6666; }
+
+/* Recuadro para agregar otra meta */
+.vision-meta-nueva {
+    --rot: 1.5deg;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px dashed rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    box-shadow: none;
+    grid-row: span 1 !important;
+    grid-column: span 1 !important;
+}
+
+.vision-meta-nueva::before { display: none; }
+.vision-meta-nueva i { font-size: 2.2rem; color: var(--tema-vivo, #d966ff); }
+.vision-meta-nueva:hover { color: #fff; border-color: var(--tema-vivo, #d966ff); }
+
+/* ── Tablet: 3 columnas, el título ocupa una fila entera ── */
+@media (max-width: 900px) {
+    /* la primera fila (la del título) toma la altura que necesite */
+    .vision-board { grid-template-columns: repeat(3, 1fr); grid-template-rows: auto; --columnas: 3; --relleno: 100px; }
+    .vision-centro,
+    .vision-board-pocas .vision-centro { grid-column: 1 / -1; grid-row: 1; padding: 6px 0 4px; }
+}
+
+/* ── Celular: 2 columnas, el detalle se ve al tocar la foto ── */
+@media (max-width: 576px) {
+    .vision-wrapper { padding-top: 70px; }
+    .vision-board {
+        grid-template-columns: repeat(2, 1fr);
+        --columnas: 2;
+        --relleno: 42px;
+        gap: 28px 14px;
+        padding: 22px 14px 32px;
+        border-radius: 20px;
+    }
+    .vision-etiqueta { font-size: 1.15rem; padding: 2px 12px 4px; }
+    .vision-meta-desc { display: none; }
+    .vision-meta-detalle { padding: 8px 8px 22px; }
+    .vision-accion { width: 28px; height: 28px; font-size: 0.8rem; }
+    .vision-sello, .vision-meta-fecha { top: 12px; right: 8px; font-size: 0.7rem; padding: 2px 8px; }
+}
+
+/* En pantallas táctiles los botones se ven siempre, sin necesitar el mouse */
+@media (hover: none) {
+    .vision-meta-detalle { opacity: 1; background: linear-gradient(to top, rgba(10, 0, 20, 0.85), transparent 45%); }
+    .vision-meta-cat, .vision-meta-desc { display: none; }
+}
+
+/* ── Modales ── */
+.vision-modal {
+    color: #fff;
+    background: rgba(20, 5, 35, 0.96);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35);
+}
+
+.vision-modal .form-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+/* m.css da a todos los inputs el tamaño grande del login; aquí van compactos */
+.vision-modal .vision-input,
+.vision-modal .vision-input:focus {
+    height: auto;
+    min-height: 42px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+}
+
+.vision-modal select.vision-input {
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.vision-input:focus { box-shadow: 0 0 0 0.2rem rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.3); }
+.vision-input option { color: #000; }
+.vision-input::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+.vision-dropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 170px;
+    border: 2px dashed rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    border-radius: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.vision-dropzone i { font-size: 2.2rem; color: var(--tema-vivo, #d966ff); }
+
+.vision-dropzone:hover,
+.vision-dropzone.arrastrando {
+    border-color: var(--tema-vivo, #d966ff);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.12);
+}
+
+.vision-dropzone img {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+}
+
+.vision-ayuda {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 6px 0 14px;
+}
+
+.vision-eliminar-icono { font-size: 2.4rem; color: #ff6666; }
+

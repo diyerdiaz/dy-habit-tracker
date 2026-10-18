@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" role="img" aria-label="Chica anime con capucha de orejas de gato, sentada abrazando sus rodillas">
+  <defs>
+    <radialGradient id="luna" cx="50%" cy="45%" r="50%">
+      <stop offset="0" stop-color="#e0fff4"/>
+      <stop offset="0.45" stop-color="#00e676"/>
+      <stop offset="0.8" stop-color="#00796b" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#00796b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="silueta" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0533"/>
+      <stop offset="1" stop-color="#07000f"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b9ffe0"/>
+      <stop offset="0.5" stop-color="#00e676"/>
+      <stop offset="1" stop-color="#7b2ff7"/>
+    </linearGradient>
+    <filter id="brillo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Aura de humo: la silueta se engrosa, se deforma con ruido animado y se difumina -->
+    <linearGradient id="aura" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00ffa3"/>
+      <stop offset="0.45" stop-color="#00e676"/>
+      <stop offset="1" stop-color="#7b2ff7"/>
+    </linearGradient>
+    <filter id="humo" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="13" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="4" result="ruido">
+        <animate attributeName="baseFrequency" dur="8s" values="0.012 0.03;0.018 0.045;0.012 0.03" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="60" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="3.5s" values="45;80;45" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="10"/>
+    </filter>
+    <filter id="humo-fino" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="5" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="2" seed="11" result="ruido">
+        <animate attributeName="baseFrequency" dur="5s" values="0.03 0.07;0.04 0.09;0.03 0.07" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="30" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="2.6s" values="22;38;22" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="3"/>
+    </filter>
+    <filter id="voluta" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <path id="forma-pelo" d="M168 222 C164 188 180 164 204 158 L210 122 L230 150 C238 150 246 154 252 160 L276 136 L272 178 C280 194 278 212 270 226 L258 208 C256 188 242 174 220 174 C198 174 184 190 182 214 C182 232 188 246 198 254 C184 254 172 242 168 222 Z"/>
+    <path id="forma-cuerpo" d="M214 170 C236 170 252 188 252 210 C252 224 246 236 236 244 L240 262 C246 290 256 306 270 312 C282 306 298 312 304 330 C312 360 316 420 318 470 L330 520 L120 520 L132 480 C124 430 126 370 140 320 C150 284 166 258 184 244 C176 236 176 222 176 210 C176 188 192 170 214 170 Z"/>
+  </defs>
+
+  <!-- Luna -->
+  <circle cx="225" cy="215" r="165" fill="url(#luna)" opacity="0.6"/>
+  <circle cx="225" cy="215" r="118" fill="none" stroke="#e0fff4" stroke-opacity="0.35" stroke-width="1.5"/>
+
+  <!-- Estrellas -->
+  <g fill="#fff">
+    <circle cx="48" cy="60" r="1.6" opacity="0.8"/>
+    <circle cx="352" cy="42" r="1.4" opacity="0.7"/>
+    <circle cx="372" cy="150" r="1.8" opacity="0.6"/>
+    <circle cx="30" cy="170" r="1.2" opacity="0.6"/>
+    <circle cx="330" cy="300" r="1.4" opacity="0.5"/>
+    <path d="M86 112 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" opacity="0.85"/>
+    <path d="M340 92 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z" opacity="0.8"/>
+  </g>
+
+  <!-- Aura de humo alrededor del personaje (se mueve sola) -->
+  <g opacity="1" filter="url(#humo)" fill="url(#aura)">
+    <use href="#forma-pelo"/>
+    <use href="#forma-cuerpo"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 -6;0 0" dur="5s" repeatCount="indefinite"/>
+  </g>
+  <g opacity="0.95" filter="url(#humo-fino)" fill="#b9ffe0">
+    <use href="#forma-pelo"/>
+    <use href="#forma-cuerpo"/>
+  </g>
+
+  <!-- Volutas de humo que suben desde los bordes -->
+  <g filter="url(#voluta)" fill="#00e676">
+    <ellipse cx="200" cy="90" rx="24" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-10 -70" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="290" cy="250" rx="22" ry="36" fill="#00ffa3">
+      <animateTransform attributeName="transform" type="translate" values="0 0;14 -80" dur="5s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="5s" begin="1s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="150" cy="255" rx="23" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-16 -75" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="70" cy="300" rx="20" ry="32" fill="#7b2ff7">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-12 -60" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="300" cy="360" rx="21" ry="34">
+      <animateTransform attributeName="transform" type="translate" values="0 0;10 -70" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="248" cy="80" rx="18" ry="30" fill="#00ffa3">
+      <animateTransform attributeName="transform" type="translate" values="0 0;8 -60" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- Cabello -->
+  <use href="#forma-pelo" fill="url(#silueta)"/>
+
+  <!-- Cuerpo y cabeza de perfil, mirando hacia el formulario -->
+  <use href="#forma-cuerpo" fill="url(#silueta)"/>
+
+
+  <!-- Contorno neón -->
+  <g fill="none" stroke="url(#neon)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" filter="url(#brillo)">
+    <use href="#forma-cuerpo"/>
+    <use href="#forma-pelo" stroke-opacity="0.8"/>
+  </g>
+
+  <!-- Ojo y detalles del personaje -->
+  <path d="M240 210 q7 -4 12 1" fill="none" stroke="#e6fff5" stroke-width="2" stroke-linecap="round" filter="url(#brillo)"/>
+  <g fill="none" stroke="#00e676" stroke-width="1.8" stroke-opacity="0.75">
+    <path d="M238 262 C250 286 270 298 302 302"/>
+    <path d="M150 320 C170 300 200 292 226 296"/>
+    <path d="M140 470 L318 470" stroke-opacity="0.35"/>
+  </g>
+  <g fill="none" stroke="#00ffa3" stroke-width="2" filter="url(#brillo)" opacity="0.9">
+    <path d="M214 128 L226 150 M272 144 L268 172"/>
+  </g>
+
+  <!-- Partículas -->
+  <g fill="#9dffd6" filter="url(#brillo)" opacity="0.9">
+    <path d="M326 206 c-4 -6 -12 -2 -8 5 l8 8 8 -8 c4 -7 -4 -11 -8 -5z"/>
+    <path d="M92 398 c-3 -5 -10 -2 -7 4 l7 7 7 -7 c3 -6 -4 -9 -7 -4z"/>
+    <path d="M352 352 c-3 -4 -8 -1 -6 3 l6 6 6 -6 c2 -4 -3 -7 -6 -3z"/>
+    <path d="M58 226 c-3 -4 -8 -1 -6 3 l6 6 6 -6 c2 -4 -3 -7 -6 -3z"/>
+  </g>
+</svg>

@@ -109,7 +109,7 @@ cats.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c;
     opt.textContent = c;
-    opt.style.background = '#1a002a';
+    opt.style.background = temaColor('oscuro-2');
     catSelect.appendChild(opt);
 });
 

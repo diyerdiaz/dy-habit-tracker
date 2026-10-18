@@ -21,6 +21,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/m.css')}}">
+  {%- if tema_sitio %}
+  {# Color del personaje con el que se inició sesión: lo usan todos los CSS #}
+  <style>:root { {% for nombre, valor in tema_sitio.items() %}--tema-{{ nombre }}: {{ valor }}; {% endfor %}}</style>
+  {%- endif %}
+  <script src="{{ url_for('static', filename='js/tema.js') }}"></script>
   {% block extra_css %}{% endblock %}
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

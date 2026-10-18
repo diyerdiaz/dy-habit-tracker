@@ -1,7 +1,19 @@
 /* =========================
    GOOGLE FONT
 ========================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Kaushan+Script&display=swap');
+
+
+/* =========================
+   TÍTULOS (letra cursiva del Vision Board en todo el sitio)
+========================= */
+h1, h2, h3, h4, h5,
+.modal-title {
+    font-family: 'Kaushan Script', 'Poppins', cursive;
+    letter-spacing: 0.01em;
+    /* la letra ya es inclinada y de un solo grosor: sin cursiva ni negrita "falsas" */
+    font-synthesis: none;
+}
 
 
 /* =========================
@@ -26,6 +38,11 @@ body {
 /* =========================
    LOGIN LAYOUT SPLIT
 ========================= */
+/* Ancho de cada lado: crece con la pantalla, entre 420px y 680px */
+:root {
+    --login-panel: clamp(420px, 36vw, 680px);
+}
+
 .login-wrapper {
     width: 100%;
     min-height: 85vh;
@@ -36,46 +53,103 @@ body {
     box-sizing: border-box;
 }
 
-.login-left {
-    flex: 1 1 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
+/* Solo el login: dos mitades iguales a pantalla completa
+   (Gestión de Hábitos, Castigos y Ruleta también usan .login-wrapper) */
+.login-wrapper.login-portada {
+    /* ocupa todo el ancho de la ventana (sale del contenedor de base.html) */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    min-height: 88vh;
+    /* dos mitades iguales: bienvenida centrada a la izquierda, login centrado a la derecha */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    align-items: stretch;
+    padding: 20px 0;
     box-sizing: border-box;
 }
 
+.login-left {
+    position: relative;
+    justify-self: center;
+    width: 100%;
+    max-width: var(--login-panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(32px, 4vw, 64px) 20px 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
 .login-brand {
-    max-width: 480px;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
 }
 
-/* BOTON PORTAFOLIO TIPO NAVBAR */
-.portfolio-badge {
-    display: inline-block;
-    padding: 10px 24px;
-    background: rgba(138, 40, 255, 0.2);
-    color: #e100ff;
-    border: 1px solid rgba(138, 40, 255, 0.4);
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: 500;
-    text-decoration: none;
-    margin-bottom: 25px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 0 15px rgba(138, 40, 255, 0.1);
+.login-brand h1 {
+    font-size: clamp(3rem, 4.6vw, 5.2rem) !important;
 }
 
-.portfolio-badge:hover {
-    background: rgba(138, 40, 255, 0.5);
-    color: #fff;
-    box-shadow: 0 0 25px rgba(138, 40, 255, 0.4);
-    transform: translateY(-2px);
+.login-brand p {
+    font-size: clamp(1.05rem, 1.25vw, 1.35rem) !important;
 }
 
-.portfolio-badge i {
-    margin-right: 8px;
+.login-brand .login-features {
+    justify-content: center;
+}
+
+/* Brillo de fondo del login con el color del personaje que salió */
+.login-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 25% 75%, rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.22), transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.14), transparent 50%),
+        radial-gradient(ellipse at 50% 110%, rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.6), transparent 60%);
+    animation: login-fondo-respira 8s ease-in-out infinite alternate;
+}
+
+@keyframes login-fondo-respira {
+    from { opacity: 0.75; }
+    to   { opacity: 1; }
+}
+
+/* Personaje anime abajo a la izquierda, fundido con el fondo de la app */
+.login-personaje {
+    display: block;
+    width: 100%;
+    max-width: clamp(320px, 30vw, 560px);
+    margin-top: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-height: clamp(320px, 52vh, 600px);
+    object-fit: contain;
+    object-position: bottom center;
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+    pointer-events: none;
+    user-select: none;
+    animation: personaje-flotar 6s ease-in-out infinite;
+}
+
+/* La tarjeta crece con la pantalla y el título siempre cabe en una línea */
+.login-right .card {
+    max-width: var(--login-panel);
+    padding: clamp(32px, 4vw, 72px);
+}
+
+.login-right .card-header h1 {
+    font-size: clamp(2.2rem, 3.4vw, 3.8rem);
+    white-space: nowrap;
+}
+
+@keyframes personaje-flotar {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
 }
 
 .login-brand h1 {
@@ -85,7 +159,7 @@ body {
     font-weight: 500;
     margin-bottom: 20px;
     line-height: 1.1;
-    text-shadow: 0 0 20px rgba(183, 0, 255, 0.5);
+    text-shadow: 0 0 20px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.5);
 }
 
 .login-brand p {
@@ -145,11 +219,12 @@ body {
 }
 
 .login-right {
-    flex: 1 1 50%;
+    justify-self: center;
+    width: 100%;
+    max-width: var(--login-panel);
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    padding: 20px;
     box-sizing: border-box;
 }
 
@@ -166,7 +241,7 @@ body {
 
     box-sizing: border-box;
 
-    background: rgba(80, 0, 120, 0.18);
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.18);
 
     border: 1px solid rgba(255, 255, 255, 0.08);
 
@@ -176,8 +251,8 @@ body {
     -webkit-backdrop-filter: blur(24px);
 
     box-shadow:
-        0 0 40px rgba(183, 0, 255, .35),
-        0 0 120px rgba(183, 0, 255, .18);
+        0 0 40px rgba(var(--tema-fuerte-rgb, 183, 0, 255), .35),
+        0 0 120px rgba(var(--tema-fuerte-rgb, 183, 0, 255), .18);
 
     animation: glow 4s ease-in-out infinite alternate;
 }
@@ -190,14 +265,14 @@ body {
 
     from {
         box-shadow:
-            0 0 40px rgba(183, 0, 255, .35),
-            0 0 120px rgba(183, 0, 255, .18);
+            0 0 40px rgba(var(--tema-fuerte-rgb, 183, 0, 255), .35),
+            0 0 120px rgba(var(--tema-fuerte-rgb, 183, 0, 255), .18);
     }
 
     to {
         box-shadow:
-            0 0 65px rgba(220, 100, 255, .55),
-            0 0 170px rgba(220, 100, 255, .28);
+            0 0 65px rgba(var(--tema-vivo-rgb, 220, 100, 255), .55),
+            0 0 170px rgba(var(--tema-vivo-rgb, 220, 100, 255), .28);
     }
 }
 
@@ -307,13 +382,13 @@ body {
 /* FOCUS */
 .form-control:focus {
 
-    border: 1px solid #d966ff;
+    border: 1px solid var(--tema-vivo, #d966ff);
 
     background: rgba(255, 255, 255, .09);
 
     box-shadow:
-        0 0 25px rgba(217, 102, 255, .45),
-        0 0 60px rgba(217, 102, 255, .18);
+        0 0 25px rgba(var(--tema-vivo-rgb, 217, 102, 255), .45),
+        0 0 60px rgba(var(--tema-vivo-rgb, 217, 102, 255), .18);
 }
 
 
@@ -385,13 +460,13 @@ body {
 
     background:
         linear-gradient(135deg,
-            #8a28ff,
-            #e100ff);
+            var(--tema-grad-1, #8a28ff),
+            var(--tema-grad-2, #e100ff));
 
     color: #fff;
 
     box-shadow:
-        0 0 25px rgba(196, 77, 255, .45);
+        0 0 25px rgba(var(--tema-vivo-rgb, 196, 77, 255), .45);
 }
 
 
@@ -401,7 +476,7 @@ body {
     transform: translateY(-4px);
 
     box-shadow:
-        0 0 45px rgba(196, 77, 255, .75);
+        0 0 45px rgba(var(--tema-vivo-rgb, 196, 77, 255), .75);
 }
 
 
@@ -416,7 +491,7 @@ body {
 
     margin-top: 15px;
 
-    color: #d966ff;
+    color: var(--tema-vivo, #d966ff);
 
     font-size: 1rem;
 
@@ -451,7 +526,7 @@ body {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(220, 100, 255, 0.4);
+    background: rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.4);
     opacity: 0;
     animation: thunder-flash 12s infinite;
 }
@@ -460,7 +535,7 @@ body {
 @keyframes thunder-flash {
     0%, 91%, 93%, 95%, 100% { opacity: 0; }
     92% { opacity: 0.8; background: rgba(255, 255, 255, 0.6); }
-    94% { opacity: 0.4; background: rgba(220, 100, 255, 0.5); }
+    94% { opacity: 0.4; background: rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.5); }
 }
 
 /* Efecto de rayo cayendo (simulado con líneas de luz rápida) */
@@ -470,7 +545,7 @@ body {
     width: 2px;
     height: 120%;
     background: #fff;
-    box-shadow: 0 0 20px #e100ff, 0 0 50px #fff;
+    box-shadow: 0 0 20px var(--tema-grad-2, #e100ff), 0 0 50px #fff;
     opacity: 0;
 }
 
@@ -487,7 +562,7 @@ body {
     width: 2px;
     height: 50%;
     background: #fff;
-    box-shadow: 0 0 15px #e100ff;
+    box-shadow: 0 0 15px var(--tema-grad-2, #e100ff);
     transform: rotate(-35deg);
 }
 
@@ -499,7 +574,7 @@ body {
     width: 2px;
     height: 40%;
     background: #fff;
-    box-shadow: 0 0 15px #e100ff;
+    box-shadow: 0 0 15px var(--tema-grad-2, #e100ff);
     transform: rotate(25deg);
 }
 
@@ -527,9 +602,9 @@ body {
     top: -10vh;
     /* Forma de pétalo */
     border-radius: 5px 25px;
-    background: linear-gradient(135deg, rgba(230, 130, 255, 0.6), rgba(183, 0, 255, 0.4));
-    border: 1px solid rgba(220, 100, 255, 0.3);
-    box-shadow: 0 0 10px rgba(183, 0, 255, 0.3);
+    background: linear-gradient(135deg, rgba(var(--tema-claro-rgb, 230, 130, 255), 0.6), rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.4));
+    border: 1px solid rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.3);
+    box-shadow: 0 0 10px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.3);
     animation: fall-sakura linear infinite, sway-sakura ease-in-out infinite alternate;
 }
 
@@ -582,10 +657,25 @@ body {
         flex-direction: column;
     }
 
+    .login-wrapper.login-portada {
+        grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+    }
+
+    .login-left,
+    .login-right {
+        max-width: 580px;
+    }
+
     .login-left {
-        padding: 20px;
-        text-align: center;
-        margin-bottom: 10px;
+        padding: 20px 20px 0;
+    }
+
+    .login-personaje {
+        max-height: 200px;
+        flex: none;
     }
 
     .login-brand {
@@ -597,7 +687,6 @@ body {
     }
 
     .login-right {
-        padding: 10px;
         width: 100%;
     }
 
@@ -625,11 +714,11 @@ body {
     left: -280px;
     width: 280px;
     height: 100vh;
-    background: rgba(30, 0, 50, 0.45);
+    background: rgba(var(--tema-oscuro-rgb, 30, 0, 50), 0.45);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 0 40px rgba(183, 0, 255, 0.2);
+    box-shadow: 0 0 40px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.2);
     transition: 0.3s ease-in-out;
     z-index: 999;
     padding-top: 80px;
@@ -639,7 +728,7 @@ body {
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
-    scrollbar-color: rgba(217, 102, 255, 0.5) transparent;
+    scrollbar-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5) transparent;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -647,7 +736,7 @@ body {
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(217, 102, 255, 0.5);
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
     border-radius: 6px;
 }
 
@@ -678,7 +767,7 @@ body {
     left: 20px;
     width: 45px;
     height: 45px;
-    background: rgba(80, 0, 120, 0.3);
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     cursor: pointer;
@@ -693,8 +782,8 @@ body {
 }
 
 .hamburger-menu:hover {
-    box-shadow: 0 0 15px rgba(220, 100, 255, 0.6);
-    border-color: rgba(220, 100, 255, 0.5);
+    box-shadow: 0 0 15px rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.6);
+    border-color: rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.5);
 }
 
 .hamburger-menu span {
@@ -740,10 +829,10 @@ body {
 }
 
 .sidebar-link:hover, .sidebar-link.active {
-    background: rgba(138, 40, 255, 0.2);
-    color: #e100ff;
-    border: 1px solid rgba(138, 40, 255, 0.4);
-    box-shadow: 0 0 15px rgba(138, 40, 255, 0.2);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.2);
+    color: var(--tema-grad-2, #e100ff);
+    border: 1px solid rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.4);
+    box-shadow: 0 0 15px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.2);
     transform: translateX(5px);
 }
 
@@ -814,7 +903,7 @@ body {
 
 .analysis-card {
     flex: 1 1 300px;
-    background: rgba(80, 0, 120, 0.15);
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.15);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     padding: 25px;
@@ -843,9 +932,9 @@ body {
 .chart-bar {
     width: 20px;
     min-height: 3px;
-    background: linear-gradient(to top, #8a28ff, #e100ff);
+    background: linear-gradient(to top, var(--tema-grad-1, #8a28ff), var(--tema-grad-2, #e100ff));
     border-radius: 6px 6px 0 0;
-    box-shadow: 0 0 15px rgba(220, 100, 255, 0.4);
+    box-shadow: 0 0 15px rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.4);
     transition: height 1s ease-in-out;
 }
 
@@ -880,10 +969,10 @@ body {
     height: 100%;
     border-radius: 50%;
     border: 8px solid transparent;
-    border-top-color: #e100ff;
-    border-right-color: #8a28ff;
+    border-top-color: var(--tema-grad-2, #e100ff);
+    border-right-color: var(--tema-grad-1, #8a28ff);
     transform: rotate(-45deg);
-    box-shadow: 0 0 15px rgba(220, 100, 255, 0.3);
+    box-shadow: 0 0 15px rgba(var(--tema-vivo-rgb, 220, 100, 255), 0.3);
 }
 
 .stat-circle-text {
@@ -973,7 +1062,7 @@ body {
 }
 
 .notification-bell {
-    background: rgba(80, 0, 120, 0.15);
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.15);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 50%;
     width: 50px;
@@ -987,14 +1076,14 @@ body {
     position: relative;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 0 15px rgba(183, 0, 255, 0.15);
+    box-shadow: 0 0 15px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.15);
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .notification-bell:hover {
-    background: rgba(138, 40, 255, 0.25);
-    border-color: rgba(138, 40, 255, 0.6);
-    box-shadow: 0 0 25px rgba(183, 0, 255, 0.4);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.25);
+    border-color: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.6);
+    box-shadow: 0 0 25px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.4);
     transform: scale(1.08);
 }
 
@@ -1021,14 +1110,14 @@ body {
     top: 60px;
     right: 0;
     width: 320px;
-    background: rgba(40, 0, 60, 0.65);
+    background: rgba(var(--tema-oscuro-rgb, 40, 0, 60), 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     box-shadow: 
         0 10px 30px rgba(0, 0, 0, 0.5),
-        0 0 30px rgba(183, 0, 255, 0.2);
+        0 0 30px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.2);
     overflow: hidden;
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
@@ -1061,7 +1150,7 @@ body {
 
 .mark-all-read {
     font-size: 0.8rem;
-    color: #e100ff;
+    color: var(--tema-grad-2, #e100ff);
     cursor: pointer;
     font-style: italic;
     transition: opacity 0.2s;
@@ -1081,7 +1170,7 @@ body {
 }
 
 .notification-list::-webkit-scrollbar-thumb {
-    background: rgba(138, 40, 255, 0.3);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.3);
     border-radius: 3px;
 }
 
@@ -1099,16 +1188,16 @@ body {
 }
 
 .notification-item.unread {
-    background: rgba(138, 40, 255, 0.08);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.08);
 }
 
 .notification-item.unread:hover {
-    background: rgba(138, 40, 255, 0.12);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.12);
 }
 
 .notification-icon {
     font-size: 1.2rem;
-    color: #e100ff;
+    color: var(--tema-grad-2, #e100ff);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1202,15 +1291,15 @@ body {
     font-style: italic;
     letter-spacing: 3px;
     color: rgba(255, 255, 255, 0.3);
-    text-shadow: 0 0 10px rgba(138, 40, 255, 0);
+    text-shadow: 0 0 10px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0);
     transition: color 0.3s, text-shadow 0.3s;
     padding: 0 30px;
 }
 
 /* Hover effects for texts */
 .marquee-content span:hover {
-    color: #e100ff;
-    text-shadow: 0 0 15px #e100ff, 0 0 30px #8a28ff;
+    color: var(--tema-grad-2, #e100ff);
+    text-shadow: 0 0 15px var(--tema-grad-2, #e100ff), 0 0 30px var(--tema-grad-1, #8a28ff);
 }
 
 /* Animations */
@@ -1264,7 +1353,8 @@ body {
     width: 280px;
     height: 280px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(185, 90, 255, 0.16) 0%, rgba(185, 90, 255, 0.06) 40%, transparent 70%);
+    /* --cursor-rgb lo cambia la sección de Inglés (azul); en el resto es el color del tema */
+    background: radial-gradient(circle, rgba(var(--cursor-rgb, var(--tema-vivo-rgb, 185, 90, 255)), 0.16) 0%, rgba(var(--cursor-rgb, var(--tema-vivo-rgb, 185, 90, 255)), 0.06) 40%, transparent 70%);
     pointer-events: none;
     z-index: 0;
     opacity: 0;
@@ -1279,31 +1369,61 @@ body {
 .cursor-luz.sobre-boton {
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(217, 102, 255, 0.24) 0%, rgba(217, 102, 255, 0.08) 40%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--cursor-rgb, var(--tema-vivo-rgb, 217, 102, 255)), 0.24) 0%, rgba(var(--cursor-rgb, var(--tema-vivo-rgb, 217, 102, 255)), 0.08) 40%, transparent 70%);
 }
 
-/* Botón de descarga del APK en el login */
-.login-descarga {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 22px;
-    padding: 9px 18px 9px 10px;
+/* Bootstrap pinta el texto de cada celda con su color oscuro e ignora el blanco
+   de la tabla: así los nombres se veían casi negros sobre el fondo oscuro */
+.custom-table {
+    --bs-table-color: #fff;
+    --bs-table-bg: transparent;
+    --bs-table-hover-color: #fff;
+}
+
+/* =========================
+   AVISOS (flash) CON EL COLOR DEL TEMA
+   Antes eran los verdes/rojos claros de Bootstrap; ahora son de vidrio oscuro
+   con el color del personaje. Los errores y advertencias conservan su acento.
+========================= */
+.flash-message.alert {
+    --acento: var(--tema-vivo, #d966ff);
+    position: relative;
+    z-index: 20;
+    color: #fff;
+    background: linear-gradient(135deg, rgba(var(--tema-oscuro-rgb, 30, 0, 45), 0.95), rgba(0, 0, 0, 0.85));
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    border-left: 5px solid var(--acento);
     border-radius: 16px;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    background: rgba(138, 40, 255, 0.18);
-    border: 1px solid rgba(217, 102, 255, 0.45);
-    transition: background 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 24px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35);
+    padding: 14px 48px 14px 18px;
+    animation: aviso-entra 0.45s ease both;
 }
 
-.login-descarga img {
-    border-radius: 8px;
+.flash-message.alert-danger  { --acento: #ff6666; border-color: rgba(255, 102, 102, 0.5); box-shadow: 0 0 24px rgba(255, 102, 102, 0.3); }
+.flash-message.alert-warning { --acento: #ffd700; border-color: rgba(255, 215, 0, 0.45); box-shadow: 0 0 24px rgba(255, 215, 0, 0.25); }
+
+.flash-message.alert::before {
+    content: '';
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--acento);
+    box-shadow: 0 0 10px var(--acento);
+    vertical-align: middle;
 }
 
-.login-descarga:hover {
-    color: #fff;
-    background: rgba(138, 40, 255, 0.4);
-    transform: translateY(-2px);
+.flash-message .btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+    opacity: 0.7;
+}
+
+.flash-message .btn-close:hover { opacity: 1; }
+
+@keyframes aviso-entra {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: none; }
 }

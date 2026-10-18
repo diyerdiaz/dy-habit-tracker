@@ -1,7 +1,7 @@
 // Service worker de Habits: permite instalar la app en el celular y muestra una
 // página amable cuando no hay internet. No guarda en caché las páginas con tus
 // datos (siempre se piden al servidor); solo la página sin conexión y el logo.
-const CACHE = 'habits-v1';
+const CACHE = 'habits-v2';  // subir el número cuando cambien el logo o la página sin conexión
 const BASICOS = ['/offline', '/static/img/logo.svg', '/static/img/icon-192.png'];
 
 self.addEventListener('install', (event) => {

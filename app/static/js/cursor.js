@@ -1,4 +1,4 @@
-// Efecto del mouse: un resplandor morado suave que sigue al puntero con un
+// Efecto del mouse: un resplandor suave (del color del tema; azul en Inglés) que sigue al puntero con un
 // pequeño retraso y se intensifica sobre botones y enlaces. Solo en equipos
 // con mouse y si el sistema no pide reducir las animaciones.
 (function () {

@@ -67,6 +67,16 @@
                 <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
         <li class="sidebar-item" style="margin-top: 24px;">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
@@ -80,7 +90,7 @@
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">
@@ -144,7 +154,7 @@
                     <p id="backDesc" style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin: 0 0 10px 0; font-style: italic;"></p>
                     <div style="margin-bottom: 18px;">
                         <span id="backCategoria" class="badge rounded-pill" style="background: rgba(255, 102, 102, 0.3); border: 1px solid rgba(255, 102, 102, 0.5); font-style: normal; font-size: 0.75rem; padding: 4px 10px;"></span>
-                        <span id="backFrecuencia" class="badge rounded-pill" style="background: rgba(138, 40, 255, 0.3); border: 1px solid rgba(138, 40, 255, 0.5); font-style: normal; font-size: 0.75rem; padding: 4px 10px; margin-left: 4px;"></span>
+                        <span id="backFrecuencia" class="badge rounded-pill" style="background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.3); border: 1px solid rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5); font-style: normal; font-size: 0.75rem; padding: 4px 10px; margin-left: 4px;"></span>
                     </div>
                     <button id="completadoBtn" class="btn btn-primary" style="max-width: 280px; display: flex; align-items: center; justify-content: center; gap: 10px; height: 50px; font-size: 0.95rem; background: linear-gradient(135deg, #ff0077, #cc0055); box-shadow: 0 0 25px rgba(255, 0, 119, 0.45);">
                         <i class="bi bi-check2-circle"></i> Castigo completado
@@ -175,17 +185,17 @@
             <div class="col-12 col-md" style="min-width: 140px; flex: 1;">
                 <label style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-style: italic; margin-bottom: 6px; display: block;">Fecha</label>
                 <select id="dateFilter" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.9rem; font-style: italic; outline: none;">
-                    <option value="all" style="background: #1a002a;">Todas</option>
-                    <option value="today" style="background: #1a002a;">Hoy</option>
-                    <option value="week" style="background: #1a002a;">Esta semana</option>
-                    <option value="month" style="background: #1a002a;">Este mes</option>
+                    <option value="all" style="background: var(--tema-oscuro-2, #1a002a);">Todas</option>
+                    <option value="today" style="background: var(--tema-oscuro-2, #1a002a);">Hoy</option>
+                    <option value="week" style="background: var(--tema-oscuro-2, #1a002a);">Esta semana</option>
+                    <option value="month" style="background: var(--tema-oscuro-2, #1a002a);">Este mes</option>
                 </select>
             </div>
             <!-- Status -->
             <div class="col-12 col-md" style="min-width: 180px; flex: 1;">
                 <label style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-style: italic; margin-bottom: 6px; display: block;">Estado</label>
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <span class="filter-badge active-filter" data-status="all" style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-style: italic; cursor: pointer; transition: 0.3s; background: rgba(138, 40, 255, 0.3); border: 1px solid rgba(138, 40, 255, 0.5); color: #fff;">Todas</span>
+                    <span class="filter-badge active-filter" data-status="all" style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-style: italic; cursor: pointer; transition: 0.3s; background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.3); border: 1px solid rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5); color: #fff;">Todas</span>
                     <span class="filter-badge" data-status="Pendiente" style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-style: italic; cursor: pointer; transition: 0.3s; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255,255,255,0.6);">Pendiente</span>
                     <span class="filter-badge" data-status="En progreso" style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-style: italic; cursor: pointer; transition: 0.3s; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255,255,255,0.6);">En progreso</span>
                     <span class="filter-badge" data-status="Completado" style="padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-style: italic; cursor: pointer; transition: 0.3s; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255,255,255,0.6);">Completado</span>
@@ -195,7 +205,7 @@
             <div class="col-12 col-md" style="min-width: 140px; flex: 1;">
                 <label style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-style: italic; margin-bottom: 6px; display: block;">Categoría</label>
                 <select id="categoryFilter" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.9rem; font-style: italic; outline: none;">
-                    <option value="all" style="background: #1a002a;">Todas</option>
+                    <option value="all" style="background: var(--tema-oscuro-2, #1a002a);">Todas</option>
                 </select>
             </div>
         </div>

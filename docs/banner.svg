@@ -1,68 +1,410 @@
-<svg viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DY Habit Tracker &amp; English">
+<svg viewBox="0 0 1200 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DY Habit Tracker &amp; English">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0a0612"/>
-      <stop offset="100%" stop-color="#150a24"/>
+      <stop offset="0%" stop-color="#07030d"/>
+      <stop offset="55%" stop-color="#13071f"/>
+      <stop offset="100%" stop-color="#050912"/>
     </linearGradient>
     <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#e879f9"/>
-      <stop offset="55%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#ff6fb5"/>
       <stop offset="100%" stop-color="#60a5fa"/>
     </linearGradient>
-    <radialGradient id="orbPurple" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#d8b4fe"/>
-      <stop offset="55%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#6b21a8" stop-opacity="0"/>
+    <radialGradient id="brilloIzq" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7b2ff7" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#7b2ff7" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="orbPink" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#fbcfe8"/>
-      <stop offset="55%" stop-color="#ec4899"/>
-      <stop offset="100%" stop-color="#9d174d" stop-opacity="0"/>
+    <radialGradient id="brilloDer" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff4d6d" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ff4d6d" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="orbBlue" cx="35%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#bfdbfe"/>
-      <stop offset="55%" stop-color="#3b82f6"/>
-      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="10" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <linearGradient id="fundido" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.7" stop-color="#fff"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <mask id="desvanecer"><rect width="1200" height="330" fill="url(#fundido)"/></mask>
+    <filter id="glow" x="-20%" y="-60%" width="140%" height="220%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <rect width="1200" height="260" fill="url(#bg)"/>
+  <rect width="1200" height="330" fill="url(#bg)"/>
+  <ellipse cx="140" cy="200" rx="230" ry="200" fill="url(#brilloIzq)"/>
+  <ellipse cx="1060" cy="200" rx="230" ry="200" fill="url(#brilloDer)"/>
 
-  <circle cx="90" cy="55" r="34" fill="url(#orbPurple)" opacity="0.85"/>
-  <circle cx="1120" cy="70" r="26" fill="url(#orbPink)" opacity="0.8"/>
-  <circle cx="1050" cy="190" r="40" fill="url(#orbPurple)" opacity="0.7"/>
-  <circle cx="60" cy="205" r="22" fill="url(#orbBlue)" opacity="0.75"/>
-  <circle cx="200" cy="220" r="10" fill="url(#orbPink)" opacity="0.7"/>
-  <circle cx="960" cy="40" r="12" fill="url(#orbBlue)" opacity="0.6"/>
-  <circle cx="330" cy="30" r="8" fill="url(#orbPink)" opacity="0.6"/>
+  <!-- Estrellas y pétalos -->
+  <g fill="#fff">
+    <circle cx="330" cy="34" r="1.6" opacity="0.7"/><circle cx="880" cy="28" r="1.4" opacity="0.6"/>
+    <circle cx="420" cy="300" r="1.2" opacity="0.5"/><circle cx="760" cy="306" r="1.6" opacity="0.5"/>
+    <path d="M905 62 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" opacity="0.8"/>
+    <path d="M300 250 l1.6 4.8 4.8 1.6 -4.8 1.6 -1.6 4.8 -1.6 -4.8 -4.8 -1.6 4.8 -1.6z" opacity="0.7"/>
+  </g>
+  <g opacity="0.85">
+    <ellipse cx="372" cy="80" rx="6" ry="3" fill="#ff9ad5" transform="rotate(-30 372 80)"/>
+    <ellipse cx="840" cy="250" rx="5" ry="2.5" fill="#ff8fa3" transform="rotate(40 840 250)"/>
+    <ellipse cx="930" cy="140" rx="4.5" ry="2.2" fill="#4dabff" transform="rotate(-15 930 140)"/>
+  </g>
 
-  <text x="600" y="118" text-anchor="middle" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-weight="700" font-style="italic" font-size="54" fill="url(#title)" filter="url(#glow)">DY Habit Tracker &amp; English</text>
+  <!-- Personajes del login (con su luna y su aura), fundidos abajo -->
+  <g mask="url(#desvanecer)">
+    <svg x="-10" y="10" width="290" height="335" viewBox="0 0 400 520" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <radialGradient id="p1-luna" cx="50%" cy="45%" r="50%">
+      <stop offset="0" stop-color="#f3c6ff"/>
+      <stop offset="0.45" stop-color="#d966ff"/>
+      <stop offset="0.8" stop-color="#7b2ff7" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7b2ff7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="p1-silueta" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0533"/>
+      <stop offset="1" stop-color="#07000f"/>
+    </linearGradient>
+    <linearGradient id="p1-neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff6fb5"/>
+      <stop offset="0.5" stop-color="#d966ff"/>
+      <stop offset="1" stop-color="#7b2ff7"/>
+    </linearGradient>
+    <filter id="p1-brillo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Aura de humo: la silueta se engrosa, se deforma con ruido animado y se difumina -->
+    <linearGradient id="p1-aura" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff6fb5"/>
+      <stop offset="0.45" stop-color="#d966ff"/>
+      <stop offset="1" stop-color="#7b2ff7"/>
+    </linearGradient>
+    <filter id="p1-humo" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="13" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="4" result="ruido">
+        <animate attributeName="baseFrequency" dur="8s" values="0.012 0.03;0.018 0.045;0.012 0.03" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="60" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="3.5s" values="45;80;45" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="10"/>
+    </filter>
+    <filter id="p1-humo-fino" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="5" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="2" seed="11" result="ruido">
+        <animate attributeName="baseFrequency" dur="5s" values="0.03 0.07;0.04 0.09;0.03 0.07" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="30" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="2.6s" values="22;38;22" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="3"/>
+    </filter>
+    <filter id="p1-voluta" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <path id="p1-forma-pelo" d="M192 90 C160 110 150 160 140 200 C128 240 100 270 56 292 C98 298 128 284 146 262 C130 300 108 332 70 352 C114 354 150 332 168 300 C164 340 152 374 134 406 C176 382 196 332 204 270 L205 205 C186 196 174 172 174 145 C174 120 182 102 192 90 Z"/>
+    <path id="p1-forma-cuerpo" d="M205 86 C228 74 256 84 262 108 L267 126 L258 120 L263 134 C266 140 270 146 275 153 L265 157 C267 161 266 164 263 166 L266 172 C263 180 260 186 254 190 C248 196 240 199 234 199 L236 222 C255 230 276 238 288 256 C298 290 300 340 302 400 L306 520 L118 520 C120 440 126 360 134 300 C138 275 146 258 160 250 C180 240 198 232 204 222 L205 205 C186 196 174 172 174 145 C174 118 184 98 205 86 Z"/>
+  </defs>
 
-  <text x="600" y="158" text-anchor="middle" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="20" fill="#c4b5fd" opacity="0.9">Hábitos, disciplina y aprendizaje de inglés — con XP, niveles y rachas</text>
+  <!-- Luna -->
+  <circle cx="225" cy="185" r="165" fill="url(#p1-luna)" opacity="0.6"/>
+  <circle cx="225" cy="185" r="118" fill="none" stroke="#f3c6ff" stroke-opacity="0.35" stroke-width="1.5"/>
 
-  <g font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="15" font-weight="600">
-    <g transform="translate(330,195)">
-      <rect x="0" y="0" width="108" height="34" rx="17" fill="#1f1030" stroke="#a855f7" stroke-opacity="0.6"/>
-      <text x="54" y="22" text-anchor="middle" fill="#e9d5ff">🔥 Hábitos</text>
-    </g>
-    <g transform="translate(450,195)">
-      <rect x="0" y="0" width="118" height="34" rx="17" fill="#1f1030" stroke="#ec4899" stroke-opacity="0.6"/>
-      <text x="59" y="22" text-anchor="middle" fill="#fbcfe8">🎮 Gamificación</text>
-    </g>
-    <g transform="translate(580,195)">
-      <rect x="0" y="0" width="94" height="34" rx="17" fill="#1f1030" stroke="#a855f7" stroke-opacity="0.6"/>
-      <text x="47" y="22" text-anchor="middle" fill="#e9d5ff">🎡 Castigos</text>
-    </g>
-    <g transform="translate(686,195)">
-      <rect x="0" y="0" width="98" height="34" rx="17" fill="#0e1a33" stroke="#3b82f6" stroke-opacity="0.7"/>
-      <text x="49" y="22" text-anchor="middle" fill="#bfdbfe">🌐 Inglés</text>
-    </g>
+  <!-- Estrellas -->
+  <g fill="#fff">
+    <circle cx="48" cy="60" r="1.6" opacity="0.8"/>
+    <circle cx="352" cy="42" r="1.4" opacity="0.7"/>
+    <circle cx="372" cy="150" r="1.8" opacity="0.6"/>
+    <circle cx="30" cy="170" r="1.2" opacity="0.6"/>
+    <circle cx="330" cy="300" r="1.4" opacity="0.5"/>
+    <path d="M86 112 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" opacity="0.85"/>
+    <path d="M340 92 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z" opacity="0.8"/>
+  </g>
+
+  <!-- Aura de humo alrededor del personaje (se mueve sola) -->
+  <g opacity="1" filter="url(#p1-humo)" fill="url(#p1-aura)">
+    <use href="#p1-forma-pelo"/>
+    <use href="#p1-forma-cuerpo"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 -6;0 0" dur="5s" repeatCount="indefinite"/>
+  </g>
+  <g opacity="0.95" filter="url(#p1-humo-fino)" fill="#ff9ad5">
+    <use href="#p1-forma-pelo"/>
+    <use href="#p1-forma-cuerpo"/>
+  </g>
+
+  <!-- Volutas de humo que suben desde los bordes -->
+  <g filter="url(#p1-voluta)" fill="#d966ff">
+    <ellipse cx="200" cy="90" rx="24" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-10 -70" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="290" cy="250" rx="22" ry="36" fill="#ff6fb5">
+      <animateTransform attributeName="transform" type="translate" values="0 0;14 -80" dur="5s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="5s" begin="1s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="150" cy="255" rx="23" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-16 -75" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="70" cy="300" rx="20" ry="32" fill="#7b2ff7">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-12 -60" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="300" cy="360" rx="21" ry="34">
+      <animateTransform attributeName="transform" type="translate" values="0 0;10 -70" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="248" cy="80" rx="18" ry="30" fill="#ff6fb5">
+      <animateTransform attributeName="transform" type="translate" values="0 0;8 -60" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- Cabello -->
+  <use href="#p1-forma-pelo" fill="url(#p1-silueta)"/>
+
+  <!-- Cuerpo y cabeza de perfil, mirando hacia el formulario -->
+  <use href="#p1-forma-cuerpo" fill="url(#p1-silueta)"/>
+
+
+  <!-- Contorno neón -->
+  <g fill="none" stroke="url(#p1-neon)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" filter="url(#p1-brillo)">
+    <use href="#p1-forma-cuerpo"/>
+    <use href="#p1-forma-pelo" stroke-opacity="0.8"/>
+  </g>
+
+  <!-- Ojo y detalles del personaje -->
+  <path d="M245 141 q8 -4 14 1" fill="none" stroke="#ffd6f5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M250 145 l2 5" stroke="#ffd6f5" stroke-width="1.4" stroke-linecap="round"/>
+  <g fill="#ff6fb5" filter="url(#p1-brillo)">
+    <path d="M184 106 l-20 -14 4 22 z"/>
+    <path d="M184 106 l-22 10 18 10 z"/>
+    <circle cx="184" cy="108" r="4.5"/>
+  </g>
+  <path d="M236 222 L262 270 L214 250" fill="none" stroke="#d966ff" stroke-width="1.8" stroke-opacity="0.7"/>
+  <g fill="#ff6fb5" filter="url(#p1-brillo)">
+    <path d="M262 268 l-16 -8 2 18 z"/>
+    <path d="M262 268 l14 -10 2 18 z"/>
+    <path d="M260 272 l-6 26 8 -4 6 4 -4 -26 z" opacity="0.85"/>
+  </g>
+
+  <!-- Partículas -->
+  <g fill="#ff9ad5" opacity="0.85">
+    <ellipse cx="322" cy="210" rx="7" ry="3.5" transform="rotate(-30 322 210)"/>
+    <ellipse cx="96" cy="400" rx="6" ry="3" transform="rotate(25 96 400)"/>
+    <ellipse cx="352" cy="360" rx="5" ry="2.6" transform="rotate(50 352 360)"/>
+    <ellipse cx="60" cy="230" rx="5.5" ry="2.8" transform="rotate(-15 60 230)"/>
+    <ellipse cx="306" cy="120" rx="4.5" ry="2.3" transform="rotate(70 306 120)"/>
+  </g>
+</svg>
+    <svg x="920" y="10" width="290" height="335" viewBox="0 0 400 520" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <radialGradient id="p4-luna" cx="50%" cy="45%" r="50%">
+      <stop offset="0" stop-color="#ffd0d8"/>
+      <stop offset="0.45" stop-color="#ff4d6d"/>
+      <stop offset="0.8" stop-color="#8b0033" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#8b0033" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="p4-silueta" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0533"/>
+      <stop offset="1" stop-color="#07000f"/>
+    </linearGradient>
+    <linearGradient id="p4-neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8fa3"/>
+      <stop offset="0.5" stop-color="#ff4d6d"/>
+      <stop offset="1" stop-color="#6a00a8"/>
+    </linearGradient>
+    <filter id="p4-brillo" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Aura de humo: la silueta se engrosa, se deforma con ruido animado y se difumina -->
+    <linearGradient id="p4-aura" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4d6d"/>
+      <stop offset="0.45" stop-color="#ff1a40"/>
+      <stop offset="1" stop-color="#6a00a8"/>
+    </linearGradient>
+    <filter id="p4-humo" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="13" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="4" result="ruido">
+        <animate attributeName="baseFrequency" dur="8s" values="0.012 0.03;0.018 0.045;0.012 0.03" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="60" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="3.5s" values="45;80;45" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="10"/>
+    </filter>
+    <filter id="p4-humo-fino" x="-35%" y="-35%" width="170%" height="170%">
+      <feMorphology in="SourceGraphic" operator="dilate" radius="5" result="grueso"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="2" seed="11" result="ruido">
+        <animate attributeName="baseFrequency" dur="5s" values="0.03 0.07;0.04 0.09;0.03 0.07" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="grueso" in2="ruido" scale="30" xChannelSelector="R" yChannelSelector="G" result="ondas">
+        <animate attributeName="scale" dur="2.6s" values="22;38;22" repeatCount="indefinite"/>
+      </feDisplacementMap>
+      <feGaussianBlur in="ondas" stdDeviation="3"/>
+    </filter>
+    <filter id="p4-voluta" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <path id="p4-forma-pelo" d="M184 120 C186 98 196 86 210 84 C222 82 232 90 228 100 C240 94 256 98 262 112 C246 106 234 110 228 118 C220 110 196 110 184 120 Z M208 86 C192 60 160 54 128 62 C150 70 170 78 182 94 Z M160 152 C158 128 176 112 200 112 C224 112 242 128 240 152 C230 138 214 134 200 140 C186 134 170 138 160 152 Z"/>
+    <path id="p4-forma-cuerpo" d="M200 112 C222 112 240 130 240 152 C240 172 230 188 214 194 L216 214 C254 220 290 234 300 258 L318 342 L292 352 L284 322 C292 382 312 452 334 520 L66 520 C88 452 108 382 116 322 L108 352 L82 342 L100 258 C110 234 146 220 184 214 L186 194 C170 188 160 172 160 152 C160 130 178 112 200 112 Z"/>
+  </defs>
+
+  <!-- Luna -->
+  <circle cx="200" cy="170" r="165" fill="url(#p4-luna)" opacity="0.6"/>
+  <circle cx="200" cy="170" r="118" fill="none" stroke="#ffd0d8" stroke-opacity="0.35" stroke-width="1.5"/>
+
+  <!-- Estrellas -->
+  <g fill="#fff">
+    <circle cx="48" cy="60" r="1.6" opacity="0.8"/>
+    <circle cx="352" cy="42" r="1.4" opacity="0.7"/>
+    <circle cx="372" cy="150" r="1.8" opacity="0.6"/>
+    <circle cx="30" cy="170" r="1.2" opacity="0.6"/>
+    <circle cx="330" cy="300" r="1.4" opacity="0.5"/>
+    <path d="M86 112 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" opacity="0.85"/>
+    <path d="M340 92 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z" opacity="0.8"/>
+  </g>
+
+  <!-- Aura de humo alrededor del personaje (se mueve sola) -->
+  <g opacity="1" filter="url(#p4-humo)" fill="url(#p4-aura)">
+    <use href="#p4-forma-pelo"/>
+    <use href="#p4-forma-cuerpo"/>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 -6;0 0" dur="5s" repeatCount="indefinite"/>
+  </g>
+  <g opacity="0.95" filter="url(#p4-humo-fino)" fill="#ffb3c1">
+    <use href="#p4-forma-pelo"/>
+    <use href="#p4-forma-cuerpo"/>
+  </g>
+
+  <!-- Volutas de humo que suben desde los bordes -->
+  <g filter="url(#p4-voluta)" fill="#ff4d6d">
+    <ellipse cx="200" cy="90" rx="24" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-10 -70" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="290" cy="250" rx="22" ry="36" fill="#ff1a40">
+      <animateTransform attributeName="transform" type="translate" values="0 0;14 -80" dur="5s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="5s" begin="1s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="150" cy="255" rx="23" ry="38">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-16 -75" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.5s" begin="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="70" cy="300" rx="20" ry="32" fill="#6a00a8">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-12 -60" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.8s" begin="0.5s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="300" cy="360" rx="21" ry="34">
+      <animateTransform attributeName="transform" type="translate" values="0 0;10 -70" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="4.2s" begin="2.6s" repeatCount="indefinite"/>
+    </ellipse>
+    <ellipse cx="248" cy="80" rx="18" ry="30" fill="#ff1a40">
+      <animateTransform attributeName="transform" type="translate" values="0 0;8 -60" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.95;0" dur="3.6s" begin="1.6s" repeatCount="indefinite"/>
+    </ellipse>
+  </g>
+
+  <!-- Cabello -->
+  <use href="#p4-forma-pelo" fill="url(#p4-silueta)"/>
+
+  <!-- Cuerpo y cabeza de perfil, mirando hacia el formulario -->
+  <use href="#p4-forma-cuerpo" fill="url(#p4-silueta)"/>
+
+
+  <!-- Contorno neón -->
+  <g fill="none" stroke="url(#p4-neon)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" filter="url(#p4-brillo)">
+    <use href="#p4-forma-cuerpo"/>
+    <use href="#p4-forma-pelo" stroke-opacity="0.8"/>
+  </g>
+
+  <!-- Ojo y detalles del personaje -->
+  <g fill="#ffd0d8" filter="url(#p4-brillo)">
+    <path d="M182 160 q6 -4 12 0 q-6 3 -12 0z"/>
+    <path d="M206 160 q6 -4 12 0 q-6 3 -12 0z"/>
+  </g>
+  <g filter="url(#p4-brillo)">
+    <path d="M200 300 L200 46" stroke="#ff4d6d" stroke-width="6" stroke-linecap="round">
+      <animate attributeName="stroke-opacity" values="1;0.6;1" dur="1.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M200 300 L200 46" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+    <ellipse cx="200" cy="304" rx="18" ry="5" fill="#ff4d6d"/>
+    <path d="M200 308 L200 360" stroke="#2a0a14" stroke-width="10" stroke-linecap="round"/>
+    <path d="M200 308 L200 360" stroke="#ff4d6d" stroke-width="3" stroke-dasharray="6 5"/>
+  </g>
+  <g fill="#14030a" stroke="#ff4d6d" stroke-width="1.6" stroke-opacity="0.8">
+    <path d="M174 318 C180 304 192 300 200 312 C208 300 220 304 226 318 C220 334 180 334 174 318 Z"/>
+  </g>
+  <path d="M186 214 L200 246 L214 214 M200 246 L200 300" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-opacity="0.6"/>
+
+  <!-- Partículas -->
+  <g fill="#ff8a5c" filter="url(#p4-brillo)">
+    <circle cx="322" cy="210" r="3.2"><animate attributeName="cy" values="230;180" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/></circle>
+    <circle cx="96" cy="400" r="2.6"><animate attributeName="cy" values="420;360" dur="3.6s" begin="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="3.6s" begin="1s" repeatCount="indefinite"/></circle>
+    <circle cx="352" cy="360" r="2.4"><animate attributeName="cy" values="380;320" dur="3.2s" begin="0.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="3.2s" begin="0.6s" repeatCount="indefinite"/></circle>
+    <circle cx="60" cy="230" r="2.8"><animate attributeName="cy" values="250;190" dur="2.8s" begin="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;0" dur="2.8s" begin="1.8s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>
+  </g>
+
+  <!-- Logo y título -->
+  <svg x="560" y="22" width="80" height="80" viewBox="0 0 100 100" preserveAspectRatio="xMidYMax meet">
+  <defs>
+    <!-- Fondo oscuro como la app -->
+    <radialGradient id="logo-fondo" cx="50%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#2a0b45"/>
+      <stop offset="0.6" stop-color="#12031f"/>
+      <stop offset="1" stop-color="#05000a"/>
+    </radialGradient>
+    <!-- Borde neón (violeta → rosado → azul: hábitos, personajes e inglés) -->
+    <linearGradient id="logo-borde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7b2ff7"/>
+      <stop offset="0.55" stop-color="#ff6fb5"/>
+      <stop offset="1" stop-color="#4dabff"/>
+    </linearGradient>
+    <!-- La luna de los personajes del login -->
+    <radialGradient id="logo-luna" cx="50%" cy="45%" r="50%">
+      <stop offset="0" stop-color="#f3c6ff"/>
+      <stop offset="0.45" stop-color="#d966ff"/>
+      <stop offset="0.8" stop-color="#7b2ff7" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#7b2ff7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logo-check" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffd6f5"/>
+    </linearGradient>
+    <filter id="logo-aura" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="100" height="100" rx="24" fill="url(#logo-fondo)"/>
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="none" stroke="url(#logo-borde)" stroke-width="3"/>
+
+  <!-- Luna con su anillo -->
+  <circle cx="50" cy="48" r="33" fill="url(#logo-luna)" opacity="0.8"/>
+  <circle cx="50" cy="48" r="24" fill="none" stroke="#f3c6ff" stroke-opacity="0.45" stroke-width="1.2"/>
+
+  <!-- El check de los hábitos, con brillo de aura -->
+  <path d="M29 51 L44 66 L72 36" fill="none" stroke="#ff6fb5" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" opacity="0.45" filter="url(#logo-aura)"/>
+  <path d="M29 51 L44 66 L72 36" fill="none" stroke="url(#logo-check)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Destello y pétalos de sakura -->
+  <polygon points="80,11 81.7,18.3 89,20 81.7,21.7 80,29 78.3,21.7 71,20 78.3,18.3" fill="#fff"/>
+  <circle cx="21" cy="24" r="1.6" fill="#fff" opacity="0.85"/>
+  <ellipse cx="22" cy="78" rx="4.2" ry="2.1" fill="#ff9ad5" transform="rotate(-28 22 78)"/>
+  <ellipse cx="80" cy="80" rx="3.4" ry="1.7" fill="#4dabff" transform="rotate(35 80 80)"/>
+</svg>
+  <text x="600" y="152" text-anchor="middle" font-family="'Brush Script MT', 'Segoe Script', 'Trebuchet MS', cursive" font-weight="700" font-style="italic" font-size="54" fill="url(#title)" filter="url(#glow)">DY Habit Tracker &amp; English</text>
+  <text x="600" y="186" text-anchor="middle" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="18" fill="#d8c8ff" opacity="0.9">Hábitos, disciplina e inglés — con XP, niveles, rachas y el color de tu personaje</text>
+
+  <g font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="14" font-weight="600">
+    <g transform="translate(228.6,212)"><rect width="107.8" height="32" rx="16" fill="#140a22" stroke="#a855f7" stroke-opacity="0.7"/><text x="53.9" y="21" text-anchor="middle" fill="#e9d5ff">🔥 Hábitos</text></g>
+    <g transform="translate(348.4,212)"><rect width="148.8" height="32" rx="16" fill="#140a22" stroke="#ec4899" stroke-opacity="0.7"/><text x="74.4" y="21" text-anchor="middle" fill="#fbcfe8">🎮 XP y niveles</text></g>
+    <g transform="translate(509.2,212)"><rect width="116.0" height="32" rx="16" fill="#140a22" stroke="#ffd700" stroke-opacity="0.7"/><text x="58.0" y="21" text-anchor="middle" fill="#fff3b0">🏅 Medallas</text></g>
+    <g transform="translate(637.2,212)"><rect width="206.2" height="32" rx="16" fill="#140a22" stroke="#00bac6" stroke-opacity="0.7"/><text x="103.1" y="21" text-anchor="middle" fill="#b8f6fb">🗂️ Métodos de estudio</text></g>
+    <g transform="translate(855.4,212)"><rect width="116.0" height="32" rx="16" fill="#140a22" stroke="#a855f7" stroke-opacity="0.7"/><text x="58.0" y="21" text-anchor="middle" fill="#e9d5ff">🎡 Castigos</text></g>
+    <g transform="translate(134.3,256)"><rect width="157.0" height="32" rx="16" fill="#140a22" stroke="#ff8c42" stroke-opacity="0.7"/><text x="78.5" y="21" text-anchor="middle" fill="#ffd9bf">🖼️ Vision Board</text></g>
+    <g transform="translate(303.3,256)"><rect width="181.6" height="32" rx="16" fill="#140a22" stroke="#00e5ff" stroke-opacity="0.7"/><text x="90.8" y="21" text-anchor="middle" fill="#c6f6ff">🔀 Temas aleatorios</text></g>
+    <g transform="translate(496.9,256)"><rect width="247.2" height="32" rx="16" fill="#140a22" stroke="#ff6fb5" stroke-opacity="0.7"/><text x="123.6" y="21" text-anchor="middle" fill="#ffd6f5">🎨 5 personajes · 5 colores</text></g>
+    <g transform="translate(756.1,256)"><rect width="198.0" height="32" rx="16" fill="#140a22" stroke="#d966ff" stroke-opacity="0.7"/><text x="99.0" y="21" text-anchor="middle" fill="#f3c6ff">🌙 Entrada a la cueva</text></g>
+    <g transform="translate(966.1,256)"><rect width="99.6" height="32" rx="16" fill="#140a22" stroke="#3b82f6" stroke-opacity="0.7"/><text x="49.8" y="21" text-anchor="middle" fill="#bfdbfe">🌐 Inglés</text></g>
   </g>
 </svg>

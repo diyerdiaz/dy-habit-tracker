@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const badge = item.querySelector('.dashboard-habit-badge');
                     if (data.done) {
                         badge.textContent = 'Completado';
-                        badge.style.background = 'rgba(138, 40, 255, 0.4)';
-                        badge.style.border = '1px solid rgba(138, 40, 255, 0.8)';
+                        badge.style.background = temaRgba('grad-1', 0.4);
+                        badge.style.border = '1px solid ' + temaRgba('grad-1', 0.8);
                         badge.style.color = '';
                     } else {
                         badge.textContent = item.dataset.descanso ? 'Descanso' : 'Pendiente';
@@ -165,8 +165,8 @@ function animateInsideSection(section) {
         const dashboardData = window.DASHBOARD_DATA || { radar_labels: [], radar_data: [] };
 
         const gradientFill = ctx.createLinearGradient(0, 0, 0, 300);
-        gradientFill.addColorStop(0, 'rgba(138, 40, 255, 0.35)');
-        gradientFill.addColorStop(1, 'rgba(225, 0, 255, 0.05)');
+        gradientFill.addColorStop(0, temaRgba('grad-1', 0.35));
+        gradientFill.addColorStop(1, temaRgba('grad-2', 0.05));
 
         new Chart(ctx, {
             type: 'radar',
@@ -176,11 +176,11 @@ function animateInsideSection(section) {
                     label: 'Cumplimiento de Hoy',
                     data: dashboardData.radar_data,
                     backgroundColor: gradientFill,
-                    borderColor: '#e100ff',
-                    pointBackgroundColor: 'rgba(20, 0, 40, 0.95)',
-                    pointBorderColor: '#e100ff',
+                    borderColor: temaColor('grad-2'),
+                    pointBackgroundColor: temaRgba('oscuro', 0.95),
+                    pointBorderColor: temaColor('grad-2'),
                     pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#e100ff',
+                    pointHoverBorderColor: temaColor('grad-2'),
                     borderWidth: 2.5,
                     pointBorderWidth: 2,
                     pointRadius: 5,
@@ -212,7 +212,7 @@ function animateInsideSection(section) {
                         position: 'bottom'
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)', titleColor: '#fff', bodyColor: 'rgba(255, 255, 255, 0.8)', borderColor: 'rgba(225, 0, 255, 0.4)', borderWidth: 1, padding: 12, displayColors: true, usePointStyle: true, boxPadding: 4
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)', titleColor: '#fff', bodyColor: 'rgba(255, 255, 255, 0.8)', borderColor: temaRgba('grad-2', 0.4), borderWidth: 1, padding: 12, displayColors: true, usePointStyle: true, boxPadding: 4
                     }
                 }
             }

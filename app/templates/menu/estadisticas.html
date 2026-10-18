@@ -67,6 +67,16 @@
                 <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
             </a>
         </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
         <li class="sidebar-item" style="margin-top: 24px;">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
@@ -80,7 +90,7 @@
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: #d966ff;"></i> Mi Perfil
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">
@@ -110,8 +120,8 @@
 
     <!-- Cabecera -->
     <div style="text-align: center; margin-bottom: 45px;">
-        <h1 style="font-size: 3rem; font-style: italic; font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; min-height: 4rem; text-shadow: 0 0 10px rgba(183,0,255,0.3);">
-            <span id="typingTitle"></span><span id="cursor" style="color: #e100ff; font-weight: 300; animation: blink 0.7s infinite; margin-left: 2px;">|</span>
+        <h1 style="font-size: 3rem; font-style: italic; font-weight: 700; color: #fff; display: inline-flex; align-items: center; justify-content: center; min-height: 4rem; text-shadow: 0 0 10px rgba(var(--tema-fuerte-rgb, 183, 0, 255),0.3);">
+            <span id="typingTitle"></span><span id="cursor" style="color: var(--tema-grad-2, #e100ff); font-weight: 300; animation: blink 0.7s infinite; margin-left: 2px;">|</span>
         </h1>
         <p id="descText" style="max-width: 700px; margin: 12px auto 0; opacity: 0; transform: translateY(15px); transition: opacity 1s, transform 1s; font-size: 1.15rem; color: rgba(255,255,255,0.6); font-style: italic;">
             Analiza el progreso de tus hábitos con gráficos interactivos y métricas detalladas.
@@ -123,7 +133,7 @@
     <!-- ═══ Tarjetas Resumen ═══ -->
     <div class="stats-summary-grid" id="summaryGrid">
         <div class="stat-card">
-            <div class="stat-icon" style="color: #8a28ff;"><i class="bi bi-lightning-charge-fill"></i></div>
+            <div class="stat-icon" style="color: var(--tema-grad-1, #8a28ff);"><i class="bi bi-lightning-charge-fill"></i></div>
             <div class="stat-value"><span class="animate-counter" data-target="{{ stats.activos }}">0</span></div>
             <div class="stat-label">Hábitos Activos</div>
         </div>
@@ -133,7 +143,7 @@
             <div class="stat-label">Completados</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="color: #e100ff;"><i class="bi bi-percent"></i></div>
+            <div class="stat-icon" style="color: var(--tema-grad-2, #e100ff);"><i class="bi bi-percent"></i></div>
             <div class="stat-value"><span class="animate-counter" data-target="{{ stats.pct_cumplimiento }}">0</span>%</div>
             <div class="stat-label">Cumplimiento</div>
         </div>
@@ -153,7 +163,7 @@
     <div class="stats-charts-grid">
         <!-- Radar -->
         <div class="chart-card" id="radarCard">
-            <h3><i class="bi bi-diagram-3-fill" style="color: #e100ff; margin-right: 10px;"></i>Desempeño por Categoría</h3>
+            <h3><i class="bi bi-diagram-3-fill" style="color: var(--tema-grad-2, #e100ff); margin-right: 10px;"></i>Desempeño por Categoría</h3>
             <p class="chart-subtitle">Distribución de hábitos activos en cada área</p>
             <div class="chart-canvas-wrap radar-wrap">
                 <canvas id="radarChart"></canvas>

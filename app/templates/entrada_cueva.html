@@ -1,0 +1,45 @@
+{# Animación de entrada al iniciar sesión: se atraviesa una cueva, aparece una luz
+   al fondo y al llenarse la pantalla se descubre la página. Se incluye una sola vez
+   después del login (ver auth.login / auth.dashboard). #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/entrada_cueva.css') }}">
+<div class="cueva" id="entradaCueva" aria-hidden="true">
+    <svg width="0" height="0" style="position:absolute">
+        <defs>
+            <radialGradient id="cuevaRoca" cx="50%" cy="50%" r="70%">
+                <stop offset="0.35" stop-color="#2a0b45"/>
+                <stop offset="0.6" stop-color="#12031f"/>
+                <stop offset="1" stop-color="#030006"/>
+            </radialGradient>
+            <filter id="cuevaBorde" x="-10%" y="-10%" width="120%" height="120%">
+                <feGaussianBlur stdDeviation="6" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <!-- Boca de la cueva: pantalla de roca con un hueco irregular en el centro -->
+            <path id="cuevaBoca" fill-rule="evenodd" d="M-200 -200 H1200 V1200 H-200 Z
+                M500 300 L548 312 L590 296 L626 330 L680 340 L700 392 L738 430 L726 486 L752 534 L716 582
+                L722 636 L672 664 L640 712 L584 708 L540 738 L492 716 L440 732 L404 690 L348 678 L332 626
+                L284 590 L300 538 L270 488 L304 440 L300 386 L352 362 L384 318 L440 322 Z"/>
+        </defs>
+    </svg>
+
+    <div class="cueva-niebla"></div>
+
+    {% for capa in range(6) %}
+    <svg class="cueva-capa" style="--i: {{ capa }};" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+        <use href="#cuevaBoca" fill="url(#cuevaRoca)"/>
+        <use href="#cuevaBoca" fill="none" stroke="{{ ['#d966ff', '#7b2ff7', '#ff6fb5'][capa % 3] }}" stroke-width="3" stroke-opacity="0.55" filter="url(#cuevaBorde)"/>
+    </svg>
+    {% endfor %}
+
+    <!-- Cristales que brillan en las paredes -->
+    <div class="cueva-cristales">
+        {% for c in range(14) %}<span style="--c: {{ c }};"></span>{% endfor %}
+    </div>
+
+    <!-- Luz al fondo de la cueva -->
+    <div class="cueva-luz"></div>
+    <p class="cueva-bienvenida">Bienvenido, {{ current_user.nameUser }}</p>
+
+    <button type="button" class="cueva-saltar" id="cuevaSaltar">Saltar <i class="bi bi-skip-forward-fill"></i></button>
+</div>
+<script src="{{ url_for('static', filename='js/entrada_cueva.js') }}"></script>
