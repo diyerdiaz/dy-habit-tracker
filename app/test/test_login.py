@@ -155,3 +155,9 @@ def test_luz_del_mouse_azul_en_ingles(client):
         css = client.get(f'/static/css/{hoja}.css').get_data(as_text=True)
         assert '--cursor-rgb: 77, 171, 255;' in css
         assert '--tema-vivo: #4dabff;' in css  # el menú y los botones también azules
+
+
+def test_login_sin_texto_de_copyright_en_el_footer(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'mi aplicacion de mejoras' not in html
+    assert 'Disciplina &bull; Progreso' in html or 'Disciplina • Progreso' in html  # la franja animada sigue

@@ -1334,15 +1334,6 @@ body {
     }
 }
 
-.footer-bottom {
-    text-align: center;
-    margin-top: 25px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.25);
-    font-size: 0.85rem;
-    font-style: italic;
-}
 /* =========================
    EFECTO DEL MOUSE (static/js/cursor.js)
 ========================= */
