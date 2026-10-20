@@ -27,7 +27,6 @@
 }
 
 .recup-estado.recup-ok { color: #00e676; }
-.recup-estado.recup-no { color: #ff6b6b; }
 
 .recup-dias {
     display: flex;
@@ -78,4 +77,40 @@
     padding: 8px 0;
     color: rgba(255, 255, 255, 0.8);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Recuperaciones que le quedan al hábito este mes: un punto por cada una */
+.recup-progreso {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0 10px;
+}
+
+.recup-punto {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6);
+    background: transparent;
+}
+
+.recup-punto.lleno {
+    background: linear-gradient(135deg, var(--tema-grad-1, #8a28ff), var(--tema-grad-2, #e100ff));
+    box-shadow: 0 0 8px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
+}
+
+.recup-progreso-texto {
+    margin-left: 4px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.recup-listo { color: #00e676; }
+.recup-aviso { color: #ffcc66; }
+
+.recup-hoy {
+    margin: 12px auto 0;
+    color: #00e676;
+    text-align: center;
 }

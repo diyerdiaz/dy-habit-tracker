@@ -3,10 +3,10 @@ from flask_login import login_required, current_user
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes, primer_dia_mes_siguiente
-from app.models.recuperacion import Recuperacion, dias_perdidos, puede_recuperar_hoy, semana_completa
+from app.models.recuperacion import Recuperacion, MAX_POR_MES, dias_perdidos, dia_libre, inicio_mes
 from app import db
 from app.gamificacion import registrar_toggle_habito, registrar_recuperacion
-from datetime import date, timedelta
+from datetime import date
 from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('habits', __name__)
@@ -200,15 +200,27 @@ def habit_delete(habit_id):
     return redirect(url_for('habits.register_habit'))
 
 
-def _estado_recuperacion(habit, hoy):
+
+
+
+def _recuperado_hoy(hoy):
+    """La recuperación que el usuario ya hizo hoy (solo se permite una por día)."""
+    return Recuperacion.query.filter_by(idUser=current_user.idUser, fechaRecuperada=hoy).first()
+
+
+def _estado_recuperacion(habit, hoy, recuperado_hoy):
     hechos = {h.fecha for h in HistHabit.query.filter_by(idHabit=habit.idHabit).all()}
-    recuperado_hoy = Recuperacion.query.filter_by(idHabit=habit.idHabit, fechaRecuperada=hoy).first() is not None
+    perdidos = dias_perdidos(habit, hechos, hoy)
+    usadas = (Recuperacion.query.filter_by(idHabit=habit.idHabit)
+              .filter(Recuperacion.fechaRecuperada >= inicio_mes(hoy)).count())
+    libre = dia_libre(habit, hoy)
     return {
         'habit': habit,
-        'perdidos': dias_perdidos(habit, hechos, hoy),
-        'semana_completa': semana_completa(habit),
-        'recuperado_hoy': recuperado_hoy,
-        'puede_hoy': puede_recuperar_hoy(habit, recuperado_hoy, hoy),
+        'perdidos': perdidos,
+        'usadas': usadas,
+        'quedan': max(0, MAX_POR_MES - usadas),
+        'dia_libre': libre,
+        'puede': bool(perdidos) and libre and usadas < MAX_POR_MES and recuperado_hoy is None,
     }
 
 
@@ -217,47 +229,51 @@ def _estado_recuperacion(habit, hoy):
 def recuperar():
     hoy = date.today()
     habits = Habit.query.filter_by(idUser=current_user.idUser, habitState='Activo').order_by(Habit.habitName).all()
-    estados = [_estado_recuperacion(h, hoy) for h in habits]
+    recuperado_hoy = _recuperado_hoy(hoy)
+    estados = [_estado_recuperacion(h, hoy, recuperado_hoy) for h in habits]
     recuperados = (Recuperacion.query.filter_by(idUser=current_user.idUser)
-                   .filter(Recuperacion.fechaRecuperada >= hoy - timedelta(days=hoy.weekday()))
+                   .filter(Recuperacion.fechaRecuperada >= inicio_mes(hoy))
                    .order_by(Recuperacion.fechaRecuperada.desc()).all())
     nombres = {h.idHabit: h.habitName for h in habits}
     return render_template("register/recuperar.html", estados=estados, recuperados=recuperados,
-                           nombres=nombres, hoy=hoy)
+                           recuperado_hoy=recuperado_hoy, nombres=nombres, hoy=hoy,
+                           max_por_mes=MAX_POR_MES)
 
 
 @bp.route('/habit/<int:habit_id>/recuperar', methods=['POST'])
 @login_required
 def habit_recuperar(habit_id):
+    """Da por hecho un día perdido del mes. Solo en un día libre del hábito,
+    un hábito por día y máximo MAX_POR_MES veces por hábito al mes."""
     habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
     hoy = date.today()
-    estado = _estado_recuperacion(habit, hoy)
-
-    if estado['semana_completa']:
-        flash(f"'{habit.habitName}' toca todos los días: no hay día libre para recuperarlo.", "danger")
-        return redirect(url_for('habits.recuperar'))
-    if not estado['puede_hoy']:
-        flash(f"Hoy no puedes recuperar '{habit.habitName}': solo se recupera en sus días de descanso, uno por día.", "warning")
-        return redirect(url_for('habits.recuperar'))
+    recuperado_hoy = _recuperado_hoy(hoy)
+    estado = _estado_recuperacion(habit, hoy, recuperado_hoy)
 
     try:
         fecha_perdida = date.fromisoformat(request.form.get('fecha', ''))
     except ValueError:
         fecha_perdida = None
+
     if fecha_perdida not in estado['perdidos']:
         flash("Ese día no se puede recuperar.", "danger")
-        return redirect(url_for('habits.recuperar'))
-
-    db.session.add(HistHabit(idUser=current_user.idUser, idHabit=habit.idHabit, fecha=fecha_perdida))
-    db.session.add(Recuperacion(idUser=current_user.idUser, idHabit=habit.idHabit,
-                                fechaPerdida=fecha_perdida, fechaRecuperada=hoy))
-    try:
-        db.session.flush()
-    except IntegrityError:
-        # Doble clic: ya se había recuperado
-        db.session.rollback()
-        return redirect(url_for('habits.recuperar'))
-
-    registrar_recuperacion(current_user.idUser)
-    flash(f"¡Recuperaste '{habit.habitName}' del {fecha_perdida.strftime('%d/%m')}!", "success")
+    elif recuperado_hoy:
+        flash("Hoy ya recuperaste un hábito. Solo se puede uno por día.", "warning")
+    elif not estado['dia_libre']:
+        flash(f"Hoy le toca '{habit.habitName}': solo se recupera en sus días libres.", "warning")
+    elif estado['usadas'] >= MAX_POR_MES:
+        flash(f"Ya recuperaste '{habit.habitName}' {MAX_POR_MES} veces este mes.", "warning")
+    else:
+        dia_estaba_vacio = HistHabit.query.filter_by(idUser=current_user.idUser, fecha=fecha_perdida).first() is None
+        db.session.add(Recuperacion(idUser=current_user.idUser, idHabit=habit.idHabit,
+                                    fechaPerdida=fecha_perdida, fechaRecuperada=hoy))
+        db.session.add(HistHabit(idUser=current_user.idUser, idHabit=habit.idHabit, fecha=fecha_perdida))
+        try:
+            db.session.flush()
+        except IntegrityError:
+            # Doble clic: ya se había recuperado
+            db.session.rollback()
+            return redirect(url_for('habits.recuperar'))
+        registrar_recuperacion(current_user.idUser, fecha_perdida, dia_estaba_vacio)
+        flash(f"¡Recuperaste '{habit.habitName}' del {fecha_perdida.strftime('%d/%m')}! +XP", "success")
     return redirect(url_for('habits.recuperar'))

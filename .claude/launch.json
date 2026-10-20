@@ -4,8 +4,20 @@
     {
       "name": "flask-app",
       "runtimeExecutable": "venv/bin/python",
-      "runtimeArgs": ["run.py"],
+      "runtimeArgs": [
+        "run.py"
+      ],
       "port": 5000
+    },
+    {
+      "name": "flask-demo",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "DATABASE_URL=sqlite:////tmp/claude-1000/-home-diyerd-Documentos-GitHub-mi-proyecto-personal/1c9412b0-b5a2-4250-822f-0bf2d2f31092/scratchpad/demo/demo.sqlite APP_PORT=5001 venv/bin/python run.py"
+      ],
+      "port": 5001,
+      "url": "http://127.0.0.1:5001"
     }
   ]
 }

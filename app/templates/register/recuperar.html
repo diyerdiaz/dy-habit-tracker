@@ -127,9 +127,13 @@
     <div class="text-center mb-4">
         <h1 class="check-title">Recuperar Día</h1>
         <p class="recup-intro">
-            ¿Se te pasó un hábito esta semana? Recupéralo haciéndolo en uno de sus días de descanso.
-            Cada día libre recupera un día perdido y salva tu racha (no suma XP). Si el hábito toca los 7 días, no hay cómo recuperarlo.
+            ¿Se te pasó un hábito este mes? Hazlo en uno de sus <strong>días libres</strong> y recupera ese día:
+            cuenta en tus estadísticas y te da XP. Solo <strong>un hábito por día</strong> y
+            máximo <strong>{{ max_por_mes }} veces por hábito al mes</strong>.
         </p>
+        {% if recuperado_hoy %}
+        <p class="recup-hoy"><i class="bi bi-check2-circle"></i> Hoy ya recuperaste un hábito. Vuelve mañana para recuperar otro.</p>
+        {% endif %}
     </div>
 
     <div class="check-card">
@@ -140,31 +144,40 @@
                 <div class="check-meta">{{ e.habit.dias_texto() }}</div>
             </div>
 
-            {% if e.semana_completa %}
-            <p class="recup-estado recup-no"><i class="bi bi-x-octagon"></i> Semana completa: este hábito toca todos los días, no se puede recuperar.</p>
-            {% elif not e.perdidos %}
-            <p class="recup-estado recup-ok"><i class="bi bi-check-circle"></i> Al día: no tienes días perdidos esta semana.</p>
+            {% if not e.perdidos %}
+            <p class="recup-estado recup-ok"><i class="bi bi-check-circle"></i> Al día: no tienes días perdidos este mes.</p>
             {% else %}
             <p class="recup-estado">
                 <i class="bi bi-exclamation-circle"></i>
-                {{ e.perdidos|length }} {{ 'día perdido' if e.perdidos|length == 1 else 'días perdidos' }} esta semana
+                {{ e.perdidos|length }} {{ 'día perdido' if e.perdidos|length == 1 else 'días perdidos' }} este mes
             </p>
+
+            <div class="recup-progreso" aria-label="{{ e.quedan }} de {{ max_por_mes }} recuperaciones disponibles">
+                {% for n in range(max_por_mes) %}
+                <span class="recup-punto{{ ' lleno' if n < e.quedan else '' }}"></span>
+                {% endfor %}
+                <span class="recup-progreso-texto">{{ e.quedan }}/{{ max_por_mes }} recuperaciones este mes</span>
+            </div>
+
+            {% if e.quedan == 0 %}
+            <p class="recup-nota">Ya usaste las {{ max_por_mes }} recuperaciones de este hábito. El próximo mes tendrás {{ max_por_mes }} más.</p>
+            {% elif not e.dia_libre %}
+            <p class="recup-nota recup-aviso">Hoy le toca este hábito. Solo se recupera en sus días libres{% if e.habit.dias_lista()|length == 7 %}, y este hábito toca todos los días: en el plan del mes quítale al menos un día para poder recuperarlo{% endif %}.</p>
+            {% elif e.puede %}
+            <p class="recup-nota recup-listo">Hoy es su día libre: haz el hábito y elige el día que quieres recuperar.</p>
+            {% endif %}
+
             <div class="recup-dias">
                 {% for fecha in e.perdidos %}
                 <form method="POST" action="{{ url_for('habits.habit_recuperar', habit_id=e.habit.idHabit) }}">
                     <input type="hidden" name="fecha" value="{{ fecha.isoformat() }}">
-                    <button type="submit" class="recup-btn" {% if not e.puede_hoy %}disabled{% endif %}>
+                    <button type="submit" class="recup-btn" {% if not e.puede %}disabled{% endif %}>
                         <i class="bi bi-arrow-counterclockwise"></i>
                         {{ ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][fecha.weekday()] }} {{ fecha.strftime('%d/%m') }}
                     </button>
                 </form>
                 {% endfor %}
             </div>
-            {% if e.recuperado_hoy %}
-            <p class="recup-nota">Hoy ya recuperaste un día con este hábito. Vuelve en su próximo día de descanso.</p>
-            {% elif not e.puede_hoy %}
-            <p class="recup-nota">Hoy le toca este hábito: hazlo normal en el Check y recupera en uno de sus días de descanso.</p>
-            {% endif %}
             {% endif %}
         </div>
         {% else %}
@@ -177,7 +190,7 @@
 
     {% if recuperados %}
     <div class="check-card recup-historial">
-        <h2 class="recup-subtitulo">Recuperados esta semana</h2>
+        <h2 class="recup-subtitulo">Recuperados este mes</h2>
         {% for r in recuperados %}
         <div class="recup-fila">
             <span>{{ nombres.get(r.idHabit, 'Hábito') }}</span>
