@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.models.users import User
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
+from app.models.plan_mensual import PlanMensual, nombre_mes
 from app.models.personajes_login import PERSONAJES, elegir_personaje
 from app import db
 from datetime import date, timedelta
@@ -182,7 +183,10 @@ def dashboard():
         'week_counts': week_counts,
         'notificaciones': notificaciones,
     }
-    return render_template("dashboard.html", data=data, entrada_cueva=session.pop('entrada_cueva', False))
+    return render_template(
+        "dashboard.html", data=data, entrada_cueva=session.pop('entrada_cueva', False),
+        necesita_plan=PlanMensual.del_mes(current_user.idUser) is None, mes=nombre_mes(hoy),
+    )
 
 
 @bp.route('/logout')

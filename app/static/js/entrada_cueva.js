@@ -15,6 +15,8 @@
         cueva.style.transition = 'opacity 0.5s ease';
         cueva.style.opacity = '0';
         setTimeout(function () { cueva.remove(); }, 550);
+        // Avisa a otras partes de la página (p. ej. el aviso del plan del mes)
+        document.dispatchEvent(new Event('cueva:terminada'));
     }
 
     // La luz llena la pantalla a los ~3.4s: ahí se empieza a ver la página

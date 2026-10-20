@@ -1,4 +1,5 @@
 import logging
+import os
 from flask import Flask, request, jsonify, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -73,11 +74,33 @@ def create_app(config_overrides=None):
     app.register_blueprint(vision_route.bp)
     app.register_blueprint(temas_route.bp)
 
+    # Los archivos de static/ llevan ?v=<fecha de modificación> en su URL: el navegador
+    # los guarda un año y, cuando cambia el archivo, cambia la URL y se descarga de nuevo.
+    @app.url_defaults
+    def version_de_estaticos(endpoint, values):
+        if endpoint == 'static' and 'filename' in values and 'v' not in values:
+            ruta = os.path.join(app.static_folder, values['filename'])
+            try:
+                values['v'] = int(os.stat(ruta).st_mtime)
+            except OSError:
+                pass
+
+    @app.after_request
+    def cache_de_estaticos(respuesta):
+        if request.endpoint == 'static' and request.args.get('v') and respuesta.status_code == 200:
+            respuesta.cache_control.public = True
+            respuesta.cache_control.max_age = 31536000
+            respuesta.cache_control.immutable = True
+        return respuesta
+
     @app.context_processor
     def tema_de_la_app():
         from flask import session
-        from app.models.personajes_login import tema_del_sitio
-        return {'tema_sitio': tema_del_sitio(session.get('tema_sitio'))}
+        from app.models.personajes_login import tema_del_sitio, personaje_del_sitio
+        return {
+            'tema_sitio': tema_del_sitio(session.get('tema_sitio')),
+            'personaje_sitio': personaje_del_sitio(session.get('tema_sitio')),
+        }
 
     def _wants_json():
         return (request.is_json

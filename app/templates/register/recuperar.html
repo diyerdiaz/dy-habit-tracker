@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Recuperar Día{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/check.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/recuperar.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link active">
+                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
+                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 24px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Contenedor Principal -->
+<div class="check-wrapper">
+
+    <div class="text-center mb-4">
+        <h1 class="check-title">Recuperar Día</h1>
+        <p class="recup-intro">
+            ¿Se te pasó un hábito esta semana? Recupéralo haciéndolo en uno de sus días de descanso.
+            Cada día libre recupera un día perdido y salva tu racha (no suma XP). Si el hábito toca los 7 días, no hay cómo recuperarlo.
+        </p>
+    </div>
+
+    <div class="check-card">
+        {% for e in estados %}
+        <div class="recup-item">
+            <div class="recup-head">
+                <div class="check-name">{{ e.habit.habitName }}</div>
+                <div class="check-meta">{{ e.habit.dias_texto() }}</div>
+            </div>
+
+            {% if e.semana_completa %}
+            <p class="recup-estado recup-no"><i class="bi bi-x-octagon"></i> Semana completa: este hábito toca todos los días, no se puede recuperar.</p>
+            {% elif not e.perdidos %}
+            <p class="recup-estado recup-ok"><i class="bi bi-check-circle"></i> Al día: no tienes días perdidos esta semana.</p>
+            {% else %}
+            <p class="recup-estado">
+                <i class="bi bi-exclamation-circle"></i>
+                {{ e.perdidos|length }} {{ 'día perdido' if e.perdidos|length == 1 else 'días perdidos' }} esta semana
+            </p>
+            <div class="recup-dias">
+                {% for fecha in e.perdidos %}
+                <form method="POST" action="{{ url_for('habits.habit_recuperar', habit_id=e.habit.idHabit) }}">
+                    <input type="hidden" name="fecha" value="{{ fecha.isoformat() }}">
+                    <button type="submit" class="recup-btn" {% if not e.puede_hoy %}disabled{% endif %}>
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        {{ ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][fecha.weekday()] }} {{ fecha.strftime('%d/%m') }}
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            {% if e.recuperado_hoy %}
+            <p class="recup-nota">Hoy ya recuperaste un día con este hábito. Vuelve en su próximo día de descanso.</p>
+            {% elif not e.puede_hoy %}
+            <p class="recup-nota">Hoy le toca este hábito: hazlo normal en el Check y recupera en uno de sus días de descanso.</p>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="check-empty">
+            <i class="bi bi-inbox"></i>
+            <span>No tienes hábitos activos.</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if recuperados %}
+    <div class="check-card recup-historial">
+        <h2 class="recup-subtitulo">Recuperados esta semana</h2>
+        {% for r in recuperados %}
+        <div class="recup-fila">
+            <span>{{ nombres.get(r.idHabit, 'Hábito') }}</span>
+            <span>{{ r.fechaPerdida.strftime('%d/%m') }} <i class="bi bi-arrow-right"></i> {{ r.fechaRecuperada.strftime('%d/%m') }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal &bull;</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

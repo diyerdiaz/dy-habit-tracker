@@ -1,9 +1,8 @@
 """Archivos para instalar la app en el celular (PWA): manifiesto, service worker,
-página sin conexión y favicon. Sirven también de base para el APK de Android."""
+página sin conexión y favicon."""
 
 import json
-import os
-from flask import Blueprint, abort, current_app, render_template, send_from_directory, url_for
+from flask import Blueprint, current_app, render_template, send_from_directory, url_for
 
 bp = Blueprint('pwa', __name__)
 
@@ -49,16 +48,3 @@ def offline():
 def favicon():
     return send_from_directory(current_app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-
-APK = 'descargas/Habits.apk'
-
-
-@bp.route('/descargar/android')
-def descargar_android():
-    """Descarga del APK de Android (se genera con Flutter en app_movil/)."""
-    if not os.path.exists(os.path.join(current_app.static_folder, APK)):
-        abort(404)
-    return send_from_directory(
-        current_app.static_folder, APK, as_attachment=True,
-        download_name='Habits.apk', mimetype='application/vnd.android.package-archive',
-    )

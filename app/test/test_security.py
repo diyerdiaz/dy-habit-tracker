@@ -49,3 +49,25 @@ def test_habit_name_is_escaped_in_onclick(logged_client, user):
     html = logged_client.get('/register_habit').data.decode()
     assert "x');alert(1)" not in html
     assert "<b>" not in html
+
+
+def test_datos_delicados_no_se_suben_a_git():
+    import subprocess
+    with open('.gitignore') as f:
+        reglas = f.read().split()
+    assert 'instance/' in reglas and '*.sqlite' in reglas and '*.sqlite.bak*' in reglas
+    rastreados = subprocess.run(['git', 'ls-files'], capture_output=True, text=True).stdout.split()
+    assert not [r for r in rastreados if r.startswith('instance/') or '.sqlite' in r or r.endswith('secret_key')]
+
+
+def test_datos_delicados_no_entran_a_la_imagen_docker():
+    with open('.dockerignore') as f:
+        reglas = f.read().split()
+    assert 'instance/' in reglas and '*.sqlite' in reglas
+
+
+def test_paginas_nuevas_piden_iniciar_sesion(client):
+    for metodo, url in [('get', '/habitos/plan-mes'), ('post', '/habitos/plan-mes'),
+                        ('get', '/habitos/recuperar'), ('post', '/habit/1/recuperar')]:
+        resp = getattr(client, metodo)(url)
+        assert resp.status_code == 302 and '/?next=' in resp.headers['Location'] or resp.status_code == 401, url

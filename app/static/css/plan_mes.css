@@ -1,0 +1,157 @@
+.plan-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 8vh 16px 60px;
+    width: 100%;
+}
+
+.plan-card {
+    width: 100%;
+    max-width: 640px;
+    padding: 30px;
+    color: #fff;
+}
+
+.plan-titulo {
+    text-align: center;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--tema-vivo, #d966ff);
+    text-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);
+}
+
+.plan-sub {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 24px;
+}
+
+.plan-habito {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    transition: opacity 0.2s ease;
+}
+
+.plan-habito.excluido { opacity: 0.45; }
+
+.plan-incluir {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.plan-check { accent-color: var(--tema-vivo, #d966ff); width: 18px; height: 18px; }
+.plan-nombre { font-weight: 600; }
+.plan-cat { margin-left: auto; font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); }
+
+.plan-aviso {
+    font-size: 0.85rem;
+    color: #ffcc66;
+    margin: 18px 0 14px;
+}
+
+.plan-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: var(--tema-vivo, #d966ff);
+}
+
+.plan-resumen {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 24px;
+}
+
+.plan-resumen li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.plan-resumen span { color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; }
+
+.plan-banner {
+    max-width: 1200px;
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 14px 20px;
+    border-radius: 16px;
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.25);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    color: #fff;
+    text-align: center;
+}
+
+.plan-banner a { color: var(--tema-vivo, #d966ff); font-weight: 600; }
+
+/* Aviso del plan: el personaje del login habla con una burbuja de comentario */
+.plan-personaje {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.plan-personaje-img {
+    width: 110px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 14px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.55));
+    animation: plan-personaje-entra 0.6s ease-out both;
+}
+
+.plan-burbuja {
+    position: relative;
+    flex: 1;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.45);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    box-shadow: 0 0 18px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.2);
+    animation: plan-burbuja-entra 0.4s ease-out 0.35s both;
+}
+
+/* Piquito de la burbuja apuntando al personaje */
+.plan-burbuja::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    bottom: 22px;
+    width: 16px;
+    height: 16px;
+    background: inherit;
+    border-left: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    border-bottom: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    transform: rotate(45deg);
+}
+
+.plan-burbuja p { margin-bottom: 6px; }
+.plan-burbuja p:last-child { margin-bottom: 0; }
+.plan-burbuja-nota { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); }
+
+@keyframes plan-personaje-entra {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes plan-burbuja-entra {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 420px) {
+    .plan-personaje { flex-direction: column; align-items: center; }
+    .plan-personaje-img { width: 90px; }
+    .plan-burbuja::before { left: 50%; top: -9px; bottom: auto; transform: translateX(-50%) rotate(135deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .plan-personaje-img, .plan-burbuja { animation: none; }
+}

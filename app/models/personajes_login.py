@@ -38,3 +38,10 @@ def tema_del_sitio(indice):
     if isinstance(indice, int) and 0 <= indice < len(PERSONAJES):
         return PERSONAJES[indice]['tema']
     return None
+
+
+def personaje_del_sitio(indice):
+    """Personaje con el que se inició sesión (None si no hay)."""
+    if isinstance(indice, int) and 0 <= indice < len(PERSONAJES):
+        return PERSONAJES[indice]
+    return None

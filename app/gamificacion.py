@@ -110,3 +110,17 @@ def registrar_toggle_habito(idUser, marcado_como_hecho):
     progress.ultimaFechaActividad = date.today()
     db.session.commit()
     return progress
+
+
+def registrar_recuperacion(idUser):
+    """
+    Recalcula la racha después de recuperar un día perdido (el día ya tiene su
+    registro en HistHabit). Recuperar no da XP ni devuelve penalizaciones:
+    solo salva el día y la racha.
+    Debe llamarse DESPUÉS de crear el registro en HistHabit.
+    """
+    progress = get_or_create_progress(idUser)
+    aplicar_penalizaciones_pendientes(progress)
+    sincronizar_racha(progress)
+    db.session.commit()
+    return progress

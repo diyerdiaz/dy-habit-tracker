@@ -1,0 +1,28 @@
+<!-- Modal: al empezar el mes, el personaje del login pregunta por el plan de hábitos -->
+<div class="modal fade" id="planMesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg glass-modal">
+            <div class="modal-header glass-header">
+                <h5 class="modal-title d-flex align-items-center fw-bold">
+                    <div class="icon-box"><i class="bi bi-calendar-check text-purple"></i></div>
+                    ¡Empieza {{ mes }}!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-white">
+                <div class="plan-personaje">
+                    {% if personaje_sitio %}
+                    <img src="{{ url_for('static', filename='img/' ~ personaje_sitio.archivo) }}"
+                        alt="{{ personaje_sitio.nombre }}" class="plan-personaje-img">
+                    {% endif %}
+                    <div class="plan-burbuja">
+                        <p>¡Hola, {{ current_user.nameUser }}! Empieza {{ mes }}.</p>
+                        <p><strong>¿Qué hábitos vas a hacer este mes y en qué días?</strong></p>
+                        <p class="plan-burbuja-nota">Cuando confirmes, tu plan queda fijo hasta el próximo mes.</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('habits.plan_mes') }}" class="btn btn-purple fw-bold w-100">Armar mi plan de {{ mes }}</a>
+            </div>
+        </div>
+    </div>
+</div>
