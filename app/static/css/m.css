@@ -1051,6 +1051,15 @@ body {
     transition: stroke-dashoffset 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* El degradado del círculo sigue el color del tema, como el resto de la tarjeta */
+#circleGrad stop:first-child {
+    stop-color: var(--tema-grad-1, #8a28ff);
+}
+
+#circleGrad stop:last-child {
+    stop-color: var(--tema-grad-2, #e100ff);
+}
+
 /* =========================
    NOTIFICATIONS SYSTEM
 ========================= */

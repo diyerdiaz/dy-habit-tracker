@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plan_mes.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -30,6 +31,11 @@
         <li class="sidebar-item">
             <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
                 <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
+                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
             </a>
         </li>
         <li class="sidebar-item">
@@ -122,10 +128,24 @@
         <h1 style="text-align: center; margin-top: 20px; color: var(--tema-vivo, #b366ff); font-style: italic; font-weight: 700; text-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);">Gestión de Hábitos</h1>
         <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Administra tus hábitos, filtra por categorías y realiza un seguimiento de tus metas.</p>
         
+        {% if not plan %}
         <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#habitModal" style="background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad)); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
             <i class="bi bi-plus-circle" style="margin-right: 8px;"></i> Registrar un Nuevo Hábito
         </button>
+        {% endif %}
     </div>
+
+    {% if plan %}
+    <div class="plan-banner fade-in-section">
+        <i class="bi bi-lock-fill"></i> Plan de {{ mes }} confirmado: tus hábitos quedan fijos hasta el {{ desbloqueo.strftime('%d/%m/%Y') }}.
+        <a href="{{ url_for('habits.plan_mes') }}">Ver plan</a>
+    </div>
+    {% else %}
+    <div class="plan-banner fade-in-section">
+        <i class="bi bi-calendar-check"></i> Aún no confirmas tu plan de {{ mes }}. Ajusta tus hábitos y luego
+        <a href="{{ url_for('habits.plan_mes') }}">arma tu plan del mes</a>.
+    </div>
+    {% endif %}
     
     <!-- Contenedor Tabla -->
     <div class="card shadow-lg border-0 rounded-lg fade-in-section" style="max-width: 1200px; padding: 30px; width: 100%; margin-bottom: 60px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);">
@@ -203,12 +223,14 @@
                                 <button type="button" class="btn btn-sm btn-outline-info rounded-circle" title="Ver" onclick="openViewModal({{ habit.idHabit }})">
                                     <i class="bi bi-eye"></i>
                                 </button>
+                                {% if not plan %}
                                 <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }}, {{ (habit.habitDesc or '')|tojson|forceescape }}, {{ habit.habitFreq|tojson|forceescape }}, {{ habit.habitCategory|tojson|forceescape }}, {{ habit.dias_lista()|tojson|forceescape }})">
                                     <i class="bi bi-pencil"></i>
                                 </button>
                                 <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }})">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

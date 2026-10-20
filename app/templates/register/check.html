@@ -4,6 +4,10 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/check.css') }}">
+{% if necesita_plan %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plan_mes.css') }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -30,6 +34,11 @@
         <li class="sidebar-item">
             <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link active">
                 <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
+                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
             </a>
         </li>
         <li class="sidebar-item">
@@ -178,11 +187,15 @@
     {% endif %}
 </div>
 
+{% if necesita_plan %}{% include 'register/plan_aviso.html' %}{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/check.js') }}"></script>
+{% if necesita_plan %}
+<script src="{{ url_for('static', filename='js/plan_mes.js') }}"></script>
+{% endif %}
 {% endblock %}
 
 {% block footer %}

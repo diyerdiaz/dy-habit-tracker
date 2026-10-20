@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Plan del Mes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plan_mes.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="plan-wrapper">
+    <div class="plan-card glass-modal">
+        <h1 class="plan-titulo">Plan de {{ mes }}</h1>
+
+        {% if plan %}
+        <p class="plan-sub">
+            <i class="bi bi-lock-fill"></i> Tu plan ya está confirmado. Podrás cambiarlo desde el
+            <strong>{{ desbloqueo.strftime('%d/%m/%Y') }}</strong>.
+        </p>
+        <ul class="plan-resumen">
+            {% for habit in habits if habit.habitState == 'Activo' %}
+            <li><strong>{{ habit.habitName }}</strong> <span>{{ habit.dias_texto() }}</span></li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-purple fw-bold w-100">Volver al inicio</a>
+
+        {% else %}
+        <p class="plan-sub">
+            Elige qué hábitos vas a hacer este mes y en qué días. Cuando confirmes,
+            el plan queda fijo hasta el <strong>{{ desbloqueo.strftime('%d/%m/%Y') }}</strong>.
+        </p>
+
+        {% if habits %}
+        <form method="POST" action="{{ url_for('habits.plan_mes') }}" id="planForm">
+            {% for habit in habits %}
+            <div class="plan-habito" data-habito="{{ habit.idHabit }}">
+                <label class="plan-incluir">
+                    <input type="checkbox" class="plan-check" name="incluir_{{ habit.idHabit }}" value="1"
+                        {% if habit.habitState == 'Activo' %}checked{% endif %}>
+                    <span class="plan-nombre">{{ habit.habitName }}</span>
+                    <span class="plan-cat">{{ habit.habitCategory|capitalize }}</span>
+                </label>
+                <div class="dias-picker">
+                    {% for dia in ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] %}
+                    <input type="checkbox" class="dia-check" name="dias_{{ habit.idHabit }}" value="{{ loop.index0 }}"
+                        id="plan{{ habit.idHabit }}Dia{{ loop.index0 }}" {% if loop.index0 in habit.dias_lista() %}checked{% endif %}>
+                    <label class="dia-chip" for="plan{{ habit.idHabit }}Dia{{ loop.index0 }}">{{ dia }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <p class="plan-aviso"><i class="bi bi-exclamation-triangle"></i> Después de confirmar no podrás crear, editar ni borrar hábitos hasta el próximo mes.</p>
+            <button type="submit" class="btn btn-purple fw-bold w-100">Confirmar plan de {{ mes }}</button>
+        </form>
+        {% else %}
+        <p class="plan-sub">Aún no tienes hábitos. Registra primero los que quieres hacer este mes.</p>
+        {% endif %}
+
+        <a href="{{ url_for('habits.register_habit') }}" class="plan-link">
+            <i class="bi bi-plus-circle"></i> Registrar un hábito nuevo antes de confirmar
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/plan_mes.js') }}"></script>
+{% endblock %}

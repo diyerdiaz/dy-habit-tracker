@@ -150,7 +150,6 @@ mi-proyecto-personal/
 ├── run.py               # Punto de entrada (desarrollo y gunicorn)
 ├── Dockerfile           # Imagen de producción con gunicorn en el puerto 4000
 ├── docker-compose.yml   # Arranque con un comando, con instance/ como volumen
-├── app_movil/           # App de Android (Flutter) que abre la web a pantalla completa
 └── requirements.txt
 ```
 
@@ -241,27 +240,9 @@ podman run -d --name mi-proyecto-personal --userns=keep-id \
 
 ## 📱 App para el celular
 
-**Android (APK):** en la pantalla de inicio de sesión está el botón **"Descargar app para
-Android"** (`/descargar/android`). Al instalarla, el celular puede pedir permiso para
-"instalar apps de origen desconocido". La app abre `https://habits.proyecto.lol` a pantalla
-completa, con subida de fotos y apuntes, descargas, botón atrás y deslizar para recargar.
-
 **Instalarla desde el navegador (Android o iPhone):** abre la página y elige
 *"Instalar app"* o *"Añadir a pantalla de inicio"*. Funciona gracias al manifiesto y al
 *service worker* (`/manifest.webmanifest`, `/sw.js`).
-
-<details>
-<summary>Volver a generar el APK</summary>
-
-El código está en `app_movil/` (Flutter). Si cambias de dominio, edita `urlInicio` en
-`app_movil/lib/main.dart`.
-
-```bash
-cd app_movil
-flutter build apk --release
-cp build/app/outputs/flutter-apk/app-release.apk ../app/static/descargas/Habits.apk
-```
-</details>
 
 <br>
 
