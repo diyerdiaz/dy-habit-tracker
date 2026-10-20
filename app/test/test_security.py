@@ -68,6 +68,7 @@ def test_datos_delicados_no_entran_a_la_imagen_docker():
 
 def test_paginas_nuevas_piden_iniciar_sesion(client):
     for metodo, url in [('get', '/habitos/plan-mes'), ('post', '/habitos/plan-mes'),
-                        ('get', '/habitos/recuperar'), ('post', '/habit/1/recuperar')]:
+                        ('get', '/habitos/recuperar'), ('post', '/habit/1/recuperar'),
+                        ('post', '/habit/1/sesion_recuperacion')]:
         resp = getattr(client, metodo)(url)
         assert resp.status_code == 302 and '/?next=' in resp.headers['Location'] or resp.status_code == 401, url

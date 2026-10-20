@@ -127,12 +127,13 @@
     <div class="text-center mb-4">
         <h1 class="check-title">Recuperar Día</h1>
         <p class="recup-intro">
-            ¿Se te pasó un hábito este mes? Hazlo en uno de sus <strong>días libres</strong> y recupera ese día:
-            cuenta en tus estadísticas y te da XP. Solo <strong>un hábito por día</strong> y
-            máximo <strong>{{ max_por_mes }} veces por hábito al mes</strong>.
+            ¿Se te pasó un hábito este mes? Hazlo en sus <strong>días libres</strong> (los que no le tocan).
+            Cada vez cuenta <strong>1 de {{ veces_para_recuperar }}</strong>: al completar {{ veces_para_recuperar }}
+            eliges el día perdido y queda hecho, con su XP y en tus estadísticas.
+            Solo <strong>un hábito por día</strong>.
         </p>
-        {% if recuperado_hoy %}
-        <p class="recup-hoy"><i class="bi bi-check2-circle"></i> Hoy ya recuperaste un hábito. Vuelve mañana para recuperar otro.</p>
+        {% if sesion_hoy %}
+        <p class="recup-hoy"><i class="bi bi-check2-circle"></i> Hoy ya hiciste "{{ nombres.get(sesion_hoy.idHabit, 'un hábito') }}" en su día libre. Mañana puedes sumar otro.</p>
         {% endif %}
     </div>
 
@@ -152,26 +153,34 @@
                 {{ e.perdidos|length }} {{ 'día perdido' if e.perdidos|length == 1 else 'días perdidos' }} este mes
             </p>
 
-            <div class="recup-progreso" aria-label="{{ e.quedan }} de {{ max_por_mes }} recuperaciones disponibles">
-                {% for n in range(max_por_mes) %}
-                <span class="recup-punto{{ ' lleno' if n < e.quedan else '' }}"></span>
+            <div class="recup-progreso" aria-label="{{ e.veces }} de {{ veces_para_recuperar }}">
+                {% for n in range(veces_para_recuperar) %}
+                <span class="recup-punto{{ ' lleno' if n < e.veces else '' }}"></span>
                 {% endfor %}
-                <span class="recup-progreso-texto">{{ e.quedan }}/{{ max_por_mes }} recuperaciones este mes</span>
+                <span class="recup-progreso-texto">{{ [e.veces, veces_para_recuperar]|min }}/{{ veces_para_recuperar }} en días libres</span>
             </div>
 
-            {% if e.quedan == 0 %}
-            <p class="recup-nota">Ya usaste las {{ max_por_mes }} recuperaciones de este hábito. El próximo mes tendrás {{ max_por_mes }} más.</p>
+            {% if e.puede_completar %}
+            <p class="recup-nota recup-listo">¡Completaste {{ veces_para_recuperar }}! Elige el día perdido que quieres completar:</p>
+            {% elif e.puede_sumar %}
+            <form method="POST" action="{{ url_for('habits.habit_sesion_recuperacion', habit_id=e.habit.idHabit) }}">
+                <button type="submit" class="recup-btn recup-btn-sumar">
+                    <i class="bi bi-plus-circle"></i> Hoy hice "{{ e.habit.habitName }}" en su día libre
+                </button>
+            </form>
+            {% elif e.hecho_hoy %}
+            <p class="recup-nota recup-listo">Hoy ya lo hiciste en su día libre. Vuelve en su próximo día libre.</p>
             {% elif not e.dia_libre %}
-            <p class="recup-nota recup-aviso">Hoy le toca este hábito. Solo se recupera en sus días libres{% if e.habit.dias_lista()|length == 7 %}, y este hábito toca todos los días: en el plan del mes quítale al menos un día para poder recuperarlo{% endif %}.</p>
-            {% elif e.puede %}
-            <p class="recup-nota recup-listo">Hoy es su día libre: haz el hábito y elige el día que quieres recuperar.</p>
+            <p class="recup-nota recup-aviso">Hoy le toca este hábito: hazlo normal en el Check. Para recuperar, hazlo en un día que no le toque{% if e.habit.dias_lista()|length == 7 %}; este hábito toca todos los días, así que en el plan del mes quítale al menos un día{% endif %}.</p>
+            {% elif sesion_hoy %}
+            <p class="recup-nota">Hoy ya hiciste otro hábito en su día libre. Mañana puedes sumar este.</p>
             {% endif %}
 
             <div class="recup-dias">
                 {% for fecha in e.perdidos %}
                 <form method="POST" action="{{ url_for('habits.habit_recuperar', habit_id=e.habit.idHabit) }}">
                     <input type="hidden" name="fecha" value="{{ fecha.isoformat() }}">
-                    <button type="submit" class="recup-btn" {% if not e.puede %}disabled{% endif %}>
+                    <button type="submit" class="recup-btn" {% if not e.puede_completar %}disabled{% endif %}>
                         <i class="bi bi-arrow-counterclockwise"></i>
                         {{ ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][fecha.weekday()] }} {{ fecha.strftime('%d/%m') }}
                     </button>
