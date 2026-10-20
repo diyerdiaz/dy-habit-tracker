@@ -1,16 +1,33 @@
 from app import db
 from datetime import date, datetime, timedelta
 
-# Veces que se puede recuperar cada hábito en un mes
-MAX_POR_MES = 3
+# Veces que hay que hacer el hábito en sus días libres para completar un día perdido
+VECES_PARA_RECUPERAR = 3
+
+
+class SesionRecuperacion(db.Model):
+    """Una vez que se hizo un hábito en un día que no le tocaba (su día libre).
+
+    Solo se registra un hábito por día (entre todos). Al juntar
+    VECES_PARA_RECUPERAR de un mismo hábito en el mes, se gastan para completar
+    un día perdido (idRecuperacion queda apuntando a esa recuperación).
+    """
+    __tablename__ = 'sesiones_recuperacion'
+
+    idSesion = db.Column(db.Integer, primary_key=True)
+    idUser = db.Column(db.Integer, db.ForeignKey('users.idUser'), nullable=False)
+    idHabit = db.Column(db.Integer, db.ForeignKey('habits.idHabit'), nullable=False)
+    fecha = db.Column(db.Date, nullable=False)
+    idRecuperacion = db.Column(db.Integer, db.ForeignKey('recuperaciones_dia.idRecuperacion'), nullable=True)
+    createdAt = db.Column(db.DateTime, default=datetime.now)
+
+    __table_args__ = (
+        db.UniqueConstraint('idHabit', 'fecha', name='uq_sesion_habit_fecha'),
+    )
 
 
 class Recuperacion(db.Model):
-    """Un día perdido de un hábito que se recuperó haciéndolo en uno de sus días libres.
-
-    Reglas: solo en un día que al hábito no le toca, un solo hábito recuperado
-    por día (entre todos) y máximo MAX_POR_MES recuperaciones por hábito al mes.
-    """
+    """Un día perdido de un hábito que se completó con VECES_PARA_RECUPERAR sesiones."""
     __tablename__ = 'recuperaciones_dia'
 
     idRecuperacion = db.Column(db.Integer, primary_key=True)
@@ -22,8 +39,6 @@ class Recuperacion(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint('idHabit', 'fechaPerdida', name='uq_recup_habit_perdida'),
-        # Un solo hábito recuperado por día
-        db.UniqueConstraint('idUser', 'fechaRecuperada', name='uq_recup_user_dia'),
     )
 
 

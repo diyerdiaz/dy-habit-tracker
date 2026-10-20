@@ -79,7 +79,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Recuperaciones que le quedan al hábito este mes: un punto por cada una */
+/* Veces hechas en días libres: un punto por cada una, se completa al llegar a 3 */
 .recup-progreso {
     display: flex;
     align-items: center;
@@ -114,3 +114,4 @@
     color: #00e676;
     text-align: center;
 }
+.recup-btn-sumar { margin-bottom: 10px; }
