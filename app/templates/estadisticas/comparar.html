@@ -1,0 +1,97 @@
+{% extends "estadisticas/layout.html" %}
+
+{% macro diferencia(valor) %}
+{% if valor is not none %}
+<span class="cmp-diferencia {{ 'sube' if valor > 0 else ('baja' if valor < 0 else 'igual') }}"
+    title="Diferencia entre el primer y el último mes elegido">
+    <i class="bi {{ 'bi-arrow-up-right' if valor > 0 else ('bi-arrow-down-right' if valor < 0 else 'bi-dash') }}"></i>
+    {{ '+' if valor > 0 else '' }}{{ valor }}%
+</span>
+{% endif %}
+{% endmacro %}
+
+{% block subtitulo %}Elige 2, 3 o más meses y mira cómo te fue en cada hábito.{% endblock %}
+
+{% block estadisticas %}
+<!-- ── Elegir meses ── -->
+<form class="cmp-form" method="GET" action="{{ url_for('estadisticas.comparar') }}">
+    <div class="cmp-atajos">
+        <span>Rápido:</span>
+        {% for n in (2, 3, 6, 12) %}
+        {% if meses|length >= n %}
+        <a href="{{ url_for('estadisticas.comparar', m=meses[:n]|map(attribute='valor')|list) }}" class="cmp-atajo">Últimos {{ n }}</a>
+        {% endif %}
+        {% endfor %}
+    </div>
+    <fieldset class="cmp-meses">
+        <legend class="visually-hidden">Meses a comparar</legend>
+        {% for m in meses|reverse %}
+        <label class="cmp-chip">
+            <input type="checkbox" name="m" value="{{ m.valor }}"{{ ' checked' if m.valor in elegidos else '' }}>
+            <span>{{ m.nombre }}</span>
+        </label>
+        {% endfor %}
+    </fieldset>
+    <p class="cmp-ayuda" id="cmpAyuda" data-max="{{ max_meses }}">Puedes elegir hasta {{ max_meses }} meses.</p>
+    <button type="submit" class="cmp-boton"><i class="bi bi-arrow-left-right"></i> Comparar</button>
+</form>
+
+{% if comparacion.habitos %}
+<!-- ── Promedio general por mes ── -->
+<div class="cmp-card cmp-general">
+    <div class="cmp-card-cabecera">
+        <h2 class="cmp-habito-nombre"><i class="bi bi-stars"></i> Promedio general</h2>
+        {{ diferencia(comparacion.diferencia_promedio) }}
+    </div>
+    <div class="cmp-filas">
+        {% for col in comparacion.meses %}
+        <div class="cmp-fila">
+            <span class="cmp-mes">{{ col.nombre }}</span>
+            <div class="cmp-pista">
+                <div class="cmp-barra nivel-{{ col.nivel }}" style="--ancho: {{ col.promedio or 0 }}%;"></div>
+            </div>
+            <span class="cmp-pct nivel-{{ col.nivel }}">{{ col.promedio ~ '%' if col.promedio is not none else '—' }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ── Cada hábito ── -->
+<div class="cmp-grid">
+    {% for h in comparacion.habitos %}
+    <div class="cmp-card">
+        <div class="cmp-card-cabecera">
+            <h2 class="cmp-habito-nombre">{{ h.nombre }}</h2>
+            {{ diferencia(h.diferencia) }}
+        </div>
+        <div class="cmp-filas">
+            {% for v in h.valores %}
+            {% set col = comparacion.meses[loop.index0] %}
+            <div class="cmp-fila"{% if v %} title="{{ v.cumplidos }} de {{ v.programados }} días"{% endif %}>
+                <span class="cmp-mes">{{ col.nombre }}</span>
+                <div class="cmp-pista">
+                    {% if v %}<div class="cmp-barra nivel-{{ v.nivel }}" style="--ancho: {{ v.pct or 0 }}%;"></div>{% endif %}
+                </div>
+                {% if v %}
+                <span class="cmp-pct nivel-{{ v.nivel }}">{{ v.pct ~ '%' if v.pct is not none else '—' }}</span>
+                {% else %}
+                <span class="cmp-pct nivel-sin-datos" title="El hábito todavía no existía">—</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="est-vacio">
+    <i class="bi bi-arrow-left-right"></i>
+    <p>No hay hábitos con datos en los meses elegidos.</p>
+    <a href="{{ url_for('habits.register_habit') }}" class="est-vacio-btn">Ir a Gestión de Hábitos</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block estadisticas_js %}
+<script src="{{ url_for('static', filename='js/estadisticas_habitos.js') }}"></script>
+{% endblock %}

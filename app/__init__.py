@@ -54,12 +54,12 @@ def create_app(config_overrides=None):
     # (se eliminó users_route_async: era una API sin autenticación que exponía
     #  contraseñas y no la usaba ninguna pantalla)
     from app.routes import (
-        users_route, auth, habits_route, menu_route, castigos_route, tareas_route,
+        users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, metodos_route, estadisticas_route,
         perfil_route, pwa_route, vision_route, temas_route,
     )
 
-    app.register_blueprint(auth.bp)
+    app.register_blueprint(auth_route.bp)
     app.register_blueprint(users_route.bp)
     app.register_blueprint(habits_route.bp)
     app.register_blueprint(menu_route.bp)
