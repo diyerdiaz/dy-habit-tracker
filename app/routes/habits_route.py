@@ -5,10 +5,11 @@ from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes, primer_dia_mes_siguiente
 from app.models.recuperacion import (
     Recuperacion, SesionRecuperacion, VECES_PARA_RECUPERAR, dias_perdidos, dia_libre, inicio_mes,
+    dias_libres_que_quedan, cuantos_se_pueden_recuperar,
 )
 from app import db
 from app.gamificacion import registrar_toggle_habito, registrar_recuperacion
-from datetime import date
+from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('habits', __name__)
@@ -225,13 +226,19 @@ def _estado_recuperacion(habit, hoy, sesion_hoy):
     perdidos = dias_perdidos(habit, hechos, hoy)
     veces = len(_sesiones_libres(habit, hoy))
     libre = dia_libre(habit, hoy)
+    # Hoy solo cuenta como día libre por usar si todavía no se sumó ningún hábito
+    desde = hoy if sesion_hoy is None else hoy + timedelta(days=1)
+    alcanzan = cuantos_se_pueden_recuperar(perdidos, veces, dias_libres_que_quedan(habit, desde, hoy))
     return {
         'habit': habit,
         'perdidos': perdidos,
         'veces': veces,
         'dia_libre': libre,
         'hecho_hoy': bool(sesion_hoy and sesion_hoy.idHabit == habit.idHabit),
-        'puede_sumar': (bool(perdidos) and libre and sesion_hoy is None
+        # Hay días perdidos y todavía da tiempo de juntar las veces antes de fin de mes
+        'recuperable': alcanzan > 0,
+        'alcanzan': alcanzan,
+        'puede_sumar': (alcanzan > 0 and libre and sesion_hoy is None
                         and veces < VECES_PARA_RECUPERAR),
         'puede_completar': bool(perdidos) and veces >= VECES_PARA_RECUPERAR,
     }
@@ -243,7 +250,8 @@ def recuperar():
     hoy = date.today()
     habits = Habit.query.filter_by(idUser=current_user.idUser, habitState='Activo').order_by(Habit.habitName).all()
     sesion_hoy = _sesion_de_hoy(hoy)
-    estados = [_estado_recuperacion(h, hoy, sesion_hoy) for h in habits]
+    # Solo los hábitos con días que de verdad se pueden recuperar este mes
+    estados = [e for e in (_estado_recuperacion(h, hoy, sesion_hoy) for h in habits) if e['recuperable']]
     recuperados = (Recuperacion.query.filter_by(idUser=current_user.idUser)
                    .filter(Recuperacion.fechaRecuperada >= inicio_mes(hoy))
                    .order_by(Recuperacion.fechaRecuperada.desc()).all())
@@ -268,6 +276,8 @@ def habit_sesion_recuperacion(habit_id):
         flash(f"Hoy le toca '{habit.habitName}': para recuperar, hazlo en un día que no le toque.", "warning")
     elif sesion_hoy:
         flash("Hoy ya hiciste un hábito en su día libre. Solo se puede uno por día.", "warning")
+    elif not estado['recuperable']:
+        flash(f"Ya no quedan suficientes días libres este mes para recuperar '{habit.habitName}'.", "warning")
     elif estado['veces'] >= VECES_PARA_RECUPERAR:
         flash(f"Ya tienes {VECES_PARA_RECUPERAR}/{VECES_PARA_RECUPERAR} de '{habit.habitName}': elige el día que quieres completar.", "info")
     else:

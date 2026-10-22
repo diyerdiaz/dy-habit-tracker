@@ -64,3 +64,27 @@ def dia_libre(habit, hoy=None):
     """True si hoy al hábito no le toca (y está activo): es su día libre."""
     hoy = hoy or date.today()
     return habit.habitState == 'Activo' and hoy.weekday() not in habit.dias_lista()
+
+
+def dias_libres_que_quedan(habit, desde, hoy=None):
+    """Días libres del hábito desde `desde` hasta fin de mes: las veces que aún se pueden sumar."""
+    hoy = hoy or date.today()
+    fin = (inicio_mes(hoy) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+    dias = set(habit.dias_lista())
+    cuenta = 0
+    cursor = desde
+    while cursor <= fin:
+        if cursor.weekday() not in dias:
+            cuenta += 1
+        cursor += timedelta(days=1)
+    return cuenta
+
+
+def cuantos_se_pueden_recuperar(perdidos, veces, libres_que_quedan):
+    """Días perdidos que todavía se alcanzan a completar este mes.
+
+    Cada día completado gasta VECES_PARA_RECUPERAR veces; las veces solo valen
+    dentro del mes, así que lo que no alcance a juntarse antes de fin de mes no
+    se puede recuperar.
+    """
+    return min(len(perdidos), (veces + libres_que_quedan) // VECES_PARA_RECUPERAR)
