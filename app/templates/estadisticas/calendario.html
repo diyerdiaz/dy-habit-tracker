@@ -1,0 +1,90 @@
+{% extends "estadisticas/layout.html" %}
+{% from "estadisticas/_selector_mes.html" import selector_mes %}
+
+{% block subtitulo %}Toca un día para ver qué hábitos hiciste y cuáles te faltaron.{% endblock %}
+
+{% block estadisticas %}
+{{ selector_mes('estadisticas.calendario', meses, mes_actual, mes_anterior, mes_siguiente) }}
+
+<div class="est-resumen cal-resumen">
+    <div class="est-dato">
+        <div class="est-dato-valor">{{ cal.total_hechos }}</div>
+        <div class="est-dato-label">Hábitos hechos en {{ mes_nombre }}</div>
+    </div>
+    <div class="est-dato">
+        <div class="est-dato-valor">{{ cal.dias_con_algo }}</div>
+        <div class="est-dato-label">Días con al menos uno</div>
+    </div>
+</div>
+
+<div class="est-grafico-card cal-card">
+    <h2 class="est-grafico-titulo">{{ mes_nombre }}{% if es_mes_en_curso %} <span class="est-en-curso">(en curso)</span>{% endif %}</h2>
+
+    <div class="cal-grid" aria-label="Calendario de {{ mes_nombre }}">
+        {% for d in cal.dias_semana %}
+        <div class="cal-cabecera" aria-hidden="true">{{ d }}</div>
+        {% endfor %}
+
+        {% for semana in cal.semanas %}
+        {% for dia in semana %}
+        {% if dia.fuera %}
+        <div class="cal-dia fuera" aria-hidden="true"><span class="cal-numero">{{ dia.numero }}</span></div>
+        {% else %}
+        <button type="button"
+            class="cal-dia nivel-{{ dia.nivel }}{{ ' futuro' if dia.futuro else '' }}{{ ' hoy' if dia.es_hoy else '' }}{{ ' con-hechos' if dia.hechos else '' }}"
+            data-dia="{{ dia.fecha.isoformat() }}"
+            aria-label="{{ dia.numero }}: {{ dia.hechos|length }} hábitos hechos">
+            <span class="cal-numero">{{ dia.numero }}</span>
+            {% if dia.hechos %}
+            <span class="cal-nombres">
+                {% for n in dia.hechos[:2] %}<span class="cal-nombre">{{ n }}</span>{% endfor %}
+                {% if dia.hechos|length > 2 %}<span class="cal-mas">+{{ dia.hechos|length - 2 }}</span>{% endif %}
+            </span>
+            <span class="cal-cuenta">{{ dia.hechos|length }}{% if dia.tocaban %}/{{ dia.tocaban }}{% endif %}</span>
+            {% endif %}
+        </button>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="est-leyenda">
+        <span><i class="est-punto nivel-alto"></i> 80% o más</span>
+        <span><i class="est-punto nivel-medio"></i> 50% a 79%</span>
+        <span><i class="est-punto nivel-bajo"></i> Menos de 50%</span>
+    </div>
+</div>
+
+<!-- ── Detalle del día elegido ── -->
+<div class="cal-detalle" id="calDetalle" aria-live="polite">
+    <p class="cal-detalle-vacio" id="calDetalleVacio">Toca un día del calendario para ver el detalle.</p>
+    {% for semana in cal.semanas %}
+    {% for dia in semana if not dia.fuera %}
+    <div class="cal-detalle-dia" id="dia-{{ dia.fecha.isoformat() }}" hidden>
+        <h3 class="cal-detalle-titulo">{{ cal.dias_semana[dia.fecha.weekday()] }} {{ dia.numero }} de {{ mes_nombre }}</h3>
+        {% if dia.futuro %}
+        <p class="cal-detalle-nota">Este día todavía no llega.</p>
+        {% else %}
+        {% if dia.hechos %}
+        <ul class="cal-lista hechos">
+            {% for n in dia.hechos %}<li><i class="bi bi-check-circle-fill"></i> {{ n }}</li>{% endfor %}
+        </ul>
+        {% else %}
+        <p class="cal-detalle-nota">No marcaste ningún hábito este día.</p>
+        {% endif %}
+        {% if dia.pendientes %}
+        <h4 class="cal-subtitulo">Te faltaron</h4>
+        <ul class="cal-lista pendientes">
+            {% for n in dia.pendientes %}<li><i class="bi bi-x-circle"></i> {{ n }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block estadisticas_js %}
+<script src="{{ url_for('static', filename='js/estadisticas_habitos.js') }}"></script>
+{% endblock %}

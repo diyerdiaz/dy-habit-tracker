@@ -330,3 +330,450 @@
         padding: 18px 10px 14px;
     }
 }
+
+/* ── Pestañas: Resumen / Comparar meses / Calendario ── */
+.est-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.est-pestana {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    padding: 9px 18px;
+    transition: all 0.2s ease;
+}
+
+.est-pestana:hover {
+    color: #fff;
+    border-color: var(--tema-vivo, #d966ff);
+}
+
+.est-pestana.activa {
+    color: #fff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.45);
+    border-color: var(--tema-vivo, #d966ff);
+    box-shadow: 0 0 14px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35);
+}
+
+/* ── Comparar meses ── */
+.cmp-form {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 18px 16px;
+    margin-bottom: 22px;
+}
+
+.cmp-atajos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.82rem;
+    margin-bottom: 14px;
+}
+
+.cmp-atajo {
+    color: var(--tema-vivo, #d966ff);
+    text-decoration: none;
+    border: 1px dashed rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.6);
+    border-radius: 14px;
+    padding: 3px 12px;
+}
+
+.cmp-atajo:hover {
+    color: #fff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.3);
+}
+
+.cmp-meses {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.cmp-chip {
+    position: relative;
+    cursor: pointer;
+}
+
+.cmp-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cmp-chip span {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 6px 14px;
+    transition: all 0.15s ease;
+}
+
+.cmp-chip input:checked + span {
+    color: #fff;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);
+    border-color: var(--tema-vivo, #d966ff);
+}
+
+.cmp-chip input:checked + span::before {
+    content: "✓ ";
+}
+
+.cmp-chip input:focus-visible + span {
+    outline: 2px solid var(--tema-vivo, #d966ff);
+    outline-offset: 2px;
+}
+
+.cmp-chip input:disabled + span {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.cmp-ayuda {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.78rem;
+    margin: 12px 0 10px;
+}
+
+.cmp-ayuda.al-limite {
+    color: #ffc107;
+}
+
+.cmp-boton {
+    color: #fff;
+    font-weight: 600;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.55);
+    border: 1px solid var(--tema-vivo, #d966ff);
+    border-radius: 22px;
+    padding: 8px 22px;
+    cursor: pointer;
+}
+
+.cmp-boton:hover {
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.8);
+}
+
+.cmp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.cmp-card {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 18px;
+}
+
+.cmp-general {
+    margin-bottom: 14px;
+    border-color: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.45);
+}
+
+.cmp-card-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.cmp-habito-nombre {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    padding-right: 4px;  /* la letra cursiva se sale un poco por la derecha */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cmp-diferencia {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 3px 10px;
+}
+
+.cmp-diferencia.sube  { color: #00e676; background: rgba(0, 230, 118, 0.12); }
+.cmp-diferencia.baja  { color: #ff5c7a; background: rgba(255, 92, 122, 0.12); }
+.cmp-diferencia.igual { color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.08); }
+
+.cmp-filas {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cmp-fila {
+    display: grid;
+    grid-template-columns: 120px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+}
+
+.cmp-mes {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.cmp-pista {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cmp-barra {
+    height: 100%;
+    width: var(--ancho);
+    min-width: 3px;
+    border-radius: 6px;
+    background: linear-gradient(to right, color-mix(in srgb, var(--nivel) 55%, transparent), var(--nivel));
+    transform-origin: left;
+    animation: cmp-crecer 0.8s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes cmp-crecer {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cmp-barra { animation: none; }
+}
+
+.cmp-pct {
+    color: var(--nivel);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+/* ── Calendario ── */
+.cal-resumen {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.cal-cabecera {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding-bottom: 4px;
+}
+
+.cal-dia {
+    position: relative;
+    min-height: 92px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    text-align: left;
+    color: #fff;
+    font: inherit;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.cal-dia.con-hechos {
+    background: color-mix(in srgb, var(--nivel) 14%, transparent);
+    border-color: color-mix(in srgb, var(--nivel) 45%, transparent);
+}
+
+.cal-dia:hover,
+.cal-dia.elegido {
+    border-color: var(--tema-vivo, #d966ff);
+}
+
+.cal-dia.elegido {
+    box-shadow: 0 0 0 2px var(--tema-vivo, #d966ff);
+}
+
+.cal-dia.hoy .cal-numero {
+    background: var(--tema-vivo, #d966ff);
+    color: #fff;
+}
+
+.cal-dia.futuro {
+    opacity: 0.4;
+}
+
+.cal-dia.fuera {
+    opacity: 0.18;
+    cursor: default;
+}
+
+.cal-numero {
+    align-self: flex-start;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 10px;
+    padding: 3px 6px;
+}
+
+.cal-nombres {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cal-nombre {
+    font-size: 0.68rem;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(0, 0, 0, 0.25);
+    border-left: 2px solid var(--nivel);
+    border-radius: 3px;
+    padding: 1px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cal-mas {
+    font-size: 0.66rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.cal-cuenta {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--nivel);
+}
+
+.cal-detalle {
+    text-align: left;
+    margin-top: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px 20px;
+    scroll-margin-top: 80px;
+}
+
+.cal-detalle-vacio,
+.cal-detalle-nota {
+    color: rgba(255, 255, 255, 0.55);
+    font-style: italic;
+    margin: 0;
+}
+
+.cal-detalle-titulo {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+}
+
+.cal-subtitulo {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 14px 0 6px;
+}
+
+.cal-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cal-lista li {
+    color: #fff;
+    font-size: 0.85rem;
+    border-radius: 14px;
+    padding: 4px 12px;
+}
+
+.cal-lista.hechos li {
+    background: rgba(0, 230, 118, 0.12);
+    border: 1px solid rgba(0, 230, 118, 0.35);
+}
+
+.cal-lista.hechos i { color: #00e676; }
+
+.cal-lista.pendientes li {
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 92, 122, 0.08);
+    border: 1px solid rgba(255, 92, 122, 0.3);
+}
+
+.cal-lista.pendientes i { color: #ff5c7a; }
+
+@media (max-width: 576px) {
+    .est-pestana {
+        padding: 7px 12px;
+        font-size: 0.82rem;
+    }
+
+    .cmp-fila {
+        grid-template-columns: 92px 1fr 40px;
+    }
+
+    .cal-grid {
+        gap: 3px;
+    }
+
+    .cal-dia {
+        min-height: 54px;
+        padding: 4px;
+        align-items: center;
+    }
+
+    /* En el celular no caben los nombres: se ven al tocar el día */
+    .cal-nombres {
+        display: none;
+    }
+
+    .cal-cuenta {
+        position: static;
+        margin-top: auto;
+    }
+}

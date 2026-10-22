@@ -1,0 +1,22 @@
+{# Selector de mes con flechas. `endpoint` es la página a la que lleva cada mes. #}
+{% macro selector_mes(endpoint, meses, mes_actual, mes_anterior, mes_siguiente) %}
+<form class="est-filtro" method="GET" action="{{ url_for(endpoint) }}">
+    {% if mes_anterior %}
+    <a class="est-flecha" href="{{ url_for(endpoint, mes=mes_anterior) }}" title="Mes anterior" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></a>
+    {% else %}
+    <span class="est-flecha deshabilitada" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+    {% endif %}
+    <label class="visually-hidden" for="estMes">Mes</label>
+    <select name="mes" id="estMes" class="est-select" onchange="this.form.submit()">
+        {% for m in meses %}
+        <option value="{{ m.valor }}"{{ ' selected' if m.valor == mes_actual else '' }}>{{ m.nombre }}</option>
+        {% endfor %}
+    </select>
+    <noscript><button type="submit" class="est-select">Ver</button></noscript>
+    {% if mes_siguiente %}
+    <a class="est-flecha" href="{{ url_for(endpoint, mes=mes_siguiente) }}" title="Mes siguiente" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></a>
+    {% else %}
+    <span class="est-flecha deshabilitada" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+    {% endif %}
+</form>
+{% endmacro %}
