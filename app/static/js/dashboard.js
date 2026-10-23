@@ -88,17 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(data => {
                     if (!data.success) return;
                     const badge = item.querySelector('.dashboard-habit-badge');
-                    if (data.done) {
-                        badge.textContent = 'Completado';
-                        badge.style.background = temaRgba('grad-1', 0.4);
-                        badge.style.border = '1px solid ' + temaRgba('grad-1', 0.8);
-                        badge.style.color = '';
-                    } else {
-                        badge.textContent = item.dataset.descanso ? 'Descanso' : 'Pendiente';
-                        badge.style.background = 'rgba(255, 255, 255, 0.05)';
-                        badge.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-                        badge.style.color = 'rgba(255,255,255,0.6)';
-                    }
+                    badge.classList.toggle('is-done', data.done);
+                    badge.textContent = data.done ? 'Completado' : (item.dataset.descanso ? 'Descanso' : 'Pendiente');
                 })
                 .catch(() => alert('No se pudo actualizar el hábito.'));
         });

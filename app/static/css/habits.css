@@ -54,3 +54,316 @@
 .dia-check:focus-visible + .dia-chip { box-shadow: 0 0 0 2px var(--tema-vivo, #d966ff); }
 .dias-ayuda { display: block; margin-top: 6px; color: rgba(255,255,255,0.45); font-size: 0.78rem; }
 
+
+/* =========================
+   GESTIÓN DE HÁBITOS: página y tabla
+   PC: tabla con columnas fijas y filas tipo tarjeta.
+   Celular: cada hábito es una tarjeta (ver @media al final).
+========================= */
+.login-wrapper.habits-page {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8vh 20px 0;
+    min-height: 85vh;
+    width: 100%;
+}
+.habits-hero {
+    width: 100%;
+    max-width: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+}
+.habits-title {
+    margin-top: 20px;
+    color: var(--tema-vivo, #b366ff);
+    font-style: italic;
+    font-weight: 700;
+    text-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);
+}
+.habits-subtitle { max-width: 800px; margin: 10px auto 0; color: rgba(255, 255, 255, 0.65); }
+.btn.btn-nuevo-habito {
+    width: auto;
+    background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad));
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-nuevo-habito i { margin-right: 8px; }
+
+.habits-card {
+    max-width: 1200px;
+    width: 100%;
+    padding: 32px;
+    margin-bottom: 60px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 28px !important;
+}
+
+/* ── Filtros: tres controles de la misma altura ── */
+.habits-filtros {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.habits-filtros .form-control,
+.habits-filtros .form-select {
+    height: 48px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+}
+.habits-buscar { position: relative; margin: 0; }
+.habits-buscar i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+}
+.habits-buscar .form-control { padding-left: 44px; }
+
+/* ── Tabla (PC) ── */
+.habits-table {
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    margin-bottom: 0;
+    color: #fff;
+}
+.habits-table .col-nombre { width: 32%; }
+.habits-table .col-cat { width: 15%; }
+.habits-table .col-freq { width: 19%; }
+.habits-table .col-estado { width: 16%; }
+.habits-table .col-acciones { width: 18%; }
+
+.habits-table th {
+    padding: 6px 16px 4px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    background: transparent;
+}
+.habits-table th:first-child { text-align: left; }
+
+.habits-table td {
+    padding: 16px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.035);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+.habits-table .habit-row td:first-child {
+    text-align: left;
+    border-left: 3px solid var(--cat);
+    border-radius: 16px 0 0 16px;
+}
+.habits-table .habit-row td:last-child {
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0 16px 16px 0;
+}
+.habits-table .habit-row:hover td {
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.08);
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.2);
+}
+.habits-table .habit-row:hover td:first-child { border-left-color: var(--cat); }
+
+/* Color de cada categoría: lo usan el ícono, la franja y el chip */
+.cat-salud { --cat: #22d3ee; --cat-rgb: 34, 211, 238; }
+.cat-mente { --cat: #fbbf24; --cat-rgb: 251, 191, 36; }
+.cat-finanzas { --cat: #34d399; --cat-rgb: 52, 211, 153; }
+.cat-espiritual { --cat: #a78bfa; --cat-rgb: 167, 139, 250; }
+
+.habit-ident { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.habit-icono {
+    flex: 0 0 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--cat);
+    background: rgba(var(--cat-rgb), 0.12);
+    border: 1px solid rgba(var(--cat-rgb), 0.3);
+}
+.habit-texto { min-width: 0; }
+.habit-nombre {
+    font-weight: 600;
+    font-size: 1.02rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.habit-fecha { margin-top: 2px; font-size: 0.78rem; color: rgba(255, 255, 255, 0.45); }
+.habit-fecha i { margin-right: 4px; font-size: 0.72rem; }
+
+/* Chips de categoría y estado: mismo tamaño para que las columnas se vean parejas */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-width: 104px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.chip-cat {
+    color: var(--cat);
+    background: rgba(var(--cat-rgb), 0.1);
+    border: 1px solid rgba(var(--cat-rgb), 0.35);
+}
+.chip-estado { --estado: #9ca3af; --estado-rgb: 156, 163, 175; color: var(--estado); background: rgba(var(--estado-rgb), 0.1); border: 1px solid rgba(var(--estado-rgb), 0.3); }
+.chip-estado .punto { width: 7px; height: 7px; border-radius: 50%; background: var(--estado); box-shadow: 0 0 8px var(--estado); }
+.estado-activo { --estado: #4ade80; --estado-rgb: 74, 222, 128; }
+.estado-pausado { --estado: #fbbf24; --estado-rgb: 251, 191, 36; }
+.estado-completado { --estado: #38bdf8; --estado-rgb: 56, 189, 248; }
+
+.freq-nombre { display: block; font-weight: 500; color: rgba(255, 255, 255, 0.9); }
+.freq-dias { display: block; margin-top: 2px; font-size: 0.76rem; color: rgba(255, 255, 255, 0.45); }
+
+/* Botones de acción: círculos iguales y centrados en su columna */
+.habit-acciones { display: flex; justify-content: center; gap: 10px; }
+.btn-accion {
+    --accion-rgb: 255, 255, 255;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: rgb(var(--accion-rgb));
+    background: rgba(var(--accion-rgb), 0.08);
+    border: 1px solid rgba(var(--accion-rgb), 0.35);
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-accion:hover, .btn-accion:focus-visible {
+    transform: translateY(-2px);
+    background: rgba(var(--accion-rgb), 0.2);
+    box-shadow: 0 0 14px rgba(var(--accion-rgb), 0.35);
+    outline: none;
+}
+.accion-ver { --accion-rgb: 56, 189, 248; }
+.accion-editar { --accion-rgb: 251, 191, 36; }
+.accion-eliminar { --accion-rgb: 248, 113, 113; }
+
+/* Filas de "sin hábitos" / "sin resultados" */
+.habits-table .fila-vacia td {
+    padding: 56px 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+}
+.fila-vacia i { display: block; margin-bottom: 14px; font-size: 3rem; opacity: 0.6; color: var(--tema-vivo, #9b59b6); }
+.fila-vacia span { font-size: 1.05rem; }
+
+/* ── Pie: contador y paginación ── */
+.habits-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+#pageInfo { color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; }
+.habits-pie .page-link { border-radius: 10px !important; margin: 0 3px; }
+.habits-pie .page-item.active .page-link {
+    background: var(--tema-vivo, #9b59b6) !important;
+    border-color: var(--tema-vivo, #9b59b6) !important;
+}
+
+/* ── Tablet ── */
+@media (max-width: 992px) {
+    .habits-card { padding: 24px; }
+    .habits-table .col-nombre { width: 30%; }
+    .habits-table .col-freq { width: 20%; }
+    .chip { min-width: 0; }
+}
+
+/* ── Celular: cada hábito es una tarjeta ── */
+@media (max-width: 767.98px) {
+    .login-wrapper.habits-page { padding: 64px 0 0; }
+    /* El layout base ya deja margen a los lados: la tarjeta lo aprovecha (16px por lado) */
+    .habits-card {
+        width: calc(100% + 24px);
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 14px;
+        border-radius: 22px !important;
+    }
+    .habits-filtros { grid-template-columns: 1fr; gap: 10px; }
+
+    .habits-table, .habits-table tbody { display: block; }
+    .habits-table thead, .habits-table colgroup { display: none; }
+
+    .habits-table .habit-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "nombre  nombre"
+            "cat     estado"
+            "freq    freq"
+            "acciones acciones";
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-left: 3px solid var(--cat);
+        border-radius: 18px;
+    }
+    .habits-table .habit-row td {
+        display: block;
+        padding: 0;
+        background: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        text-align: left;
+    }
+    .habits-table .celda-nombre { grid-area: nombre; }
+    .habits-table .celda-cat { grid-area: cat; }
+    .habits-table .celda-estado { grid-area: estado; text-align: right; }
+    .habits-table .habit-row td.celda-freq {
+        grid-area: freq;
+        display: flex !important;
+        align-items: baseline;
+        gap: 8px;
+        padding: 10px 12px !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-radius: 12px !important;
+    }
+    .freq-nombre, .freq-dias { display: inline; margin: 0; }
+    .freq-nombre::after { content: " ·"; color: rgba(255, 255, 255, 0.35); }
+    .habits-table .habit-row td.celda-acciones {
+        grid-area: acciones;
+        padding-top: 12px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+    }
+    .habit-acciones { justify-content: flex-end; }
+    .habit-nombre { white-space: normal; }
+
+    .habits-table .fila-vacia { display: block; }
+    .habits-table .fila-vacia td { display: block; padding: 40px 16px; }
+
+    .habits-pie { flex-direction: column; justify-content: center; }
+}

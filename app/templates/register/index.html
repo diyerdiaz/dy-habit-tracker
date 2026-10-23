@@ -20,70 +20,65 @@
     <ul class="sidebar-menu">
         <li class="sidebar-item">
             <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
-                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+                <i class="bi bi-house-door sidebar-icon"></i> Inicio
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link active">
-                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+                <i class="bi bi-list-check sidebar-icon"></i> Gestión de Hábitos
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
-                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+                <i class="bi bi-check2-square sidebar-icon"></i> Check de Hábitos
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
-                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
+                <i class="bi bi-arrow-counterclockwise sidebar-icon ico-recuperar"></i> Recuperar Día
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
-                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('menu.historial') }}" class="sidebar-link">
-                <i class="bi bi-clock-history" style="margin-right: 15px; font-size: 1.2rem;"></i> Historial de Hábitos
+                <i class="bi bi-card-checklist sidebar-icon"></i> Tareas del Día
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
-                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+                <i class="bi bi-bar-chart-fill sidebar-icon ico-estadisticas"></i> Estadísticas
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
-                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+                <i class="bi bi-award-fill sidebar-icon ico-nivel"></i> Mi Nivel Personal
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
-                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+                <i class="bi bi-trophy-fill sidebar-icon ico-medallas"></i> Medallas
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
-                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+                <i class="bi bi-chat-heart-fill sidebar-icon ico-motivacion"></i> Motivación
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
-                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+                <i class="bi bi-kanban-fill sidebar-icon ico-metodos"></i> Métodos de Estudio
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('vision.index') }}" class="sidebar-link">
-                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+                <i class="bi bi-images sidebar-icon ico-vision"></i> Vision Board
             </a>
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('temas.index') }}" class="sidebar-link">
-                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+                <i class="bi bi-shuffle sidebar-icon ico-temas"></i> Temas Aleatorios
             </a>
         </li>
-        <li class="sidebar-item" style="margin-top: 24px;">
+        <li class="sidebar-item sidebar-item-toggle">
             <div class="sidebar-toggle">
                 <span class="sidebar-toggle-thumb"></span>
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
@@ -96,12 +91,12 @@
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+                <i class="bi bi-person-circle sidebar-icon ico-perfil"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
-                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-salir">
+                <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
             </a>
         </li>
     </ul>
@@ -122,15 +117,13 @@
 </div>
 
 <!-- Contenedor Principal -->
-<div class="login-wrapper" style="flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; min-height: 85vh; padding-left: 20px; padding-right: 20px; width: 100%;">
-    
-    <div class="text-center mb-4 fade-in-section" style="text-align: center; width: 100%; max-width: none !important; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
-        <h1 style="text-align: center; margin-top: 20px; color: var(--tema-vivo, #b366ff); font-style: italic; font-weight: 700; text-shadow: 0 0 18px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.5);">Gestión de Hábitos</h1>
-        <p style="text-align: center; max-width: 800px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Administra tus hábitos, filtra por categorías y realiza un seguimiento de tus metas.</p>
-        
+<div class="login-wrapper habits-page">
+    <div class="text-center mb-4 fade-in-section habits-hero">
+        <h1 class="habits-title">Gestión de Hábitos</h1>
+        <p class="habits-subtitle">Administra tus hábitos, filtra por categorías y realiza un seguimiento de tus metas.</p>
         {% if not plan %}
-        <button type="button" class="btn btn-primary mt-4 btn-hover-effect" data-bs-toggle="modal" data-bs-target="#habitModal" style="background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad)); border: none; padding: 12px 30px; font-weight: 600; border-radius: 30px; box-shadow: 0 4px 15px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.4); transition: transform 0.3s ease, box-shadow 0.3s ease;">
-            <i class="bi bi-plus-circle" style="margin-right: 8px;"></i> Registrar un Nuevo Hábito
+        <button type="button" class="btn btn-primary mt-4 btn-hover-effect btn-nuevo-habito" data-bs-toggle="modal" data-bs-target="#habitModal">
+            <i class="bi bi-plus-circle"></i> Registrar un Nuevo Hábito
         </button>
         {% endif %}
     </div>
@@ -146,116 +139,103 @@
         <a href="{{ url_for('habits.plan_mes') }}">arma tu plan del mes</a>.
     </div>
     {% endif %}
-    
+
     <!-- Contenedor Tabla -->
-    <div class="card shadow-lg border-0 rounded-lg fade-in-section" style="max-width: 1200px; padding: 30px; width: 100%; margin-bottom: 60px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1);">
-        
-        <!-- Filtros y Búsqueda -->
-        <div class="row mb-4 justify-content-center">
-            <div class="col-lg-4 col-md-5 mb-3 mb-md-0">
-                <div class="input-group">
-                    <span class="input-group-text glass-input"><i class="bi bi-search text-white"></i></span>
-                    <input type="text" id="searchInput" class="form-control glass-input" placeholder="Buscar hábito...">
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-4 mb-3 mb-md-0">
-                <select id="filterCategory" class="form-select glass-input">
-                    <option value="">Todas las Categorías</option>
-                    <option value="salud">Salud y Deporte</option>
-                    <option value="mente">Mente y Educación</option>
-                    <option value="finanzas">Finanzas</option>
-                    <option value="espiritual">Espiritual / Social</option>
-                </select>
-            </div>
-            <div class="col-lg-4 col-md-3">
-                <select id="filterState" class="form-select glass-input">
-                    <option value="">Todos los Estados</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Pausado">Pausado</option>
-                    <option value="Completado">Completado</option>
-                </select>
-            </div>
+    <div class="card shadow-lg border-0 rounded-lg fade-in-section habits-card">
+
+        <!-- Filtros y Búsqueda: tres controles iguales -->
+        <div class="habits-filtros">
+            <label class="habits-buscar">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" class="form-control glass-input" placeholder="Buscar hábito..." aria-label="Buscar hábito">
+            </label>
+            <select id="filterCategory" class="form-select glass-input" aria-label="Filtrar por categoría">
+                <option value="">Todas las Categorías</option>
+                <option value="salud">Salud y Deporte</option>
+                <option value="mente">Mente y Educación</option>
+                <option value="finanzas">Finanzas</option>
+                <option value="espiritual">Espiritual / Social</option>
+            </select>
+            <select id="filterState" class="form-select glass-input" aria-label="Filtrar por estado">
+                <option value="">Todos los Estados</option>
+                <option value="Activo">Activo</option>
+                <option value="Pausado">Pausado</option>
+                <option value="Completado">Completado</option>
+            </select>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-borderless align-middle custom-table" style="color: #fff; margin-bottom: 0;">
-                <thead style="border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
-                    <tr>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent;">Nombre</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: center;">Categoría</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: center;">Frecuencia</th>
-                        <th scope="col" style="color: rgba(255, 255, 255, 0.8); font-weight: 600; padding: 15px; background: transparent; text-align: right;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="habitsTableBody">
-                    {% for habit in habits %}
-                    <tr class="habit-row" data-id="{{ habit.idHabit }}" data-name="{{ habit.habitName|lower }}" data-category="{{ habit.habitCategory }}" data-state="{{ habit.habitState }}" data-desc="{{ habit.habitDesc or '' }}" style="background: rgba(255, 255, 255, 0.02); transition: background 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.02)'">
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
-                            <div class="d-flex align-items-center">
-                                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(var(--tema-vivo-rgb, 155, 89, 182), 0.2); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                                    {% if habit.habitCategory == 'salud' %}
-                                        <i class="bi bi-heart-pulse text-info" style="font-size: 1.2rem;"></i>
-                                    {% elif habit.habitCategory == 'mente' %}
-                                        <i class="bi bi-book text-warning" style="font-size: 1.2rem;"></i>
-                                    {% elif habit.habitCategory == 'finanzas' %}
-                                        <i class="bi bi-wallet2 text-success" style="font-size: 1.2rem;"></i>
-                                    {% else %}
-                                        <i class="bi bi-people text-primary" style="font-size: 1.2rem;"></i>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    <div style="font-weight: 600;">{{ habit.habitName }}</div>
-                                    <div style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5);">{{ habit.createdAt.strftime('%d/%m/%Y') }}</div>
-                                </div>
+        <table class="table table-borderless align-middle custom-table habits-table">
+            <colgroup>
+                <col class="col-nombre"><col class="col-cat"><col class="col-freq"><col class="col-estado"><col class="col-acciones">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Categoría</th>
+                    <th scope="col">Frecuencia</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="habitsTableBody">
+                {% set iconos = {'salud': 'bi-heart-pulse', 'mente': 'bi-book', 'finanzas': 'bi-wallet2'} %}
+                {% for habit in habits %}
+                {% set cat = habit.habitCategory if habit.habitCategory in iconos else 'espiritual' %}
+                <tr class="habit-row cat-{{ cat }}" data-id="{{ habit.idHabit }}" data-name="{{ habit.habitName|lower }}" data-category="{{ habit.habitCategory }}" data-state="{{ habit.habitState }}" data-desc="{{ habit.habitDesc or '' }}">
+                    <td class="celda-nombre">
+                        <div class="habit-ident">
+                            <span class="habit-icono"><i class="bi {{ iconos.get(cat, 'bi-people') }}"></i></span>
+                            <div class="habit-texto">
+                                <div class="habit-nombre" title="{{ habit.habitName }}">{{ habit.habitName }}</div>
+                                <div class="habit-fecha"><i class="bi bi-calendar3"></i> {{ habit.createdAt.strftime('%d/%m/%Y') }}</div>
                             </div>
-                        </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent; text-align: center;">
-                            <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; padding: 8px 12px; border-radius: 20px; font-weight: normal; border: 1px solid rgba(255, 255, 255, 0.05);">
-                                {{ habit.habitCategory|capitalize }}
-                            </span>
-                        </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); background: transparent; text-align: center;">
-                            {{ habit.habitFreq|capitalize }}
-                            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.5);">{{ habit.dias_texto() }}</div>
-                        </td>
-                        <td style="padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: transparent;">
-                            <div class="d-flex justify-content-end gap-2" style="white-space: nowrap;">
-                                <button type="button" class="btn btn-sm btn-outline-info rounded-circle" title="Ver" onclick="openViewModal({{ habit.idHabit }})">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                {% if not plan %}
-                                <button type="button" class="btn btn-sm btn-outline-warning rounded-circle" title="Editar" onclick="openEditModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }}, {{ (habit.habitDesc or '')|tojson|forceescape }}, {{ habit.habitFreq|tojson|forceescape }}, {{ habit.habitCategory|tojson|forceescape }}, {{ habit.dias_lista()|tojson|forceescape }})">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle" title="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }})">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr id="emptyRow">
-                        <td colspan="4" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
-                            <i class="bi bi-inbox" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5; color: var(--tema-vivo, #9b59b6);"></i>
-                            <span style="font-size: 1.1rem;">Aún no has registrado ningún hábito. ¡Comienza ahora!</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr id="noResultsRow" style="display: none;">
-                        <td colspan="4" class="text-center" style="padding: 60px 40px; color: rgba(255, 255, 255, 0.5); background: transparent;">
-                            <i class="bi bi-search" style="font-size: 3.5rem; display: block; margin-bottom: 15px; opacity: 0.5;"></i>
-                            <span style="font-size: 1.1rem;">No se encontraron hábitos que coincidan con la búsqueda.</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        
+                        </div>
+                    </td>
+                    <td class="celda-cat"><span class="chip chip-cat">{{ habit.habitCategory|capitalize }}</span></td>
+                    <td class="celda-freq">
+                        <span class="freq-nombre">{{ habit.habitFreq|capitalize }}</span>
+                        <span class="freq-dias">{{ habit.dias_texto() }}</span>
+                    </td>
+                    <td class="celda-estado">
+                        <span class="chip chip-estado estado-{{ habit.habitState|lower }}"><span class="punto"></span>{{ habit.habitState }}</span>
+                    </td>
+                    <td class="celda-acciones">
+                        <div class="habit-acciones">
+                            <button type="button" class="btn-accion accion-ver" title="Ver" aria-label="Ver" onclick="openViewModal({{ habit.idHabit }})">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            {% if not plan %}
+                            <button type="button" class="btn-accion accion-editar" title="Editar" aria-label="Editar" onclick="openEditModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }}, {{ (habit.habitDesc or '')|tojson|forceescape }}, {{ habit.habitFreq|tojson|forceescape }}, {{ habit.habitCategory|tojson|forceescape }}, {{ habit.dias_lista()|tojson|forceescape }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn-accion accion-eliminar" title="Eliminar" aria-label="Eliminar" onclick="openDeleteModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr id="emptyRow" class="fila-vacia">
+                    <td colspan="5">
+                        <i class="bi bi-inbox"></i>
+                        <span>Aún no has registrado ningún hábito. ¡Comienza ahora!</span>
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr id="noResultsRow" class="fila-vacia" style="display: none;">
+                    <td colspan="5">
+                        <i class="bi bi-search"></i>
+                        <span>No se encontraron hábitos que coincidan con la búsqueda.</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
         <!-- Paginación -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-            <span id="pageInfo" style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">Mostrando 0 registros</span>
-            <nav aria-label="Page navigation">
+        <div class="habits-pie">
+            <span id="pageInfo">Mostrando 0 registros</span>
+            <nav aria-label="Paginación de hábitos">
                 <ul class="pagination pagination-sm mb-0" id="paginationControls">
                     <!-- Dinámico -->
                 </ul>

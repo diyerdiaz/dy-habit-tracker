@@ -1,0 +1,38 @@
+/* Login / registro: las dos tarjetas se apilan en la misma celda y login.js las desliza */
+.login-card {
+    display: grid;
+    overflow: hidden;
+    position: relative;
+}
+
+#loginSection,
+#registerSection {
+    grid-area: 1 / 1;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease;
+}
+
+#loginSection {
+    opacity: 1;
+    transform: translateX(0);
+    z-index: 2;
+}
+
+#registerSection {
+    opacity: 0;
+    transform: translateX(100%);
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.login-switch {
+    text-align: center;
+}
+
+#passwordError {
+    color: #ff0077;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 8px;
+    display: none;
+}

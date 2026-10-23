@@ -21,8 +21,8 @@ def login():
         user = User.query.filter_by(nameUser=nameUser).first()
         if user and user.check_password(passwordUser):
             login_user(user)
-            # El dashboard muestra una sola vez la animación de entrada a la cueva
-            session['entrada_cueva'] = True
+            # El saludo de bienvenida sale siempre justo después de iniciar sesión
+            session['bienvenida'] = True
             # Toda la app toma el color del personaje que salió en el login
             session['tema_sitio'] = session.get('personaje_login', 0)
             flash("Login successful!", "success")
@@ -35,7 +35,7 @@ def login():
     # Cada vez que se carga el login aparece un personaje distinto al anterior
     indice = elegir_personaje(session.get('personaje_login'))
     session['personaje_login'] = indice
-    return render_template("login.html", personaje=PERSONAJES[indice])
+    return render_template("auth/login.html", personaje=PERSONAJES[indice])
 
 @bp.route('/dashboard')
 @login_required
@@ -184,7 +184,7 @@ def dashboard():
         'notificaciones': notificaciones,
     }
     return render_template(
-        "dashboard.html", data=data, entrada_cueva=session.pop('entrada_cueva', False),
+        "dashboard/index.html", data=data, recien_logueado=session.pop('bienvenida', False),
         necesita_plan=PlanMensual.del_mes(current_user.idUser) is None, mes=nombre_mes(hoy),
     )
 

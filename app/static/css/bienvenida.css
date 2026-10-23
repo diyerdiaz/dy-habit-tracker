@@ -1,0 +1,39 @@
+/* Saludo al iniciar sesión. Solo anima opacity y transform (los baratos de pintar),
+   sin desenfoques ni capas encima de la página, para que no se trabe en el celular. */
+.bienvenida {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    background: var(--tema-oscuro, #12031f);
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+}
+
+.bienvenida.is-saliendo {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bienvenida-texto {
+    margin: 0;
+    text-align: center;
+    font-family: 'Kaushan Script', 'Poppins', cursive;
+    font-size: clamp(1.8rem, 6vw, 3.2rem);
+    color: #fff;
+    text-shadow: 0 0 18px var(--tema-vivo, #d966ff);
+    opacity: 0;
+    transform: translateY(12px);
+    animation: bienvenida-entra 0.7s ease 0.1s forwards;
+}
+
+@keyframes bienvenida-entra {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bienvenida-texto { animation: none; opacity: 1; transform: none; }
+}

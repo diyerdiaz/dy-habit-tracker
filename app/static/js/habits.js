@@ -109,7 +109,7 @@ function renderPagination(totalPages) {
 
     for (let i = 1; i <= totalPages; i++) {
         ul.innerHTML += `<li class="page-item ${currentPage === i ? 'active' : ''}">
-            <a class="page-link glass-input" href="#" onclick="goToPage(${i}, event)" ${currentPage === i ? 'style="background: var(--tema-vivo, #9b59b6) !important; border-color: var(--tema-vivo, #9b59b6) !important;"' : ''}>${i}</a>
+            <a class="page-link glass-input" href="#" onclick="goToPage(${i}, event)">${i}</a>
         </li>`;
     }
 

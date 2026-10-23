@@ -1,0 +1,8 @@
+{# Saludo al entrar: solo texto que aparece y se desvanece, liviano para el celular.
+   Sale justo después del login (data-login="1") y también cada vez que se vuelve a abrir
+   la página con la sesión ya iniciada; bienvenida.js evita repetirlo en la misma visita. #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bienvenida.css') }}">
+<div class="bienvenida" id="bienvenida" aria-live="polite" data-login="{{ '1' if recien_logueado else '0' }}">
+    <p class="bienvenida-texto">Bienvenido, {{ current_user.nameUser }}</p>
+</div>
+<script src="{{ url_for('static', filename='js/bienvenida.js') }}"></script>
