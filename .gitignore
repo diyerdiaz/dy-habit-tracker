@@ -16,3 +16,6 @@ instance/
 
 # Tests
 .pytest_cache/
+
+# Secretos locales (clave del correo, etc.): no versionar
+.env

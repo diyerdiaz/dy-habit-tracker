@@ -12,6 +12,10 @@ def app():
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "WTF_CSRF_ENABLED": False,
         "SECRET_KEY": "test-secret",
+        # Los tests nunca usan el correo real aunque exista un .env con datos
+        "MAIL_ENABLED": False,
+        "MAIL_USERNAME": "",
+        "MAIL_PASSWORD": "",
     })
     with app.app_context():
         assert app.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:"

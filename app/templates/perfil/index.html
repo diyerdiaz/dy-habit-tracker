@@ -186,6 +186,55 @@
             <button type="submit" class="perfil-btn">Guardar contraseña</button>
         </form>
     </div>
+
+    <!-- ── Recordatorios por correo ── -->
+    <section class="perfil-card perfil-recordatorios" id="recordatorios">
+        <h2 class="perfil-subtitulo"><i class="bi bi-envelope-paper-heart"></i> Recordatorios por correo</h2>
+        <p class="perfil-ayuda">A cada hora que agregues te llega un correo con los hábitos que te faltan ese día. Si ya los completaste todos, no te llega nada.</p>
+        {% if not correo_activo %}
+        <p class="perfil-error"><i class="bi bi-exclamation-circle"></i> El envío de correos no está configurado en el servidor todavía.</p>
+        {% endif %}
+
+        <div class="perfil-formularios">
+            <div>
+                <form method="POST" action="{{ url_for('perfil.guardar_correo') }}">
+                    <label class="perfil-label" for="email">Tu correo</label>
+                    <input type="email" name="email" id="email" class="perfil-input" maxlength="120"
+                        autocomplete="email" placeholder="nombre@gmail.com" value="{{ current_user.email or '' }}">
+                    <button type="submit" class="perfil-btn">Guardar correo</button>
+                </form>
+                {% if current_user.email %}
+                <form method="POST" action="{{ url_for('perfil.correo_prueba') }}">
+                    <button type="submit" class="perfil-foto-btn perfil-prueba-btn"><i class="bi bi-send"></i> Enviarme un correo de prueba</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <div>
+                <p class="perfil-label">Horas de aviso ({{ recordatorios|length }}/{{ max_recordatorios }})</p>
+                {% if recordatorios %}
+                <ul class="perfil-recordatorio-lista">
+                    {% for rec in recordatorios %}
+                    <li>
+                        <span><i class="bi bi-alarm"></i> {{ rec.hora_texto() }}</span>
+                        <form method="POST" action="{{ url_for('perfil.borrar_recordatorio', idRecordatorio=rec.idRecordatorio) }}">
+                            <button type="submit" class="perfil-foto-btn perfil-foto-quitar" aria-label="Quitar recordatorio de las {{ rec.hora_texto() }}"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="perfil-ayuda">Aún no tienes recordatorios.</p>
+                {% endif %}
+                {% if recordatorios|length < max_recordatorios %}
+                <form method="POST" action="{{ url_for('perfil.agregar_recordatorio') }}" class="perfil-recordatorio-nuevo">
+                    <input type="time" name="hora" id="hora" class="perfil-input" value="20:00" required aria-label="Hora del recordatorio">
+                    <button type="submit" class="perfil-foto-btn"><i class="bi bi-plus-lg"></i> Agregar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 </div>
 
 {% endblock %}
