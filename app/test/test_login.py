@@ -83,21 +83,51 @@ def test_elegir_personaje_nunca_repite_el_anterior():
     assert 0 <= elegir_personaje(None) < len(PERSONAJES)
 
 
-def test_animacion_de_cueva_solo_despues_de_iniciar_sesion(client, user):
+def test_bienvenida_despues_de_iniciar_sesion(client, user):
     resp = client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD},
                        follow_redirects=True)
     html = resp.get_data(as_text=True)
-    assert 'id="entradaCueva"' in html
+    assert 'id="bienvenida"' in html and 'data-login="1"' in html
     assert f'Bienvenido, {user.nameUser}' in html
-    # Al volver al dashboard ya no se repite
-    assert 'id="entradaCueva"' not in client.get('/dashboard').get_data(as_text=True)
+    assert 'js/bienvenida.js' in html and 'css/bienvenida.css' in html
 
 
-def test_login_fallido_no_muestra_animacion(client, user):
+def test_bienvenida_tambien_al_volver_sin_cerrar_sesion(logged_client, user):
+    # Con la sesión abierta el saludo sigue en la página; bienvenida.js decide
+    # mostrarlo si es una visita nueva (pestaña o app recién abierta)
+    logged_client.get('/dashboard')
+    html = logged_client.get('/dashboard').get_data(as_text=True)
+    assert f'Bienvenido, {user.nameUser}' in html
+    assert 'data-login="0"' in html
+
+
+def test_bienvenida_no_se_repite_en_la_misma_visita():
+    with open('app/static/js/bienvenida.js') as f:
+        js = f.read()
+    assert 'sessionStorage' in js and "dataset.login !== '1'" in js
+
+
+def test_la_cueva_ya_no_existe(client, user):
+    # La animación pesada de la cueva se trababa en el celular; quedó solo el saludo
+    resp = client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD},
+                       follow_redirects=True)
+    html = resp.get_data(as_text=True)
+    assert 'cueva' not in html
+    assert client.get('/static/js/entrada_cueva.js').status_code == 404
+
+
+def test_bienvenida_es_liviana():
+    # Sin desenfoques ni filtros SVG: son los que traban la animación en el celular
+    with open('app/static/css/bienvenida.css') as f:
+        css = f.read()
+    assert 'blur(' not in css and 'filter:' not in css
+
+
+def test_login_fallido_no_muestra_bienvenida(client, user):
     client.post('/', data={'nameUser': user.nameUser, 'passwordUser': 'mala'})
     assert client.get('/dashboard').status_code == 302
     with client.session_transaction() as s:
-        assert 'entrada_cueva' not in s
+        assert 'bienvenida' not in s
 
 
 def test_cada_personaje_trae_su_paleta_completa():

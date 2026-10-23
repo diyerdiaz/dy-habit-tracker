@@ -160,8 +160,8 @@ def test_el_personaje_del_login_pregunta_por_el_plan(client, user):
     assert f'¡Hola, {user.nameUser}!' in aviso
 
 
-def test_el_aviso_espera_a_que_termine_la_cueva():
-    with open('app/static/js/entrada_cueva.js') as f:
-        assert "cueva:terminada" in f.read()
+def test_el_aviso_espera_a_que_termine_la_bienvenida():
+    with open('app/static/js/bienvenida.js') as f:
+        assert "bienvenida:terminada" in f.read()
     with open('app/static/js/plan_mes.js') as f:
-        assert "cueva:terminada" in f.read()
+        assert "bienvenida:terminada" in f.read()

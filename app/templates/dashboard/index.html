@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Dashboard de Hábitos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% if necesita_plan %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/plan_mes.css') }}">
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% include 'dashboard/bienvenida.html' %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sistema de Notificaciones -->
+<div class="notification-container" id="notificationContainer">
+    <button class="notification-bell" id="notificationBellBtn">
+        <i class="bi bi-bell-fill"></i>
+        <span class="notification-badge" id="notificationBadge"></span>
+    </button>
+
+    <!-- Panel Desplegable -->
+    <div class="notification-dropdown" id="notificationDropdown">
+        <div class="notification-header">
+            <h3>Notificaciones</h3>
+            <span class="mark-all-read" id="markAllRead">Marcar como leídas</span>
+        </div>
+        <div class="notification-list">
+            {% for n in data.notificaciones %}
+            <div class="notification-item unread" onclick="markAsRead(this)">
+                <div class="notification-icon">
+                    <i class="bi {{ n.icono }}" style="color: {{ n.color }};"></i>
+                </div>
+                <div class="notification-content">
+                    <p>{{ n.mensaje }}</p>
+                    <span class="notification-time">Hoy</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="notification-item">
+                <div class="notification-content">
+                    <p>No tienes notificaciones nuevas.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link active">
+                <i class="bi bi-house-door sidebar-icon"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-plus-circle sidebar-icon"></i> Registrar Hábito
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square sidebar-icon"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
+                <i class="bi bi-arrow-counterclockwise sidebar-icon ico-recuperar"></i> Recuperar Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist sidebar-icon"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill sidebar-icon ico-estadisticas"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill sidebar-icon ico-nivel"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill sidebar-icon ico-medallas"></i> Medallas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill sidebar-icon ico-motivacion"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill sidebar-icon ico-metodos"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images sidebar-icon ico-vision"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle sidebar-icon ico-temas"></i> Temas Aleatorios
+            </a>
+        </li>
+        <li class="sidebar-item sidebar-item-toggle">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle sidebar-icon ico-perfil"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-salir">
+                <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Efectos de Fondo -->
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Contenedor Principal Adaptado a Pantallas Grandes -->
+<div class="dashboard-wrapper-wide dashboard-main">
+
+    <!-- Cabecera Animada -->
+    <div class="text-center mb-5 dashboard-hero">
+        <h1 class="dashboard-hero-title">
+            <span id="typingTitle"></span><span id="cursor">|</span>
+        </h1>
+        <p id="descText">
+            Monitorea tus rutinas diarias, analiza las métricas de consistencia y mantén tu racha activa.
+        </p>
+    </div>
+
+    <!-- Grid Principal (Dos Columnas en Escritorio) -->
+    <div class="dashboard-grid">
+
+        <!-- Columna Izquierda (Wrapper) -->
+        <div class="dashboard-col">
+            
+            <!-- Hábitos del Día -->
+            <div class="card shadow-lg border-0 rounded-lg fade-in-section responsive-card">
+            <div class="card-header dashboard-card-header">
+                <h2 class="dashboard-card-title">Hábitos de Hoy</h2>
+                <p class="dashboard-card-sub">Completa tus metas diarias para mejorar un
+                    1% cada día</p>
+            </div>
+
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush bg-transparent ps-0 mb-0" id="dashboardHabitsList">
+                    {% for habit in data.habitos_hoy %}
+                    <li class="list-group-item bg-transparent text-white border-bottom border-light p-3 dashboard-habit-item"
+                        data-id="{{ habit.id }}"{% if habit.descanso %} data-descanso="1"{% endif %}>
+                        <div><i class="bi bi-star-fill dashboard-habit-star"></i>{{ habit.name }}</div>
+                        <span class="badge rounded-pill dashboard-habit-badge{{ ' is-done' if habit.done }}">{{ 'Completado' if habit.done else ('Descanso' if habit.descanso else 'Pendiente') }}</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item bg-transparent text-white p-3 dashboard-habits-empty">
+                        Aún no tienes hábitos registrados.
+                        <a href="{{ url_for('habits.register_habit') }}">Registra el primero</a>.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tarjeta Principal de Análisis de Hábitos (Movida aquí) -->
+        <div class="analysis-card radar-card-container fade-in-section">
+            <h3 class="radar-card-title">Mapeo y Desempeño General</h3>
+            
+            <!-- Lado Izquierdo: Gráfico Radar -->
+            <div class="radar-chart-wrapper">
+                <canvas id="habitsRadarChart"></canvas>
+            </div>
+
+            <!-- Lado Derecho: Estadísticas Detalladas -->
+            <div class="radar-stats">
+                
+                <!-- Item de Estadística -->
+                <div class="stat-item">
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-graph-up-arrow stat-icon ico-hoy"></i> Progreso de Hoy</span>
+                        <span class="stat-value"><span class="animate-counter" data-target="{{ data.pct_hoy }}">0</span>%</span>
+                    </div>
+                    <div class="progress stat-progress">
+                        <div role="progressbar" data-width="{{ data.pct_hoy }}%" class="progress-bar animate-progress-bar bar-hoy"></div>
+                    </div>
+                </div>
+
+                <!-- Item de Estadística -->
+                <div class="stat-item">
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-arrow-repeat stat-icon ico-consistencia"></i> Consistencia Semanal</span>
+                        <span class="stat-value"><span class="animate-counter" data-target="{{ data.pct_consistencia }}">0</span>%</span>
+                    </div>
+                    <div class="progress stat-progress">
+                        <div role="progressbar" data-width="{{ data.pct_consistencia }}%" class="progress-bar animate-progress-bar bar-consistencia"></div>
+                    </div>
+                </div>
+
+                <!-- Item de Estadística -->
+                <div class="stat-item">
+                    <div class="stat-row">
+                        <span class="stat-label"><i class="bi bi-shield-lock-fill stat-icon ico-disciplina"></i> Disciplina</span>
+                        <span class="stat-value">{{ data.disciplina_label }}</span>
+                    </div>
+                    <div class="progress stat-progress">
+                        <div role="progressbar" data-width="{{ data.disciplina_pct }}%" class="progress-bar animate-progress-bar bar-disciplina"></div>
+                    </div>
+                </div>
+
+                <!-- Item de Estadística -->
+                <div>
+                    <div class="stat-row stat-row-tight">
+                        <span class="stat-label"><i class="bi bi-lightning-charge-fill stat-icon ico-activos"></i> Hábitos Activos</span>
+                        <span class="stat-value"><span class="animate-counter" data-target="{{ data.activos }}">0</span></span>
+                    </div>
+                    <div class="stat-nota">
+                        Racha actual: {{ data.racha_actual }} {{ 'día' if data.racha_actual == 1 else 'días' }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        </div> <!-- Fin Columna Izquierda (Wrapper) -->
+
+        <!-- Columna Derecha: Análisis y Estadísticas -->
+        <div class="card shadow-lg border-0 rounded-lg fade-in-section responsive-card">
+            <div class="card-header dashboard-card-header dashboard-card-header-sm">
+                <h2 class="dashboard-card-title">Análisis Visual</h2>
+                <p class="dashboard-card-sub">Métricas de rendimiento automatizadas</p>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="analysis-container mt-2">
+
+                    <!-- Tarjeta de Frecuencia Semanal -->
+                    <div class="analysis-card mb-2">
+                        <h3 class="analysis-title">Frecuencia
+                            Semanal</h3>
+                        <div class="chart-bar-container">
+                            {% for i in range(7) %}
+                            <div class="chart-bar-wrapper">
+                                <div class="chart-bar" data-height="{{ data.week_data[i] }}%" title="{{ data.week_counts[i] }} actividades"></div>
+                                <span class="chart-label">{{ data.week_labels[i] }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Porcentaje de Cumplimiento SVG Premium -->
+                    <div class="analysis-card mb-2 meta-card">
+                        <h3 class="analysis-title analysis-title-tight">Meta General
+                        </h3>
+                        <div class="stat-circle-container meta-circle">
+                            <svg width="150" height="150" viewBox="0 0 150 150" class="stat-circle-svg">
+                                <defs>
+                                    <linearGradient id="circleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#8a28ff" />
+                                        <stop offset="100%" stop-color="#e100ff" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="75" cy="75" r="60" class="circle-bg" />
+                                <circle cx="75" cy="75" r="60" class="circle-progress" id="progressCircle"
+                                    data-percentage="{{ data.pct_hoy }}" />
+                            </svg>
+                            <span class="stat-circle-text meta-circle-text"><span class="animate-counter"
+                                    data-target="{{ data.pct_hoy }}">0</span>%</span>
+                        </div>
+                        <p class="meta-mensaje">
+                            {{ data.mensaje_meta }}
+                        </p>
+                    </div>
+                </div>
+
+
+                <!-- Estadísticas Rápidas con Contador Animado -->
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-num">
+                            <span class="animate-counter" data-target="{{ data.racha_actual }}">0</span>
+                        </div>
+                        <div class="quick-stat-label">
+                            Racha (Días)</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-num">
+                            <span class="animate-counter" data-target="{{ data.completados_hoy }}">0</span>/<span class="animate-counter"
+                                data-target="{{ data.total_habitos }}">0</span>
+                        </div>
+                        <div class="quick-stat-label">
+                            Completados Hoy</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-num">
+                            <span class="animate-counter" data-target="{{ data.total_habitos }}">0</span>
+                        </div>
+                        <div class="quick-stat-label">
+                            Total Hábitos</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if necesita_plan %}{% include 'register/plan_aviso.html' %}{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.DASHBOARD_DATA = {
+        radar_labels: {{ data.radar_labels | tojson }},
+        radar_data: {{ data.radar_data | tojson }}
+    };
+</script>
+<!-- Chart.js solo se carga en las páginas que tienen gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% if necesita_plan %}
+<script src="{{ url_for('static', filename='js/plan_mes.js') }}"></script>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <!-- Track LTR (Izquierda a Derecha) -->
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+            </div>
+        </div>
+        <!-- Track RTL (Derecha a Izquierda) -->
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+                <span>Disciplina &bull; Progreso &bull; Consistencia &bull; Hábitos &bull; Desarrollo Personal
+                    &bull;</span>
+            </div>
+        </div>
+    </div>
+
+</footer>
+{% endblock %}

@@ -41,7 +41,7 @@ def service_worker():
 
 @bp.route('/offline')
 def offline():
-    return render_template('offline.html')
+    return render_template('pwa/offline.html')
 
 
 @bp.route('/favicon.ico')

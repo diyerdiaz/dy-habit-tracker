@@ -1427,3 +1427,18 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: none; }
 }
+
+/* Íconos del menú lateral (compartido por todas las páginas con sidebar) */
+.sidebar-icon { margin-right: 15px; font-size: 1.2rem; }
+.ico-recuperar { color: #ffcc66; }
+.ico-estadisticas { color: #00e676; }
+.ico-nivel { color: #ffd700; }
+.ico-medallas { color: #ffb347; }
+.ico-motivacion { color: #ff6fb5; }
+.ico-metodos { color: #00bac6; }
+.ico-vision { color: #ff8c42; }
+.ico-temas { color: #00e5ff; }
+.ico-perfil { color: var(--tema-vivo, #d966ff); }
+.sidebar-item-toggle { margin-top: 24px; }
+.sidebar-link.sidebar-link-salir { color: #ff6666; border-color: rgba(255, 102, 102, 0.2); }
+
