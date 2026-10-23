@@ -10,6 +10,12 @@ services:
       
       SESSION_COOKIE_SECURE: "0"
       TZ: America/Bogota
+      # Correo de los recordatorios. Los valores reales se ponen en Coolify
+      # (Environment Variables) o en un .env junto a este archivo; nunca aquí.
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      # Dirección pública para los botones del correo (Coolify la llena sola)
+      APP_URL: ${SERVICE_URL_APP:-}
     volumes:
      
       - ./instance:/app/instance:z

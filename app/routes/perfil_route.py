@@ -15,7 +15,7 @@ from app.models.medallas import obtener_metricas, evaluar_medallas
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
 from app.gamificacion import get_or_create_progress
 from app.level_config import calcular_progreso
-from app.correo import enviar_pendientes
+from app.correo import enviar_pendientes, limite_prueba, registrar_prueba
 
 bp = Blueprint('perfil', __name__, url_prefix='/perfil')
 
@@ -127,7 +127,10 @@ def correo_prueba():
         flash('Primero guarda tu correo.', 'warning')
     elif not current_app.config.get('MAIL_ENABLED'):
         flash('El envío de correos no está configurado en el servidor.', 'danger')
+    elif (motivo := limite_prueba(current_user)):
+        flash(motivo, 'warning')
     else:
+        registrar_prueba(current_user)
         try:
             enviar_pendientes(current_user, prueba=True)
             flash(f'Te enviamos un correo de prueba a {current_user.email}. Revisa también la carpeta de spam.', 'success')

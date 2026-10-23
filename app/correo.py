@@ -18,7 +18,7 @@ from app.gamificacion import calcular_racha
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.personajes_login import PERSONAJES, elegir_personaje
-from app.models.recordatorios import Recordatorio
+from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.users import User
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 # Si el comando se ejecuta más tarde que la hora del recordatorio (equipo apagado,
 # cron atrasado), aún se envía dentro de esta ventana; después se salta ese día.
 VENTANA_MINUTOS = 60
+
+# Límites del botón "Enviarme un correo de prueba" del perfil
+PRUEBA_ESPERA_SEGUNDOS = 60      # entre dos pruebas del mismo usuario
+PRUEBA_MAX_DIA_USUARIO = 5
+PRUEBA_MAX_DIA_DESTINO = 5       # a una misma dirección, aunque sean varias cuentas
+PRUEBA_MAX_DIA_TOTAL = 100       # toda la app (Gmail permite ~500 al día)
 
 
 def habitos_pendientes(idUser, fecha=None):
@@ -126,6 +132,32 @@ def _render(plantilla, **datos):
     # Sin render_template: el comando programado no tiene petición HTTP (ni sesión)
     # y los context processors de la app la necesitan
     return current_app.jinja_env.get_template(plantilla).render(**datos)
+
+
+def limite_prueba(user, ahora=None):
+    """Mensaje de por qué no se puede enviar otra prueba ahora, o None si se puede."""
+    ahora = ahora or datetime.now()
+    inicio_dia = datetime.combine(ahora.date(), datetime.min.time())
+    hoy = EnvioPrueba.query.filter(EnvioPrueba.createdAt >= inicio_dia)
+    ultima = (EnvioPrueba.query.filter_by(idUser=user.idUser)
+              .order_by(EnvioPrueba.createdAt.desc()).first())
+    if ultima and (ahora - ultima.createdAt).total_seconds() < PRUEBA_ESPERA_SEGUNDOS:
+        return 'Espera un minuto antes de pedir otro correo de prueba.'
+    if hoy.filter_by(idUser=user.idUser).count() >= PRUEBA_MAX_DIA_USUARIO:
+        return f'Ya enviaste {PRUEBA_MAX_DIA_USUARIO} correos de prueba hoy. Inténtalo mañana.'
+    if hoy.filter_by(email=user.email).count() >= PRUEBA_MAX_DIA_DESTINO:
+        return 'Esa dirección ya recibió muchos correos de prueba hoy. Inténtalo mañana.'
+    if hoy.count() >= PRUEBA_MAX_DIA_TOTAL:
+        return 'Se alcanzó el límite de correos de prueba de hoy. Inténtalo mañana.'
+    return None
+
+
+def registrar_prueba(user, ahora=None):
+    """Cuenta el intento (aunque luego falle el SMTP) y limpia registros viejos."""
+    ahora = ahora or datetime.now()
+    EnvioPrueba.query.filter(EnvioPrueba.createdAt < ahora - timedelta(days=2)).delete(synchronize_session=False)
+    db.session.add(EnvioPrueba(idUser=user.idUser, email=user.email, createdAt=ahora))
+    db.session.commit()
 
 
 def toca_enviar(recordatorio, ahora):

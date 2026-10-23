@@ -320,3 +320,72 @@ def test_asunto_de_prueba(user, smtp):
     _con_correo(user)
     correo.enviar_pendientes(user, HOY, prueba=True)
     assert smtp.enviados[0]['Subject'].startswith('Prueba:')
+
+
+# ── Límite del correo de prueba ──
+
+def _probar(cliente):
+    return cliente.post('/perfil/correo/prueba', follow_redirects=True).get_data(as_text=True)
+
+
+def _pruebas_previas(user, cantidad, email='yo@test.com', hace_minutos=5):
+    from app.models.recordatorios import EnvioPrueba
+    for i in range(cantidad):
+        db.session.add(EnvioPrueba(idUser=user.idUser, email=email,
+                                   createdAt=datetime.now() - timedelta(minutes=hace_minutos + i)))
+    db.session.commit()
+
+
+def test_prueba_espera_un_minuto(logged_client, user, smtp):
+    _con_correo(user)
+    _probar(logged_client)
+    html = _probar(logged_client)
+    assert len(smtp.enviados) == 1
+    assert 'Espera un minuto' in html
+
+
+def test_prueba_maximo_5_al_dia_por_usuario(logged_client, user, smtp):
+    _con_correo(user)
+    _pruebas_previas(user, correo.PRUEBA_MAX_DIA_USUARIO)
+    html = _probar(logged_client)
+    assert smtp.enviados == []
+    assert 'Inténtalo mañana' in html
+
+
+def test_prueba_las_de_ayer_no_cuentan(logged_client, user, smtp):
+    _con_correo(user)
+    _pruebas_previas(user, correo.PRUEBA_MAX_DIA_USUARIO, hace_minutos=60 * 24 + 1)
+    _probar(logged_client)
+    assert len(smtp.enviados) == 1
+
+
+def test_prueba_maximo_por_direccion_aunque_sean_otras_cuentas(logged_client, user, other_user, smtp):
+    # Otra cuenta ya mandó 5 pruebas a la misma dirección: no se puede seguir llenándola
+    _con_correo(user, 'victima@test.com')
+    _pruebas_previas(other_user, correo.PRUEBA_MAX_DIA_DESTINO, email='victima@test.com')
+    html = _probar(logged_client)
+    assert smtp.enviados == []
+    assert 'Esa dirección ya recibió muchos' in html
+
+
+def test_prueba_limite_total_de_la_app(user, other_user, monkeypatch):
+    monkeypatch.setattr(correo, 'PRUEBA_MAX_DIA_TOTAL', 3)
+    _con_correo(user)
+    _pruebas_previas(other_user, 3, email='otro@test.com')
+    assert 'límite de correos de prueba' in correo.limite_prueba(user)
+
+
+def test_prueba_cuenta_aunque_falle_el_smtp(logged_client, user, smtp):
+    from app.models.recordatorios import EnvioPrueba
+    _con_correo(user)
+    smtp.falla = True
+    assert 'No se pudo enviar' in _probar(logged_client)
+    assert EnvioPrueba.query.filter_by(idUser=user.idUser).count() == 1
+
+
+def test_registrar_prueba_limpia_registros_viejos(user):
+    from app.models.recordatorios import EnvioPrueba
+    _con_correo(user)
+    _pruebas_previas(user, 2, hace_minutos=60 * 24 * 3)
+    correo.registrar_prueba(user)
+    assert EnvioPrueba.query.count() == 1

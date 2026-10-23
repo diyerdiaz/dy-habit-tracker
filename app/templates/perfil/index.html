@@ -206,6 +206,7 @@
                 {% if current_user.email %}
                 <form method="POST" action="{{ url_for('perfil.correo_prueba') }}">
                     <button type="submit" class="perfil-foto-btn perfil-prueba-btn"><i class="bi bi-send"></i> Enviarme un correo de prueba</button>
+                    <p class="perfil-ayuda">Máximo 5 pruebas al día.</p>
                 </form>
                 {% endif %}
             </div>
