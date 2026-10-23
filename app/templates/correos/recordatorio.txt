@@ -1,0 +1,22 @@
+¡Hola, {{ user.nameUser }}!
+{% if pendientes %}
+Hoy ({{ fecha.strftime('%d/%m/%Y') }}) todavía te {{ 'falta este hábito' if pendientes|length == 1 else 'faltan estos hábitos' }}:
+{% for h in pendientes %}
+  [ ] {{ h.habitName }} ({{ h.habitCategory }})
+{%- endfor %}
+{% else %}
+Hoy ({{ fecha.strftime('%d/%m/%Y') }}) completaste todos tus hábitos. ¡Vas al día!
+{% endif %}
+{%- if racha_en_riesgo %}
+Llevas {{ racha }} {{ 'día' if racha == 1 else 'días' }} de racha: marca al menos un hábito hoy para no perderla.
+{%- elif racha > 0 %}
+Tu racha de {{ racha }} {{ 'día' if racha == 1 else 'días' }} está a salvo hoy.
+{%- endif %}
+{% if url_check %}
+Marca tus hábitos aquí: {{ url_check }}
+{% endif %}
+{%- if prueba %}
+(Este es un correo de prueba enviado desde tu perfil.)
+{% endif %}
+Recibes este correo porque activaste recordatorios en tu perfil.
+{% if url_perfil %}Cambiar o quitar recordatorios: {{ url_perfil }}{% else %}Puedes cambiarlos o quitarlos en tu perfil de la app.{% endif %}

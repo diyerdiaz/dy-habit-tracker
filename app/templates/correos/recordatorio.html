@@ -1,0 +1,128 @@
+{# Correo HTML: tablas y estilos inline porque Gmail y otros clientes ignoran los .css
+   externos y los <style>. Los colores vienen del personaje del login (tema). #}
+{%- set dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'] -%}
+{%- set meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] -%}
+{%- set n = pendientes|length -%}
+{%- set dias_racha = 'día' if racha == 1 else 'días' -%}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Tus hábitos de hoy</title>
+</head>
+<body style="margin:0;padding:0;background:#07000d;" bgcolor="#07000d">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#07000d" style="background:#07000d;">
+<tr><td align="center" style="padding:28px 12px;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+    <!-- Marca -->
+    <tr><td align="center" style="padding:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:{{ tema['vivo'] }};">
+      DY Habit Tracker
+    </td></tr>
+
+    <!-- Tarjeta -->
+    <tr><td bgcolor="{{ tema['oscuro'] }}" style="background:{{ tema['oscuro'] }};background-image:linear-gradient(180deg, {{ tema['oscuro'] }} 0%, {{ tema['oscuro-2'] }} 100%);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.35);border-radius:24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+        <!-- Personaje -->
+        <tr><td align="center" style="padding:24px 24px 0;">
+          <img src="cid:personaje" width="200" alt="{{ personaje['nombre'] }}" style="display:block;width:200px;max-width:100%;height:auto;border:0;">
+        </td></tr>
+
+        <!-- Saludo -->
+        <tr><td align="center" style="padding:8px 28px 0;font-family:Georgia,'Times New Roman',serif;">
+          <h1 style="margin:0;font-size:30px;font-style:italic;font-weight:700;color:{{ tema['vivo'] }};">¡Hola, {{ user.nameUser }}!</h1>
+          <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:rgba(255,255,255,0.55);">
+            {{ dias[fecha.weekday()]|capitalize }} {{ fecha.day }} de {{ meses[fecha.month - 1] }}
+          </p>
+        </td></tr>
+
+        <!-- Número grande -->
+        <tr><td style="padding:22px 28px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba({{ tema['vivo-rgb'] }}, 0.10);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.30);border-radius:18px;">
+            <tr><td align="center" style="padding:18px 16px;font-family:Arial,Helvetica,sans-serif;">
+              {% if n %}
+              <div style="font-size:54px;line-height:1;font-weight:800;color:#ffffff;">{{ n }}</div>
+              <div style="margin-top:6px;font-size:15px;color:rgba(255,255,255,0.75);">{{ 'hábito te espera hoy' if n == 1 else 'hábitos te esperan hoy' }}</div>
+              {% else %}
+              <div style="font-size:40px;line-height:1;">🏆</div>
+              <div style="margin-top:8px;font-size:17px;font-weight:700;color:#ffffff;">¡Completaste todo lo de hoy!</div>
+              {% endif %}
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Racha -->
+        <tr><td style="padding:14px 28px 0;">
+          {% if racha_en_riesgo %}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ tema['grad-1'] }}" style="background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['grad-2'] }});border-radius:16px;">
+            <tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">
+              <div style="font-size:17px;font-weight:800;">🔥 Llevas {{ racha }} {{ dias_racha }} de racha</div>
+              <div style="margin-top:4px;font-size:14px;">Marca al menos un hábito hoy para no perderla.</div>
+            </td></tr>
+          </table>
+          {% elif racha > 0 %}
+          <p style="margin:0;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,0.05);font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#ffffff;">
+            🔥 Tu racha de <strong>{{ racha }} {{ dias_racha }}</strong> está a salvo hoy.{% if n %} ¡Termina lo que falta!{% endif %}
+          </p>
+          {% elif n %}
+          <p style="margin:0;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,0.05);font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#ffffff;">
+            ✨ Marca un hábito hoy y empieza una racha nueva.
+          </p>
+          {% endif %}
+        </td></tr>
+
+        <!-- Lista de pendientes -->
+        {% if n %}
+        <tr><td style="padding:20px 28px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Te {{ 'falta' if n == 1 else 'faltan' }}</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            {% for h in pendientes %}
+            <tr><td style="padding:0 0 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba(255,255,255,0.05);border-left:4px solid {{ tema['vivo'] }};border-radius:12px;">
+                <tr>
+                  <td width="34" valign="middle" style="padding:12px 0 12px 14px;">
+                    <div style="width:16px;height:16px;border:2px solid {{ tema['vivo'] }};border-radius:50%;"></div>
+                  </td>
+                  <td valign="middle" style="padding:12px 14px 12px 6px;">
+                    <div style="font-size:16px;font-weight:700;color:#ffffff;">{{ h.habitName }}</div>
+                    <div style="margin-top:2px;font-size:12px;color:rgba(255,255,255,0.5);">{{ h.habitCategory }}</div>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+            {% endfor %}
+          </table>
+        </td></tr>
+        {% endif %}
+
+        <!-- Botón -->
+        {% if url_check %}
+        <tr><td align="center" style="padding:18px 28px 0;">
+          <a href="{{ url_check }}" style="display:inline-block;padding:14px 30px;border-radius:14px;background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['vivo'] }});font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+            Marcar mis hábitos →
+          </a>
+        </td></tr>
+        {% endif %}
+
+        <!-- Frase -->
+        <tr><td align="center" style="padding:22px 28px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-style:italic;color:rgba({{ tema['claro-rgb'] }}, 0.85);">
+          {% if n %}“Aún estás a tiempo. Un hábito a la vez.”{% else %}“Lo que haces cada día es lo que te convierte en quien eres.”{% endif %}
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- Pie -->
+    <tr><td align="center" style="padding:18px 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.4);">
+      {% if prueba %}<span style="color:{{ tema['vivo'] }};">Este es un correo de prueba enviado desde tu perfil.</span><br>{% endif %}
+      Recibes este correo porque activaste recordatorios en tu perfil.<br>
+      {% if url_perfil %}<a href="{{ url_perfil }}" style="color:rgba(255,255,255,0.6);">Cambiar o quitar recordatorios</a>{% else %}Puedes cambiarlos o quitarlos en tu perfil de la app.{% endif %}
+    </td></tr>
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>

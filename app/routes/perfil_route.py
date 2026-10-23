@@ -1,4 +1,6 @@
 import os
+import re
+import smtplib
 import uuid
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash,
@@ -10,8 +12,10 @@ from app import db
 from app.models.users import User
 from app.models.habitos import Habit
 from app.models.medallas import obtener_metricas, evaluar_medallas
+from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
 from app.gamificacion import get_or_create_progress
 from app.level_config import calcular_progreso
+from app.correo import enviar_pendientes
 
 bp = Blueprint('perfil', __name__, url_prefix='/perfil')
 
@@ -20,6 +24,9 @@ MAX_USUARIO = 80
 TAMANO_FOTO = 400          # la foto se guarda recortada en un cuadrado de 400x400
 MAX_FOTO_MB = 8
 EXTENSIONES_FOTO = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_EMAIL = 120
+PATRON_EMAIL = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+PATRON_HORA = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
 
 
 def carpeta_avatars():
@@ -59,7 +66,75 @@ def index():
         medallas_ganadas=sum(1 for m in medallas if m['desbloqueada']),
         medallas_total=len(medallas),
         min_password=MIN_PASSWORD,
+        recordatorios=Recordatorio.query.filter_by(idUser=current_user.idUser)
+                                        .order_by(Recordatorio.hora).all(),
+        max_recordatorios=MAX_RECORDATORIOS,
+        correo_activo=current_app.config.get('MAIL_ENABLED', False),
     )
+
+
+@bp.route('/correo', methods=['POST'])
+@login_required
+def guardar_correo():
+    email = (request.form.get('email') or '').strip().lower()
+    if not email:
+        current_user.email = None
+        db.session.commit()
+        flash('Quitaste tu correo: ya no recibirás recordatorios.', 'info')
+    elif len(email) > MAX_EMAIL or not PATRON_EMAIL.match(email):
+        flash('Escribe un correo válido, por ejemplo nombre@gmail.com.', 'danger')
+    else:
+        current_user.email = email
+        db.session.commit()
+        flash(f'Listo, los recordatorios llegarán a {email}.', 'success')
+    return redirect(url_for('perfil.index'))
+
+
+@bp.route('/recordatorios', methods=['POST'])
+@login_required
+def agregar_recordatorio():
+    hora = (request.form.get('hora') or '').strip()
+    existentes = Recordatorio.query.filter_by(idUser=current_user.idUser)
+    if not PATRON_HORA.match(hora):
+        flash('Elige una hora válida para el recordatorio.', 'danger')
+    elif existentes.count() >= MAX_RECORDATORIOS:
+        flash(f'Puedes tener máximo {MAX_RECORDATORIOS} recordatorios.', 'warning')
+    elif existentes.filter_by(hora=hora).first():
+        flash('Ya tienes un recordatorio a esa hora.', 'warning')
+    else:
+        rec = Recordatorio(idUser=current_user.idUser, hora=hora)
+        db.session.add(rec)
+        db.session.commit()
+        aviso = '' if current_user.email else ' Agrega tu correo para empezar a recibirlos.'
+        flash(f'Recordatorio agregado: {rec.hora_texto()}{aviso}', 'success')
+    return redirect(url_for('perfil.index'))
+
+
+@bp.route('/recordatorios/<int:idRecordatorio>/borrar', methods=['POST'])
+@login_required
+def borrar_recordatorio(idRecordatorio):
+    rec = Recordatorio.query.filter_by(idRecordatorio=idRecordatorio, idUser=current_user.idUser).first_or_404()
+    db.session.delete(rec)
+    db.session.commit()
+    flash('Recordatorio eliminado.', 'info')
+    return redirect(url_for('perfil.index'))
+
+
+@bp.route('/correo/prueba', methods=['POST'])
+@login_required
+def correo_prueba():
+    if not current_user.email:
+        flash('Primero guarda tu correo.', 'warning')
+    elif not current_app.config.get('MAIL_ENABLED'):
+        flash('El envío de correos no está configurado en el servidor.', 'danger')
+    else:
+        try:
+            enviar_pendientes(current_user, prueba=True)
+            flash(f'Te enviamos un correo de prueba a {current_user.email}. Revisa también la carpeta de spam.', 'success')
+        except (smtplib.SMTPException, OSError):
+            current_app.logger.exception('Falló el correo de prueba')
+            flash('No se pudo enviar el correo. Inténtalo más tarde.', 'danger')
+    return redirect(url_for('perfil.index'))
 
 
 @bp.route('/usuario', methods=['POST'])

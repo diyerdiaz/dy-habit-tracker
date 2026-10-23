@@ -14,3 +14,4 @@ __pycache__/
 librerias/
 .DS_Store
 
+.env

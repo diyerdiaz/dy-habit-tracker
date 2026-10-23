@@ -19,7 +19,7 @@ def actualizar_esquema():
     db.create_all()
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
-        'users': {'avatar': 'VARCHAR(64)'},
+        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)'},
         'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
     }
@@ -73,6 +73,10 @@ def create_app(config_overrides=None):
     app.register_blueprint(pwa_route.bp)
     app.register_blueprint(vision_route.bp)
     app.register_blueprint(temas_route.bp)
+
+    # Comando `flask enviar-recordatorios` (correos de hábitos pendientes)
+    from app.correo import registrar_comandos
+    registrar_comandos(app)
 
     # Los archivos de static/ llevan ?v=<fecha de modificación> en su URL: el navegador
     # los guarda un año y, cuando cambia el archivo, cambia la URL y se descarga de nuevo.
