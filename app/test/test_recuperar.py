@@ -5,6 +5,7 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.recuperacion import (
     Recuperacion, SesionRecuperacion, VECES_PARA_RECUPERAR, dias_perdidos, dia_libre, inicio_mes,
+    dias_libres_que_quedan, cuantos_se_pueden_recuperar,
 )
 from app.level_config import XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO
 from app.models.user_progress import UserProgress
@@ -17,6 +18,8 @@ SAB_17 = date(2026, 10, 17)
 DOM_18 = date(2026, 10, 18)
 LUN_19 = date(2026, 10, 19)
 SAB_24 = date(2026, 10, 24)
+DOM_25 = date(2026, 10, 25)
+SAB_31 = date(2026, 10, 31)
 
 
 class _Hoy(date):
@@ -118,18 +121,101 @@ def test_habito_de_lunes_a_viernes_muestra_dias_perdidos(logged_client, user, ho
     assert 'en su día libre' in html  # botón para sumar hoy (sábado)
 
 
-def test_habito_de_todos_los_dias_avisa_que_no_tiene_dia_libre(logged_client, user, hoy):
+def test_habito_de_todos_los_dias_no_aparece(logged_client, user, hoy):
+    # Sin días libres nunca se puede recuperar: no se muestra
     habit = _habit(user, list(range(7)), 'Agua')
     html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
-    assert 'quítale al menos un día' in html
+    assert 'Agua' not in html
+    assert 'No tienes días que puedas recuperar' in html
     _hice_en_dia_libre(logged_client, habit, SAB_17)
     assert SesionRecuperacion.query.count() == 0
 
 
-def test_habito_al_dia(logged_client, user, hoy):
+def test_habito_al_dia_no_aparece(logged_client, user, hoy):
     habit = _habit(user, [0, 1, 2, 3, 4], 'Leer')
     _lun_a_vie_hechos(user, habit)
-    assert 'Al día' in logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    assert 'Leer' not in html
+    assert 'No tienes días que puedas recuperar' in html
+
+
+def test_solo_aparecen_los_habitos_recuperables(logged_client, user, hoy):
+    perdido = _habit(user, [0, 1, 2, 3, 4], 'Leer')
+    al_dia = _habit(user, [0, 1, 2, 3, 4], 'Correr')
+    _lun_a_vie_hechos(user, perdido, menos={LUN_5})
+    _lun_a_vie_hechos(user, al_dia)
+    html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    assert 'Leer' in html
+    assert 'Correr' not in html.split('class="check-card"')[1]
+
+
+# ── Fin de mes: solo si todavía alcanzan los días libres ──
+
+def test_dias_libres_que_quedan_hasta_fin_de_mes():
+    h = Habit(habitName='x', habitFreq='diario', habitCategory='salud', habitState='Activo')
+    h.set_dias([0, 1, 2, 3, 4])
+    # Octubre 2026 termina el sábado 31: libres 24, 25 y 31
+    assert dias_libres_que_quedan(h, SAB_24, SAB_24) == 3
+    assert dias_libres_que_quedan(h, DOM_25, DOM_25) == 2
+    assert dias_libres_que_quedan(h, date(2026, 11, 1), SAB_31) == 0
+
+
+def test_cuantos_se_pueden_recuperar():
+    dos = [LUN_5, LUN_12]
+    assert cuantos_se_pueden_recuperar(dos, 0, 6) == 2
+    assert cuantos_se_pueden_recuperar(dos, 0, 3) == 1
+    assert cuantos_se_pueden_recuperar(dos, 1, 1) == 0
+    assert cuantos_se_pueden_recuperar(dos, 3, 0) == 1
+    assert cuantos_se_pueden_recuperar([], 3, 9) == 0
+
+
+def test_no_aparece_si_ya_no_alcanzan_los_dias_libres(logged_client, user, hoy):
+    habit = _habit(user, [0, 1, 2, 3, 4], 'Leer')
+    _lun_a_vie_hechos(user, habit, menos={LUN_5})
+    # Domingo 25 con 0/3: quedan el 25 y el 31, no alcanza
+    hoy.actual = DOM_25
+    html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    assert 'Leer' not in html.split('class="check-card"')[1]
+    # Y tampoco deja sumar una vez que no sirve
+    _hice_en_dia_libre(logged_client, habit, DOM_25)
+    assert SesionRecuperacion.query.count() == 0
+
+
+def test_aparece_si_alcanza_justo(logged_client, user, hoy):
+    habit = _habit(user, [0, 1, 2, 3, 4], 'Leer')
+    _lun_a_vie_hechos(user, habit, menos={LUN_5})
+    # Sábado 24 con 0/3: quedan 24, 25 y 31, justo 3
+    hoy.actual = SAB_24
+    assert 'Leer' in logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    # Sumando el 24, el domingo 25 sigue alcanzando (1 + 25 y 31)
+    _hice_en_dia_libre(logged_client, habit, SAB_24)
+    hoy.actual = DOM_25
+    assert 'Leer' in logged_client.get('/habitos/recuperar').get_data(as_text=True)
+
+
+def test_avisa_cuantos_alcanzan_si_son_menos_que_los_perdidos(logged_client, user, hoy):
+    habit = _habit(user, [0, 1, 2, 3, 4], 'Leer')
+    _lun_a_vie_hechos(user, habit, menos={LUN_5, LUN_12})
+    for dia in range(19, 24):  # la semana del 19 al 23 sí se hizo
+        db.session.add(HistHabit(idUser=user.idUser, idHabit=habit.idHabit, fecha=date(2026, 10, dia)))
+    db.session.commit()
+    hoy.actual = SAB_24
+    html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    assert '2 días perdidos este mes' in html
+    assert 'te alcanza para recuperar 1' in html
+
+
+def test_con_tres_veces_sigue_apareciendo_aunque_no_queden_libres(logged_client, user, hoy):
+    habit = _habit(user, [0, 1, 2, 3, 4], 'Leer')
+    _lun_a_vie_hechos(user, habit, menos={LUN_5})
+    for fecha in (SAB_17, DOM_18, SAB_24):
+        db.session.add(SesionRecuperacion(idUser=user.idUser, idHabit=habit.idHabit, fecha=fecha))
+    db.session.commit()
+    hoy.actual = SAB_31
+    _hice_en_dia_libre(logged_client, habit, SAB_31)  # no suma: ya tiene 3
+    html = logged_client.get('/habitos/recuperar').get_data(as_text=True)
+    assert 'Leer' in html and '3/3 en días libres' in html
+    assert 'Completaste' in _completar(logged_client, habit, LUN_5).get_data(as_text=True)
 
 
 # ── 3 veces en días libres → 1 día completado ──

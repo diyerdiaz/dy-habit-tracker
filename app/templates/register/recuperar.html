@@ -140,12 +140,12 @@
                 <div class="check-meta">{{ e.habit.dias_texto() }}</div>
             </div>
 
-            {% if not e.perdidos %}
-            <p class="recup-estado recup-ok"><i class="bi bi-check-circle"></i> Al día: no tienes días perdidos este mes.</p>
-            {% else %}
             <p class="recup-estado">
                 <i class="bi bi-exclamation-circle"></i>
                 {{ e.perdidos|length }} {{ 'día perdido' if e.perdidos|length == 1 else 'días perdidos' }} este mes
+                {% if e.alcanzan < e.perdidos|length %}
+                · te alcanza para recuperar {{ e.alcanzan }}
+                {% endif %}
             </p>
 
             <div class="recup-progreso" aria-label="{{ e.veces }} de {{ veces_para_recuperar }}">
@@ -166,7 +166,7 @@
             {% elif e.hecho_hoy %}
             <p class="recup-nota recup-listo">Hoy ya lo hiciste en su día libre. Vuelve en su próximo día libre.</p>
             {% elif not e.dia_libre %}
-            <p class="recup-nota recup-aviso">Hoy le toca este hábito: hazlo normal en el Check. Para recuperar, hazlo en un día que no le toque{% if e.habit.dias_lista()|length == 7 %}; este hábito toca todos los días, así que en el plan del mes quítale al menos un día{% endif %}.</p>
+            <p class="recup-nota recup-aviso">Hoy le toca este hábito: hazlo normal en el Check. Para recuperar, hazlo en uno de sus días libres.</p>
             {% elif sesion_hoy %}
             <p class="recup-nota">Hoy ya hiciste otro hábito en su día libre. Mañana puedes sumar este.</p>
             {% endif %}
@@ -182,12 +182,11 @@
                 </form>
                 {% endfor %}
             </div>
-            {% endif %}
         </div>
         {% else %}
         <div class="check-empty">
-            <i class="bi bi-inbox"></i>
-            <span>No tienes hábitos activos.</span>
+            <i class="bi bi-emoji-smile"></i>
+            <span>No tienes días que puedas recuperar este mes.</span>
         </div>
         {% endfor %}
     </div>
