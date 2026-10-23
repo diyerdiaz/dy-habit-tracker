@@ -28,3 +28,14 @@ class Recordatorio(db.Model):
         t = self.hora_time()
         sufijo = 'a. m.' if t.hour < 12 else 'p. m.'
         return f"{(t.hour % 12) or 12}:{t.minute:02d} {sufijo}"
+
+
+class EnvioPrueba(db.Model):
+    """Registro de cada correo de prueba enviado desde el perfil, para limitarlos
+    (evita que se use la app para llenar de correos a alguien o que Gmail
+    suspenda la cuenta por exceso de envíos)."""
+    __tablename__ = 'envios_prueba'
+    idEnvio = db.Column(db.Integer, primary_key=True)
+    idUser = db.Column(db.Integer, db.ForeignKey('users.idUser'), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    createdAt = db.Column(db.DateTime, default=datetime.now, nullable=False, index=True)

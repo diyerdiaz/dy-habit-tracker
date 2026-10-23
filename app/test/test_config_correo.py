@@ -82,3 +82,12 @@ def test_env_example_no_tiene_secretos_reales():
 
 def test_tests_no_usan_correo_real(app):
     assert app.config["MAIL_ENABLED"] is False
+
+
+def test_docker_compose_pasa_las_variables_del_correo_sin_valores():
+    # Con Docker Compose (Coolify) solo llegan al contenedor las variables nombradas
+    # en el compose; los valores reales van en Coolify, nunca en el archivo
+    compose = (RAIZ / "docker-compose.yml").read_text()
+    assert "MAIL_USERNAME: ${MAIL_USERNAME:-}" in compose
+    assert "MAIL_PASSWORD: ${MAIL_PASSWORD:-}" in compose
+    assert "APP_URL: ${SERVICE_URL_APP:-}" in compose
