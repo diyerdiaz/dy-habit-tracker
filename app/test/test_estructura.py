@@ -109,3 +109,17 @@ def test_github_actions_corre_todos_los_tests():
     # Misma versión de Python que el Dockerfile de producción
     version = re.search(r'FROM python:(\d+\.\d+)', (APP.parent / "Dockerfile").read_text()).group(1)
     assert f'python-version: "{version}"' in flujo
+
+
+def test_animacion_de_carga_en_todas_las_paginas(client, logged_client):
+    for cliente, url in ((client, "/"), (logged_client, "/dashboard"), (logged_client, "/metodos/")):
+        html = cliente.get(url, follow_redirects=True).get_data(as_text=True)
+        # cargando.js define los puntos que luego usa envio_unico.js en los botones
+        assert "js/cargando.js" in html and "js/envio_unico.js" in html, url
+        assert html.index("js/cargando.js") < html.index("js/envio_unico.js"), url
+    js = client.get("/static/js/cargando.js").get_data(as_text=True)
+    assert "window.puntosCargando" in js and "pageshow" in js
+    # Las descargas y los modales no muestran la capa (la página no cambia)
+    assert "download" in js and "data-bs-toggle" in js
+    css = client.get("/static/css/m.css").get_data(as_text=True)
+    assert "@keyframes ola-puntos" in css and ".capa-cargando.visible" in css
