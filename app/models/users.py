@@ -9,6 +9,38 @@ import base64
 # Prefijos de los hashes que genera werkzeug (scrypt por defecto, pbkdf2 en versiones viejas)
 _HASH_PREFIXES = ('scrypt:', 'pbkdf2:')
 
+# Requisitos de una contraseña segura: (clave, texto para mostrar, comprobación).
+# static/js/contrasena.js repite estas mismas reglas para marcarlas mientras se escribe.
+MIN_LARGO_CONTRASENA = 8
+MAX_LARGO_CONTRASENA = 128
+REQUISITOS_CONTRASENA = [
+    ('largo', f'Mínimo {MIN_LARGO_CONTRASENA} caracteres', lambda c: len(c) >= MIN_LARGO_CONTRASENA),
+    ('mayuscula', 'Una letra mayúscula', lambda c: any(ch.isupper() for ch in c)),
+    ('minuscula', 'Una letra minúscula', lambda c: any(ch.islower() for ch in c)),
+    ('numero', 'Un número', lambda c: any(ch.isdigit() for ch in c)),
+    ('simbolo', 'Un símbolo (por ejemplo ! @ # $ . _ -)', lambda c: any(not ch.isalnum() and not ch.isspace() for ch in c)),
+]
+
+
+def requisitos_faltantes(clave):
+    """Textos de los requisitos que la contraseña no cumple (lista vacía = segura)."""
+    clave = clave or ''
+    return [texto for _, texto, cumple in REQUISITOS_CONTRASENA if not cumple(clave)]
+
+
+def contrasena_segura(clave):
+    return not requisitos_faltantes(clave) and len(clave or '') <= MAX_LARGO_CONTRASENA
+
+
+def mensaje_requisitos(clave):
+    """Mensaje para el usuario con lo que le falta a la contraseña, o None si es segura."""
+    if len(clave or '') > MAX_LARGO_CONTRASENA:
+        return f'La contraseña puede tener máximo {MAX_LARGO_CONTRASENA} caracteres.'
+    faltan = requisitos_faltantes(clave)
+    if not faltan:
+        return None
+    return 'La contraseña no es segura. Le falta: ' + ', '.join(f.lower() for f in faltan) + '.'
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'

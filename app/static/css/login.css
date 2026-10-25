@@ -36,3 +36,112 @@
     margin-top: 8px;
     display: none;
 }
+
+/* ── Recuperar contraseña ── */
+/* minmax(0, 1fr): nada dentro de la tarjeta puede ensancharla y descuadrar los márgenes */
+.login-card {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.recuperar-section {
+    grid-area: 1 / 1;
+    min-width: 0;
+}
+
+/* Títulos largos ("Recuperar contraseña"): un poco más pequeños y pueden partirse */
+.recuperar-section .card-header h1 {
+    white-space: normal;
+    font-size: clamp(2rem, 2.6vw, 2.7rem);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+}
+
+.recuperar-ayuda {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.82rem;
+    margin: 8px 0 0;
+}
+
+.codigo-cajas {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.codigo-caja {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 58px;
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    text-align: center;
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: #fff;
+    caret-color: var(--tema-vivo, #d966ff);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.codigo-caja:focus {
+    border-color: var(--tema-vivo, #d966ff);
+    box-shadow: 0 0 14px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+    transform: translateY(-2px);
+}
+
+.codigo-caja.llena {
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.7);
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.12);
+}
+
+/* Al enfocar un cuadro su número se selecciona (para reemplazarlo): sin el resaltado azul */
+.codigo-caja::selection {
+    background: transparent;
+}
+
+.codigo-caja:disabled {
+    opacity: 0.4;
+}
+
+.recuperar-estado {
+    margin-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.85rem;
+}
+
+.recuperar-estado strong {
+    color: var(--tema-vivo, #d966ff);
+}
+
+.recuperar-vencido {
+    color: #ff6666;
+    font-size: 0.9rem;
+    margin: 12px 0 0;
+}
+
+.recuperar-reenviar {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.login-olvide {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 400px) {
+    .codigo-cajas {
+        gap: 6px;
+    }
+
+    .codigo-caja {
+        font-size: 1.5rem;
+        border-radius: 10px;
+    }
+}

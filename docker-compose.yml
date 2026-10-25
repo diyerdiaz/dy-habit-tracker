@@ -8,7 +8,8 @@ services:
       - "4000:4000"
     environment:
       
-      SESSION_COOKIE_SECURE: "0"
+      # La app se publica con HTTPS (habits.proyecto.lol): la cookie de sesión solo viaja cifrada
+      SESSION_COOKIE_SECURE: "1"
       TZ: America/Bogota
       # Correo de los recordatorios. Los valores reales se ponen en Coolify
       # (Environment Variables) o en un .env junto a este archivo; nunca aquí.

@@ -18,7 +18,7 @@ def test_login_invalid_credentials(client, user):
         'passwordUser': 'clave_incorrecta',
     }, follow_redirects=True)
     assert response.status_code == 200
-    assert b"Invalid credentials. Please try again." in response.data
+    assert "Usuario o contraseña incorrectos" in response.get_data(as_text=True)
 
 
 def test_password_is_stored_hashed(user):

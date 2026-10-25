@@ -1,0 +1,81 @@
+{# Correo HTML: tablas y estilos inline porque Gmail y otros clientes ignoran los .css
+   externos y los <style>. Los colores vienen del personaje del login (tema). #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Tu contraseña se cambió</title>
+</head>
+<body style="margin:0;padding:0;background:#07000d;" bgcolor="#07000d">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#07000d" style="background:#07000d;">
+<tr><td align="center" style="padding:28px 12px;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+    <tr><td align="center" style="padding:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:{{ tema['vivo'] }};">
+      DY Habit Tracker
+    </td></tr>
+
+    <tr><td bgcolor="{{ tema['oscuro'] }}" style="background:{{ tema['oscuro'] }};background-image:linear-gradient(180deg, {{ tema['oscuro'] }} 0%, {{ tema['oscuro-2'] }} 100%);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.35);border-radius:24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td align="center" style="padding:24px 24px 0;">
+          <img src="cid:personaje" width="170" alt="{{ personaje['nombre'] }}" style="display:block;width:170px;max-width:100%;height:auto;border:0;">
+        </td></tr>
+
+        <tr><td align="center" style="padding:8px 28px 0;font-family:Georgia,'Times New Roman',serif;">
+          <h1 style="margin:0;font-size:26px;font-style:italic;font-weight:700;color:{{ tema['vivo'] }};">Tu contraseña se cambió</h1>
+          <p style="margin:10px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:rgba(255,255,255,0.8);">
+            Hola, {{ user.nameUser }}. Te avisamos por seguridad.
+          </p>
+        </td></tr>
+
+        <!-- Cuándo -->
+        <tr><td style="padding:22px 28px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba({{ tema['vivo-rgb'] }}, 0.10);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.30);border-radius:18px;">
+            <tr><td align="center" style="padding:18px 16px;font-family:Arial,Helvetica,sans-serif;">
+              <div style="font-size:34px;line-height:1;">🔐</div>
+              <div style="margin-top:10px;font-size:16px;font-weight:700;color:#ffffff;">{{ ahora.strftime('%d/%m/%Y') }} a las {{ ahora.strftime('%H:%M') }}</div>
+              <div style="margin-top:4px;font-size:13px;color:rgba(255,255,255,0.6);">con un código de recuperación enviado a este correo</div>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <!-- Si fuiste tú -->
+        <tr><td style="padding:14px 28px 0;">
+          <p style="margin:0;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,0.05);font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#ffffff;">
+            ✅ <strong>¿Fuiste tú?</strong> Listo, no tienes que hacer nada. Ya puedes entrar con tu nueva contraseña.
+          </p>
+        </td></tr>
+
+        <!-- Si no fuiste tú -->
+        <tr><td style="padding:10px 28px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ tema['grad-1'] }}" style="background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['grad-2'] }});border-radius:16px;">
+            <tr><td style="padding:14px 18px;font-family:Arial,Helvetica,sans-serif;color:#ffffff;">
+              <div style="font-size:15px;font-weight:800;">⚠️ ¿No fuiste tú?</div>
+              <div style="margin-top:4px;font-size:14px;line-height:1.5;">Recupera tu contraseña otra vez cuanto antes y cambia también la contraseña de este correo: alguien podría tener acceso a él.</div>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        {% if url_recuperar %}
+        <tr><td align="center" style="padding:18px 28px 0;">
+          <a href="{{ url_recuperar }}" style="display:inline-block;padding:14px 30px;border-radius:14px;background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['vivo'] }});font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+            Recuperar mi contraseña →
+          </a>
+        </td></tr>
+        {% endif %}
+
+        <tr><td style="padding:24px 28px 0;"></td></tr>
+      </table>
+    </td></tr>
+
+    <tr><td align="center" style="padding:18px 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:rgba(255,255,255,0.4);">
+      Este es un aviso automático de seguridad de tu cuenta.
+    </td></tr>
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>

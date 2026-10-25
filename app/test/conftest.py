@@ -1,7 +1,7 @@
 import pytest
 from app import create_app, db
 
-TEST_PASSWORD = "test_password"
+TEST_PASSWORD = "Test_password1"
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def user(app):
 @pytest.fixture
 def other_user(app):
     from app.models.users import User
-    other = User(nameUser="otro", password="otra_clave")
+    other = User(nameUser="otro", password="Otra_clave1")
     db.session.add(other)
     db.session.commit()
     yield other

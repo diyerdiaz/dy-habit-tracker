@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models.users import User
+from app.models.users import User, contrasena_segura
+from app.models.intentos_login import IntentoLogin, MAX_FALLOS, MINUTOS_BLOQUEO
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes
@@ -18,18 +19,36 @@ def login():
         nameUser = (request.form.get('nameUser') or '').strip()
         passwordUser = request.form.get('passwordUser') or ''
 
-        user = User.query.filter_by(nameUser=nameUser).first()
-        if user and user.check_password(passwordUser):
-            login_user(user)
-            # El saludo de bienvenida sale siempre justo después de iniciar sesión
-            session['bienvenida'] = True
-            # Toda la app toma el color del personaje que salió en el login
-            session['tema_sitio'] = session.get('personaje_login', 0)
-            flash("Login successful!", "success")
-            return redirect(url_for('auth.dashboard'))
-        
-        flash('Invalid credentials. Please try again.', 'danger')
-    
+        minutos = IntentoLogin.minutos_bloqueado(nameUser)
+        if minutos:
+            # Bloqueado: ni siquiera se revisa la contraseña
+            flash(f"Demasiados intentos fallidos. Por seguridad espera {minutos} "
+                  f"{'minuto' if minutos == 1 else 'minutos'} o recupera tu contraseña.", 'danger')
+        else:
+            user = User.query.filter_by(nameUser=nameUser).first()
+            if user and user.check_password(passwordUser):
+                IntentoLogin.limpiar(nameUser)
+                login_user(user)
+                # El saludo de bienvenida sale siempre justo después de iniciar sesión
+                session['bienvenida'] = True
+                # Toda la app toma el color del personaje que salió en el login
+                session['tema_sitio'] = session.get('personaje_login', 0)
+                if not contrasena_segura(passwordUser):
+                    # Contraseña antigua que no cumple los requisitos: se mantiene,
+                    # pero no puede usar la app hasta cambiarla (ver app/__init__.py)
+                    session['debe_cambiar_clave'] = True
+                    return redirect(url_for('perfil.actualizar_contrasena'))
+                flash("Login successful!", "success")
+                return redirect(url_for('auth.dashboard'))
+
+            restantes = IntentoLogin.registrar_fallo(nameUser) if nameUser else MAX_FALLOS
+            if restantes == 0:
+                flash(f'Demasiados intentos fallidos. Por seguridad el acceso queda bloqueado '
+                      f'{MINUTOS_BLOQUEO} minutos. Si olvidaste tu contraseña, recupérala.', 'danger')
+            else:
+                flash(f"Usuario o contraseña incorrectos. Te {'queda 1 intento' if restantes == 1 else f'quedan {restantes} intentos'} "
+                      f"antes de bloquear el acceso {MINUTOS_BLOQUEO} minutos.", 'danger')
+
     if current_user.is_authenticated:
         return redirect(url_for('auth.dashboard'))
     # Cada vez que se carga el login aparece un personaje distinto al anterior

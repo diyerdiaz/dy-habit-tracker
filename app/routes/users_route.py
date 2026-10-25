@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file, flash, abort
 from flask_login import login_required, current_user, logout_user
-from app.models.users import User
+from app.models.users import User, mensaje_requisitos
 from app import db
 from io import BytesIO
 import base64
@@ -8,7 +8,6 @@ import json
 
 bp = Blueprint('user', __name__, url_prefix='/User')
 
-MIN_PASSWORD = 6
 
 
 def _own_user_or_403(id):
@@ -30,12 +29,14 @@ def _delete_user_data(idUser):
     from app.models.shadowing_sesion import ShadowingSesion
     from app.models.metodo_estudio import MetodoEstudio
     from app.models.recordatorios import Recordatorio, EnvioPrueba
+    from app.models.codigos_recuperacion import CodigoRecuperacion
     from app.routes.metodos_route import _borrar_archivos
     for metodo in MetodoEstudio.query.filter_by(idUser=idUser).all():
         _borrar_archivos([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     for model in (HistHabit, Habit, Castigo, Tarea, UserProgress,
-                  VocabularioRegistro, Vocabulario, ShadowingSesion, Recordatorio, EnvioPrueba):
+                  VocabularioRegistro, Vocabulario, ShadowingSesion, Recordatorio, EnvioPrueba,
+                  CodigoRecuperacion):
         model.query.filter_by(idUser=idUser).delete(synchronize_session=False)
 
 
@@ -63,8 +64,8 @@ def add():
         if not nameUser or len(nameUser) > 80:
             flash("Ingresa un nombre de usuario válido (máx. 80 caracteres).", "danger")
             return redirect(url_for('auth.login', register=1))
-        if len(passwordUser) < MIN_PASSWORD:
-            flash(f"La contraseña debe tener al menos {MIN_PASSWORD} caracteres.", "danger")
+        if mensaje_requisitos(passwordUser):
+            flash(mensaje_requisitos(passwordUser), "danger")
             return redirect(url_for('auth.login', register=1))
 
         existing_user = User.query.filter_by(nameUser=nameUser).first()
@@ -97,8 +98,8 @@ def edit(id):
 
         # Contraseña vacía = no cambiarla
         if passwordUser:
-            if len(passwordUser) < MIN_PASSWORD:
-                flash(f"La contraseña debe tener al menos {MIN_PASSWORD} caracteres.", "danger")
+            if mensaje_requisitos(passwordUser):
+                flash(mensaje_requisitos(passwordUser), "danger")
                 return redirect(url_for('user.edit', id=id))
             user.set_password(passwordUser)
 

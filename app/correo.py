@@ -19,6 +19,7 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.personajes_login import PERSONAJES, elegir_personaje
 from app.models.recordatorios import Recordatorio, EnvioPrueba
+from app.models.codigos_recuperacion import CodigoRecuperacion, MINUTOS_VALIDEZ
 from app.models.users import User
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,11 @@ PRUEBA_ESPERA_SEGUNDOS = 60      # entre dos pruebas del mismo usuario
 PRUEBA_MAX_DIA_USUARIO = 5
 PRUEBA_MAX_DIA_DESTINO = 5       # a una misma dirección, aunque sean varias cuentas
 PRUEBA_MAX_DIA_TOTAL = 100       # toda la app (Gmail permite ~500 al día)
+
+# Límites de los códigos para recuperar la contraseña
+CODIGO_ESPERA_SEGUNDOS = 60
+CODIGO_MAX_DIA_USUARIO = 5
+CODIGO_MAX_DIA_TOTAL = 100
 
 
 def habitos_pendientes(idUser, fecha=None):
@@ -158,6 +164,66 @@ def registrar_prueba(user, ahora=None):
     EnvioPrueba.query.filter(EnvioPrueba.createdAt < ahora - timedelta(days=2)).delete(synchronize_session=False)
     db.session.add(EnvioPrueba(idUser=user.idUser, email=user.email, createdAt=ahora))
     db.session.commit()
+
+
+def limite_codigo(user, ahora=None):
+    """Mensaje de por qué no se puede enviar otro código ahora, o None si se puede."""
+    ahora = ahora or datetime.now()
+    inicio_dia = datetime.combine(ahora.date(), datetime.min.time())
+    hoy = CodigoRecuperacion.query.filter(CodigoRecuperacion.createdAt >= inicio_dia)
+    ultimo = (CodigoRecuperacion.query.filter_by(idUser=user.idUser)
+              .order_by(CodigoRecuperacion.createdAt.desc()).first())
+    if ultimo and (ahora - ultimo.createdAt).total_seconds() < CODIGO_ESPERA_SEGUNDOS:
+        return 'Espera un minuto antes de pedir otro código.'
+    if hoy.filter_by(idUser=user.idUser).count() >= CODIGO_MAX_DIA_USUARIO:
+        return f'Ya pediste {CODIGO_MAX_DIA_USUARIO} códigos hoy. Inténtalo mañana.'
+    if hoy.count() >= CODIGO_MAX_DIA_TOTAL:
+        return 'No podemos enviar más códigos hoy. Inténtalo mañana.'
+    return None
+
+
+def enviar_codigo(user, codigo, personaje=None):
+    """Envía el código de recuperación con el diseño de la app (personaje incrustado)."""
+    if personaje is None:
+        personaje = elegir_personaje()
+    datos = dict(user=user, codigo=codigo, minutos=MINUTOS_VALIDEZ,
+                 personaje=PERSONAJES[personaje], tema=PERSONAJES[personaje]['tema'])
+    return enviar_correo(
+        user.email,
+        f'Tu código para recuperar la contraseña: {codigo}',
+        _render('correos/codigo.txt', **datos),
+        _render('correos/codigo.html', **datos),
+        imagenes={'personaje': (imagen_personaje(personaje), 'jpeg')},
+    )
+
+
+def avisar_contrasena_cambiada(user, personaje=None):
+    """Aviso de seguridad tras cambiar la contraseña con un código. Si falla, solo se registra."""
+    if personaje is None:
+        personaje = elegir_personaje()
+    app_url = (current_app.config.get('APP_URL') or '').rstrip('/')
+    datos = dict(user=user, ahora=datetime.now(), personaje=PERSONAJES[personaje],
+                 tema=PERSONAJES[personaje]['tema'],
+                 url_recuperar=f'{app_url}/recuperar/' if app_url else None)
+    try:
+        enviar_correo(
+            user.email, 'Tu contraseña se cambió',
+            _render('correos/contrasena_cambiada.txt', **datos),
+            _render('correos/contrasena_cambiada.html', **datos),
+            imagenes={'personaje': (imagen_personaje(personaje), 'jpeg')},
+        )
+    except (smtplib.SMTPException, OSError):
+        logger.exception('No se pudo enviar el aviso de contraseña cambiada a %s', user.idUser)
+
+
+def ocultar_email(email):
+    """d***z7@gmail.com: para mostrar a dónde se envió el código sin revelar el correo completo."""
+    usuario, _, dominio = (email or '').partition('@')
+    if len(usuario) <= 2:
+        visible = usuario[:1] + '***'
+    else:
+        visible = usuario[0] + '***' + usuario[-2:]
+    return f'{visible}@{dominio}'
 
 
 def toca_enviar(recordatorio, ahora):

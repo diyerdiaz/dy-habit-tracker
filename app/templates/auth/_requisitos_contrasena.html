@@ -1,0 +1,9 @@
+{# Lista de requisitos de la contraseña; contrasena.js los marca mientras se escribe.
+   Uso: {% with campo='id_del_input' %}{% include 'auth/_requisitos_contrasena.html' %}{% endwith %} #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/contrasena.css') }}">
+<ul class="requisitos-contrasena" data-para="{{ campo }}" aria-live="polite">
+    {% for clave, texto, _ in requisitos_contrasena %}
+    <li data-regla="{{ clave }}"><i class="bi bi-circle" aria-hidden="true"></i> {{ texto }}</li>
+    {% endfor %}
+</ul>
+<script src="{{ url_for('static', filename='js/contrasena.js') }}" defer></script>

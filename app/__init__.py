@@ -56,7 +56,7 @@ def create_app(config_overrides=None):
     from app.routes import (
         users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, metodos_route, estadisticas_route,
-        perfil_route, pwa_route, vision_route, temas_route,
+        perfil_route, pwa_route, vision_route, temas_route, recuperar_route,
     )
 
     app.register_blueprint(auth_route.bp)
@@ -73,6 +73,20 @@ def create_app(config_overrides=None):
     app.register_blueprint(pwa_route.bp)
     app.register_blueprint(vision_route.bp)
     app.register_blueprint(temas_route.bp)
+    app.register_blueprint(recuperar_route.bp)
+
+    # Quien entró con una contraseña que no cumple los requisitos solo puede
+    # cambiarla o cerrar sesión hasta que la actualice (ver auth_route.login)
+    PERMITIDAS_SIN_CAMBIAR_CLAVE = {'perfil.actualizar_contrasena', 'auth.logout', 'static'}
+
+    @app.before_request
+    def obligar_cambio_de_contrasena():
+        from flask import session, redirect, url_for
+        from flask_login import current_user
+        if (session.get('debe_cambiar_clave') and current_user.is_authenticated
+                and request.endpoint not in PERMITIDAS_SIN_CAMBIAR_CLAVE
+                and not (request.endpoint or '').startswith('pwa.')):
+            return redirect(url_for('perfil.actualizar_contrasena'))
 
     # Comando `flask enviar-recordatorios` (correos de hábitos pendientes)
     from app.correo import registrar_comandos
@@ -101,9 +115,11 @@ def create_app(config_overrides=None):
     def tema_de_la_app():
         from flask import session
         from app.models.personajes_login import tema_del_sitio, personaje_del_sitio
+        from app.models.users import REQUISITOS_CONTRASENA
         return {
             'tema_sitio': tema_del_sitio(session.get('tema_sitio')),
             'personaje_sitio': personaje_del_sitio(session.get('tema_sitio')),
+            'requisitos_contrasena': REQUISITOS_CONTRASENA,
         }
 
     def _wants_json():

@@ -13,7 +13,7 @@ def csrf_client():
     })
     with app.app_context():
         db.create_all()
-        db.session.add(User(nameUser="u", password="clave123"))
+        db.session.add(User(nameUser="u", password="Clave_123"))
         db.session.commit()
         yield app.test_client()
         db.session.remove()
@@ -21,7 +21,7 @@ def csrf_client():
 
 
 def test_post_without_csrf_token_is_rejected(csrf_client):
-    response = csrf_client.post('/', data={'nameUser': 'u', 'passwordUser': 'clave123'})
+    response = csrf_client.post('/', data={'nameUser': 'u', 'passwordUser': 'Clave_123'})
     assert response.status_code == 400
 
 

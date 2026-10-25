@@ -1,0 +1,50 @@
+{% extends "auth/_recuperar_layout.html" %}
+
+{% block titulo_pagina %}Escribe tu código{% endblock %}
+
+{% block tarjeta %}
+<div class="card-header">
+    <h1>Escribe tu código</h1>
+    <p>Paso 2 de 3 · Lo enviamos a <strong>{{ email }}</strong></p>
+</div>
+<div class="card-body">
+    {% if vigente %}
+    <form method="post" action="{{ url_for('recuperar.codigo') }}" id="formCodigo">
+        <div class="form-group mb-3">
+            <label class="form-label" id="etiquetaCodigo">Código de {{ digitos }} dígitos</label>
+            {# Un cuadro por número; recuperar.js junta los dígitos en el campo oculto "codigo" #}
+            <input type="hidden" name="codigo" id="codigo">
+            <div class="codigo-cajas" role="group" aria-labelledby="etiquetaCodigo">
+                {% for i in range(digitos) %}
+                <input type="text" class="codigo-caja" inputmode="numeric" pattern="[0-9]" maxlength="{{ digitos }}"
+                    autocomplete="{{ 'one-time-code' if loop.first else 'off' }}"
+                    aria-label="Dígito {{ loop.index }} de {{ digitos }}"{% if loop.first %} autofocus{% endif %}>
+                {% endfor %}
+            </div>
+            <p class="recuperar-vencido" id="avisoIncompleto" hidden><i class="bi bi-exclamation-circle"></i> Escribe los {{ digitos }} números.</p>
+        </div>
+        <div class="recuperar-estado">
+            <span><i class="bi bi-stopwatch"></i> Vence en <strong id="cuentaRegresiva" data-segundos="{{ segundos }}">{{ '%d:%02d' % (segundos // 60, segundos % 60) }}</strong></span>
+            <span><i class="bi bi-shield-check"></i> {{ intentos }} {{ 'intento' if intentos == 1 else 'intentos' }}</span>
+        </div>
+        <p class="recuperar-vencido" id="avisoVencido" hidden><i class="bi bi-exclamation-circle"></i> El código venció. Pide uno nuevo.</p>
+        <div class="d-grid gap-3 mt-4">
+            <button type="submit" class="btn btn-primary btn-block" id="btnCodigo">
+                <i class="bi bi-check2-circle"></i> Verificar código
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <p class="recuperar-vencido"><i class="bi bi-exclamation-circle"></i> Ya no tienes un código válido. Pide uno nuevo.</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('recuperar.reenviar') }}" class="mt-3">
+        <button type="submit" class="forgot-link recuperar-reenviar w-100">
+            <i class="bi bi-arrow-repeat"></i> Enviarme un código nuevo
+        </button>
+    </form>
+    <a href="{{ url_for('recuperar.inicio') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch">
+        <i class="bi bi-arrow-left"></i> Usar otro usuario o correo
+    </a>
+</div>
+{% endblock %}

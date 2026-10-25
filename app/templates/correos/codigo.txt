@@ -1,0 +1,10 @@
+Hola, {{ user.nameUser }}:
+
+Tu código para recuperar la contraseña es:
+
+    {{ codigo }}
+
+Vence en {{ minutos }} minutos y tienes 3 intentos para escribirlo.
+
+Si no pediste este código, ignora este correo: tu contraseña no cambia y tu cuenta sigue segura.
+Nunca compartas este código con nadie.

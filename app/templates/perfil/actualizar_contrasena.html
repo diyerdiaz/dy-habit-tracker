@@ -1,0 +1,50 @@
+{% extends "auth/_recuperar_layout.html" %}
+{# Cambio obligatorio: quien entra con una contraseña que no cumple los requisitos #}
+
+{% block titulo_pagina %}Actualiza tu contraseña{% endblock %}
+{% block marca_titulo %}Protejamos tu cuenta{% endblock %}
+{% block marca_texto %}Tu contraseña actual ya no cumple los requisitos de seguridad. Cámbiala una vez y sigue con tus hábitos.{% endblock %}
+
+{% block tarjeta %}
+<div class="card-header">
+    <h1>Actualiza tu contraseña</h1>
+    <p>Hola, <strong>{{ current_user.nameUser }}</strong>. Antes de seguir, crea una contraseña segura.</p>
+</div>
+<div class="card-body">
+    <p class="recuperar-ayuda mb-3"><i class="bi bi-shield-lock"></i> Tu contraseña actual no cambia hasta que guardes la nueva.</p>
+    <form method="post" action="{{ url_for('perfil.actualizar_contrasena') }}" id="formNueva">
+        <div class="form-group mb-3">
+            <label for="nueva_contrasena" class="form-label">Contraseña nueva</label>
+            <div class="password-field">
+                <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="form-control"
+                    placeholder="Crea una contraseña segura" autocomplete="new-password" maxlength="128" required autofocus>
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('nueva_contrasena', this)" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            {% with campo='nueva_contrasena' %}{% include 'auth/_requisitos_contrasena.html' %}{% endwith %}
+        </div>
+        <div class="form-group mb-4">
+            <label for="confirmar_contrasena" class="form-label">Repite la contraseña</label>
+            <div class="password-field">
+                <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="form-control"
+                    placeholder="Repite tu contraseña" autocomplete="new-password" maxlength="128" required>
+                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmar_contrasena', this)" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+            <div id="passwordError">
+                <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.
+            </div>
+        </div>
+        <div class="d-grid gap-3">
+            <button type="submit" class="btn btn-primary btn-block" id="btnNueva">
+                <i class="bi bi-lock-fill"></i> Guardar y continuar
+            </button>
+            <a href="{{ url_for('auth.logout') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch">
+                <i class="bi bi-box-arrow-left"></i> Cerrar sesión
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

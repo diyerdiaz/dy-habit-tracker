@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{# Base de las pantallas de "recuperar contraseña" y "actualizar contraseña": mismo fondo, personaje y tarjeta del login #}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+<style>:root { {% for nombre, valor in personaje.tema.items() %}--tema-{{ nombre }}: {{ valor }}; {% endfor %}}</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-fondo"></div>
+<div class="lightning-storm">
+    <div class="lightning-flash flash-1"></div>
+    <div class="lightning-flash flash-2"></div>
+    <div class="lightning-flash flash-3"></div>
+</div>
+<div class="sakura">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="login-wrapper login-portada">
+    <div class="login-left">
+        <div class="login-brand">
+            <h1>{% block marca_titulo %}¿Olvidaste tu contraseña?{% endblock %}</h1>
+            <p>{% block marca_texto %}Tranquilo: te enviamos un código a tu correo y en un minuto vuelves a tus hábitos.{% endblock %}</p>
+        </div>
+        <img src="{{ url_for('static', filename='img/' ~ personaje.archivo) }}" alt="" class="login-personaje" aria-hidden="true">
+    </div>
+
+    <div class="login-right">
+        <div class="card shadow-lg border-0 rounded-lg login-card">
+            <div class="recuperar-section">
+                {% block tarjeta %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+<script src="{{ url_for('static', filename='js/recuperar.js') }}"></script>
+{% endblock %}

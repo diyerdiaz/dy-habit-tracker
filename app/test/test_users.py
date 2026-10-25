@@ -5,12 +5,12 @@ from app.models.users import User
 def test_register_user(client):
     response = client.post('/User/add', data={
         'nameUser': 'new_user',
-        'passwordUser': 'new_password',
+        'passwordUser': 'New_password1',
     })
     assert response.status_code == 302
     created = User.query.filter_by(nameUser='new_user').first()
     assert created is not None
-    assert created.check_password('new_password')
+    assert created.check_password('New_password1')
 
 
 def test_register_rejects_short_password(client):
@@ -40,7 +40,7 @@ def test_index_does_not_leak_passwords(logged_client, user, other_user):
 
 def test_cannot_edit_other_user(logged_client, other_user):
     response = logged_client.post(f'/User/edit/{other_user.idUser}', data={
-        'nameUser': 'hackeado', 'passwordUser': 'hackeado123',
+        'nameUser': 'hackeado', 'passwordUser': 'Hackeado_123',
     })
     assert response.status_code == 403
     assert db.session.get(User, other_user.idUser).nameUser == 'otro'
@@ -48,11 +48,11 @@ def test_cannot_edit_other_user(logged_client, other_user):
 
 def test_edit_own_user(logged_client, user):
     response = logged_client.post(f'/User/edit/{user.idUser}', data={
-        'nameUser': 'updated_user', 'passwordUser': 'updated_password',
+        'nameUser': 'updated_user', 'passwordUser': 'Updated_password1',
     }, follow_redirects=True)
     assert response.status_code == 200
     assert b"updated_user" in response.data
-    assert db.session.get(User, user.idUser).check_password('updated_password')
+    assert db.session.get(User, user.idUser).check_password('Updated_password1')
 
 
 def test_delete_requires_post(logged_client, user):

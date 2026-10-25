@@ -1,0 +1,29 @@
+/* Lista de requisitos de la contraseña (templates/auth/_requisitos_contrasena.html) */
+.requisitos-contrasena {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 4px 12px;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.requisitos-contrasena li {
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s ease;
+}
+
+.requisitos-contrasena li i {
+    margin-right: 4px;
+}
+
+.requisitos-contrasena li.cumple {
+    color: #00e676;
+}
+
+/* Si intenta guardar sin cumplir todo, lo que falta se marca en rojo */
+.requisitos-contrasena.falta li:not(.cumple) {
+    color: #ff6666;
+}

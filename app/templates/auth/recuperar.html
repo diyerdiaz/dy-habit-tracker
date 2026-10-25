@@ -1,0 +1,29 @@
+{% extends "auth/_recuperar_layout.html" %}
+
+{% block titulo_pagina %}Recuperar contraseña{% endblock %}
+
+{% block tarjeta %}
+<div class="card-header">
+    <h1>Recuperar contraseña</h1>
+    <p>Paso 1 de 3 · ¿Quién eres?</p>
+</div>
+<div class="card-body">
+    <form method="post" action="{{ url_for('recuperar.inicio') }}">
+        <div class="form-group mb-4">
+            <label for="identificador" class="form-label">Usuario o correo electrónico</label>
+            <input type="text" name="identificador" id="identificador" class="form-control"
+                placeholder="Tu usuario o tu correo" value="{{ identificador }}"
+                autocomplete="username" maxlength="120" required autofocus>
+            <p class="recuperar-ayuda">Te enviaremos un código de 6 dígitos al correo que registraste en tu perfil.</p>
+        </div>
+        <div class="d-grid gap-3">
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="bi bi-envelope-arrow-up"></i> Enviarme el código
+            </button>
+            <a href="{{ url_for('auth.login') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch">
+                <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

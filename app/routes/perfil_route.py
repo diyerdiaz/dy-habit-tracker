@@ -4,22 +4,22 @@ import smtplib
 import uuid
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash,
-    current_app, send_from_directory, abort,
+    current_app, send_from_directory, abort, session,
 )
 from PIL import Image, ImageOps, UnidentifiedImageError
 from flask_login import login_required, current_user
 from app import db
-from app.models.users import User
+from app.models.users import User, mensaje_requisitos, MIN_LARGO_CONTRASENA
 from app.models.habitos import Habit
 from app.models.medallas import obtener_metricas, evaluar_medallas
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
+from app.models.personajes_login import PERSONAJES
 from app.gamificacion import get_or_create_progress
 from app.level_config import calcular_progreso
 from app.correo import enviar_pendientes, limite_prueba, registrar_prueba
 
 bp = Blueprint('perfil', __name__, url_prefix='/perfil')
 
-MIN_PASSWORD = 6
 MAX_USUARIO = 80
 TAMANO_FOTO = 400          # la foto se guarda recortada en un cuadrado de 400x400
 MAX_FOTO_MB = 8
@@ -65,7 +65,7 @@ def index():
         habitos=habitos,
         medallas_ganadas=sum(1 for m in medallas if m['desbloqueada']),
         medallas_total=len(medallas),
-        min_password=MIN_PASSWORD,
+        min_password=MIN_LARGO_CONTRASENA,
         recordatorios=Recordatorio.query.filter_by(idUser=current_user.idUser)
                                         .order_by(Recordatorio.hora).all(),
         max_recordatorios=MAX_RECORDATORIOS,
@@ -166,8 +166,8 @@ def cambiar_contrasena():
     confirmar = request.form.get('confirmar_contrasena') or ''
     if not _contrasena_actual_ok():
         pass
-    elif len(nueva) < MIN_PASSWORD:
-        flash(f'La nueva contraseña debe tener al menos {MIN_PASSWORD} caracteres.', 'danger')
+    elif mensaje_requisitos(nueva):
+        flash(mensaje_requisitos(nueva), 'danger')
     elif nueva != confirmar:
         flash('La nueva contraseña y su confirmación no coinciden.', 'danger')
     elif current_user.check_password(nueva):
@@ -177,6 +177,33 @@ def cambiar_contrasena():
         db.session.commit()
         flash('Tu contraseña se cambió correctamente.', 'success')
     return redirect(url_for('perfil.index'))
+
+
+@bp.route('/actualizar-contrasena', methods=['GET', 'POST'])
+@login_required
+def actualizar_contrasena():
+    """Cambio obligatorio para quien entró con una contraseña que no cumple los
+    requisitos. La contraseña vieja sigue igual hasta que se guarde la nueva."""
+    if not session.get('debe_cambiar_clave'):
+        return redirect(url_for('auth.dashboard'))
+    if request.method == 'POST':
+        nueva = request.form.get('nueva_contrasena') or ''
+        confirmar = request.form.get('confirmar_contrasena') or ''
+        if mensaje_requisitos(nueva):
+            flash(mensaje_requisitos(nueva), 'danger')
+        elif nueva != confirmar:
+            flash('Las contraseñas no coinciden.', 'danger')
+        elif current_user.check_password(nueva):
+            flash('La nueva contraseña debe ser distinta de la actual.', 'warning')
+        else:
+            current_user.set_password(nueva)
+            db.session.commit()
+            session.pop('debe_cambiar_clave', None)
+            flash('¡Listo! Tu contraseña ahora es segura.', 'success')
+            return redirect(url_for('auth.dashboard'))
+    indice = session.get('tema_sitio', 0)
+    personaje = PERSONAJES[indice] if isinstance(indice, int) and 0 <= indice < len(PERSONAJES) else PERSONAJES[0]
+    return render_template('perfil/actualizar_contrasena.html', personaje=personaje)
 
 
 @bp.route('/foto', methods=['POST'])

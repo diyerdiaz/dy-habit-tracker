@@ -166,7 +166,7 @@
         <!-- ── Cambiar contraseña ── -->
         <form class="perfil-card" method="POST" action="{{ url_for('perfil.cambiar_contrasena') }}" id="formContrasena">
             <h2 class="perfil-subtitulo"><i class="bi bi-shield-lock"></i> Cambiar contraseña</h2>
-            <p class="perfil-ayuda">Mínimo {{ min_password }} caracteres.</p>
+            <p class="perfil-ayuda">Debe ser una contraseña segura.</p>
                 <label class="perfil-label" for="contrasena_actual">Contraseña actual</label>
                 <div class="perfil-campo">
                     <input type="password" name="contrasena_actual" id="contrasena_actual" class="perfil-input" autocomplete="current-password" required>
@@ -174,12 +174,13 @@
                 </div>
                 <label class="perfil-label" for="nueva_contrasena">Nueva contraseña</label>
                 <div class="perfil-campo">
-                    <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="perfil-input" autocomplete="new-password" required minlength="{{ min_password }}">
+                    <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="perfil-input" autocomplete="new-password" required maxlength="128">
                     <button type="button" class="perfil-ver" data-ver="nueva_contrasena" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
                 </div>
+                {% with campo='nueva_contrasena' %}{% include 'auth/_requisitos_contrasena.html' %}{% endwith %}
                 <label class="perfil-label" for="confirmar_contrasena">Repite la nueva contraseña</label>
                 <div class="perfil-campo">
-                    <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="perfil-input" autocomplete="new-password" required minlength="{{ min_password }}">
+                    <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="perfil-input" autocomplete="new-password" required maxlength="128">
                     <button type="button" class="perfil-ver" data-ver="confirmar_contrasena" aria-label="Mostrar contraseña"><i class="bi bi-eye"></i></button>
                 </div>
             <p class="perfil-error" id="errorContrasena" hidden><i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.</p>

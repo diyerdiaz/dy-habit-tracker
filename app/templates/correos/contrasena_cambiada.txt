@@ -1,0 +1,6 @@
+Hola, {{ user.nameUser }}:
+
+La contraseña de tu cuenta se cambió el {{ ahora.strftime('%d/%m/%Y a las %H:%M') }} usando un código de recuperación enviado a este correo.
+
+Si fuiste tú, no tienes que hacer nada.
+Si NO fuiste tú, recupera tu contraseña de nuevo cuanto antes y revisa quién tiene acceso a este correo.

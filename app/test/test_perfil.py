@@ -40,19 +40,19 @@ def test_no_permite_usuario_repetido(logged_client, user, other_user):
 def test_cambiar_contrasena(logged_client, user):
     logged_client.post('/perfil/contrasena', data={
         'contrasena_actual': TEST_PASSWORD,
-        'nueva_contrasena': 'clave_nueva_123',
-        'confirmar_contrasena': 'clave_nueva_123',
+        'nueva_contrasena': 'Clave_nueva_123',
+        'confirmar_contrasena': 'Clave_nueva_123',
     })
     u = _usuario(user)
-    assert u.check_password('clave_nueva_123')
+    assert u.check_password('Clave_nueva_123')
     assert not u.check_password(TEST_PASSWORD)
 
 
 def test_contrasena_no_cambia_si_algo_falla(logged_client, user):
     casos = [
-        {'contrasena_actual': 'incorrecta', 'nueva_contrasena': 'clave_nueva_123', 'confirmar_contrasena': 'clave_nueva_123'},
+        {'contrasena_actual': 'incorrecta', 'nueva_contrasena': 'Clave_nueva_123', 'confirmar_contrasena': 'Clave_nueva_123'},
         {'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'corta', 'confirmar_contrasena': 'corta'},
-        {'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'clave_nueva_123', 'confirmar_contrasena': 'otra_cosa_123'},
+        {'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'Clave_nueva_123', 'confirmar_contrasena': 'Otra_cosa_123'},
     ]
     for datos in casos:
         logged_client.post('/perfil/contrasena', data=datos)
@@ -63,10 +63,10 @@ def test_puede_iniciar_sesion_con_los_datos_nuevos(client, user):
     client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD})
     client.post('/perfil/usuario', data={'nuevo_usuario': 'renombrado', 'contrasena_actual': TEST_PASSWORD})
     client.post('/perfil/contrasena', data={
-        'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'otra_clave_99', 'confirmar_contrasena': 'otra_clave_99',
+        'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'Otra_clave_99', 'confirmar_contrasena': 'Otra_clave_99',
     })
     client.get('/logout')
-    resp = client.post('/', data={'nameUser': 'renombrado', 'passwordUser': 'otra_clave_99'})
+    resp = client.post('/', data={'nameUser': 'renombrado', 'passwordUser': 'Otra_clave_99'})
     assert resp.status_code == 302 and '/dashboard' in resp.headers['Location']
 
 
