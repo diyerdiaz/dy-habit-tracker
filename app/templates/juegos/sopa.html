@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Sopa de letras{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'menu/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Sopa de letras</h1>
+        <p class="ingles-desc">Busca la palabra en inglés de cada significado. Toca su primera letra y luego la última.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza (de 3 a 10 letras, sin espacios) para jugar.
+            Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
+        <a href="{{ url_for('menu.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoSopa"
+         data-por-ronda="{{ por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='sopa') }}">
+
+        <div class="sopa-niveles" role="group" aria-label="Dificultad">
+            {% for nivel in niveles %}
+            <button type="button" class="sopa-nivel" data-nivel="{{ nivel }}" aria-pressed="false">
+                {{ {'facil': 'Fácil', 'normal': 'Normal', 'dificil': 'Difícil'}[nivel] }}
+                <small>{{ {'facil': '→ ↓', 'normal': '→ ↓ ↘ ↗', 'dificil': 'todas, también al revés'}[nivel] }}</small>
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="juego-barra">
+            <span><i class="bi bi-search"></i> <strong id="sopaEncontradas">0</strong>/<span id="sopaTotal">0</span></span>
+            <span><i class="bi bi-x-circle"></i> <strong id="sopaErrores">0</strong> errores</span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="sopaTiempo">0:00</strong></span>
+            <button type="button" class="juego-sonido" id="sopaPista" title="Ilumina la primera letra de una palabra">
+                <i class="bi bi-lightbulb"></i> <span id="sopaPistas">0</span>
+            </button>
+            <button type="button" class="juego-sonido" id="sopaSonido" aria-pressed="true" title="Pronunciar las palabras al encontrarlas">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="sopa-zona" id="sopaZona">
+            <div class="sopa-tablero" id="sopaTablero" role="grid" aria-label="Sopa de letras"></div>
+            <div class="sopa-pistas">
+                <h2 class="unir-columna-titulo">Busca en inglés</h2>
+                <ol class="sopa-lista" id="sopaLista"></ol>
+            </div>
+        </div>
+
+        <div class="juego-final" id="sopaFinal" hidden>
+            <div class="juego-final-icono" id="sopaFinalIcono">🏆</div>
+            <h2 id="sopaFinalTitulo">¡Sopa completa!</h2>
+            <ul class="juego-final-stats">
+                <li><span id="sopaFinalTiempo">0:00</span> tiempo</li>
+                <li><span id="sopaFinalErrores">0</span> errores</li>
+                <li><span id="sopaFinalPistas">0</span> pistas</li>
+            </ul>
+            <p class="juego-final-nota" id="sopaFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="sopaOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+    <script type="application/json" id="sopaPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}
