@@ -18,7 +18,7 @@
             boton.setAttribute('aria-disabled', 'true');
             if (boton.tagName === 'BUTTON') {
                 boton.dataset.textoOriginal = boton.innerHTML;
-                boton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Procesando…';
+                boton.innerHTML = window.puntosCargando('chico') + '<span class="visually-hidden">Procesando…</span>';
             }
         });
     });
