@@ -56,7 +56,7 @@ def create_app(config_overrides=None):
     from app.routes import (
         users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, metodos_route, estadisticas_route,
-        perfil_route, pwa_route, vision_route, temas_route, recuperar_route,
+        perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route,
     )
 
     app.register_blueprint(auth_route.bp)
@@ -74,6 +74,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(vision_route.bp)
     app.register_blueprint(temas_route.bp)
     app.register_blueprint(recuperar_route.bp)
+    app.register_blueprint(juegos_route.bp)
 
     # Quien entró con una contraseña que no cumple los requisitos solo puede
     # cambiarla o cerrar sesión hasta que la actualice (ver auth_route.login)

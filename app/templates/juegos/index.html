@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Juegos de vocabulario{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'menu/_sidebar_ingles.html' %}
+
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('menu.ingles') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Aprende Inglés</a>
+
+    <div class="text-center mb-4 ingles-hero">
+        <span class="ingles-flag-badge"><i class="bi bi-controller"></i> Game Zone</span>
+        <h1 class="ingles-title">Juegos</h1>
+        <p class="ingles-desc">Repasa tu vocabulario jugando. Las palabras salen al azar y no se repiten hasta que hayas visto todas.</p>
+    </div>
+
+    {% if total_palabras < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras en tu vocabulario para jugar. Tienes {{ total_palabras }}.</p>
+        <a href="{{ url_for('menu.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% endif %}
+
+    <div class="ingles-grid juegos-grid">
+        {% set unir = resumen.get('unir') %}
+        <a href="{{ url_for('juegos.unir') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
+            <i class="bi bi-link-45deg"></i>
+            <h3>Unir parejas</h3>
+            <p class="juego-desc">Conecta cada palabra en inglés con su significado.</p>
+            {% if unir %}
+            <ul class="juego-stats">
+                <li><span>{{ unir.jugadas }}</span> {{ 'ronda' if unir.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ unir.precision }}%</span> precisión</li>
+                {% if unir.mejor_tiempo is not none %}<li><span>{{ unir.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
+        <div class="ingles-card juego-card proximamente" aria-disabled="true">
+            <i class="bi bi-grid-3x3"></i>
+            <h3>Sopa de letras</h3>
+            <p class="juego-desc">Muy pronto.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+{% endblock %}

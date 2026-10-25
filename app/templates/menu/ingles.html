@@ -7,102 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<!-- Botón Hamburguesa -->
-<button class="hamburger-menu" id="sidebarToggle">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
-
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-    <ul class="sidebar-menu">
-        <li class="sidebar-item">
-            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
-                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
-                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
-                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
-                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
-                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
-                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
-                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
-                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
-                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
-                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
-                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
-                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
-            </a>
-        </li>
-        <li class="sidebar-item" style="margin-top: 24px;">
-            <div class="sidebar-toggle toggle-right">
-                <span class="sidebar-toggle-thumb"></span>
-                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
-                    <i class="bi bi-house-door"></i> Hábitos
-                </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
-                    <i class="bi bi-translate"></i> Inglés
-                </a>
-            </div>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('auth.logout') }}" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
-                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
-            </a>
-        </li>
-    </ul>
-</div>
-
-<!-- Overlay -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+{% include 'menu/_sidebar_ingles.html' %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -115,7 +20,7 @@
         <span class="ingles-flag-badge">🇬🇧 English Zone 🇺🇸</span>
         <h1 class="ingles-title">Aprende Inglés</h1>
         <p class="ingles-subtitle">de la forma más fácil</p>
-        <p class="ingles-desc">Practica vocabulario y shadowing a tu propio ritmo, directo desde tu panel de hábitos.</p>
+        <p class="ingles-desc">Practica vocabulario, shadowing y juegos a tu propio ritmo, directo desde tu panel de hábitos.</p>
     </div>
 
     <div class="ingles-grid fade-in-section">
@@ -126,6 +31,10 @@
         <a href="{{ url_for('menu.shadowing') }}" class="ingles-card">
             <i class="bi bi-headphones"></i>
             <h3>Shadowing</h3>
+        </a>
+        <a href="{{ url_for('juegos.index') }}" class="ingles-card">
+            <i class="bi bi-controller"></i>
+            <h3>Juegos</h3>
         </a>
     </div>
 </div>
