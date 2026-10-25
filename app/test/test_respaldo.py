@@ -96,6 +96,8 @@ def test_con_bucket_y_base_existente_replica_sin_restaurar(entorno):
     # La base de datos nunca la copia rclone (es trabajo de Litestream)
     assert "--exclude *.sqlite*" in sync
     assert "--exclude .*-litestream/**" in sync
+    # La clave secreta nunca sale del servidor
+    assert "--exclude /secret_key" in sync
 
 
 def test_servidor_nuevo_restaura_antes_de_arrancar(entorno):

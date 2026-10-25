@@ -38,10 +38,11 @@ export RCLONE_CONFIG_RESPALDO_ACCESS_KEY_ID="$RESPALDO_ACCESS_KEY_ID"
 export RCLONE_CONFIG_RESPALDO_SECRET_ACCESS_KEY="$RESPALDO_SECRET_ACCESS_KEY"
 export RCLONE_CONFIG_RESPALDO_NO_CHECK_BUCKET=true
 REMOTO="respaldo:$RESPALDO_BUCKET/instance"
-# La base de datos la respalda Litestream; rclone solo copia lo demás
-# (subidas y clave secreta), nunca el .sqlite ni los archivos de trabajo de Litestream.
+# La base de datos la respalda Litestream; rclone solo copia los archivos subidos.
+# Nunca sube la clave secreta: con ella, quien lea el bucket podría falsificar
+# sesiones. Si se pierde, el servidor nuevo crea otra (solo se cierran las sesiones).
 rclone_archivos() {
-    rclone "$@" --exclude '*.sqlite*' --exclude '.*-litestream/**'
+    rclone "$@" --exclude '*.sqlite*' --exclude '.*-litestream/**' --exclude '/secret_key'
 }
 
 # Servidor nuevo (sin base de datos): se recupera todo desde el respaldo
