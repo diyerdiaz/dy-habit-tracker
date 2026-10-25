@@ -44,3 +44,25 @@ def test_iconos_pesan_poco():
 def test_no_queda_codigo_de_flutter(client):
     assert not os.path.exists('app_movil')
     assert client.get('/descargar/android').status_code == 404
+
+
+def test_service_worker_guarda_el_diseno_para_internet_malo(client):
+    """El CSS/JS (con ?v=) y Bootstrap se sirven desde la caché del navegador:
+    así la página no queda en blanco ni sin estilos cuando la conexión falla."""
+    sw = client.get('/sw.js')
+    js = sw.get_data(as_text=True)
+    sw.close()
+    assert "url.pathname.startsWith('/static/')" in js and "searchParams.has('v')" in js
+    assert 'https://cdn.jsdelivr.net/npm/' in js
+    # Las páginas con datos del usuario nunca se guardan: siempre van al servidor
+    assert "request.mode === 'navigate'" in js and 'fetch(request).catch' in js
+    # Solo GET: los formularios (POST) nunca pasan por la caché
+    assert "request.method !== 'GET'" in js
+
+
+def test_bootstrap_del_cdn_tiene_version_fija(client):
+    # Si la URL no llevara versión exacta, la caché podría quedarse con una vieja
+    html = client.get('/').get_data(as_text=True)
+    import re
+    for url in re.findall(r'https://cdn\.jsdelivr\.net/npm/[^"]+', html):
+        assert re.search(r'@\d+\.\d+\.\d+/', url), url

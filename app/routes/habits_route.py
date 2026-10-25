@@ -8,7 +8,7 @@ from app.models.recuperacion import (
     dias_libres_que_quedan, cuantos_se_pueden_recuperar,
 )
 from app import db
-from app.gamificacion import registrar_toggle_habito, registrar_recuperacion
+from app.services.gamificacion import registrar_toggle_habito, registrar_recuperacion
 from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
 

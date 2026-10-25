@@ -14,7 +14,7 @@ import click
 from flask import current_app
 
 from app import db
-from app.gamificacion import calcular_racha
+from app.services.gamificacion import calcular_racha
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.personajes_login import PERSONAJES, elegir_personaje

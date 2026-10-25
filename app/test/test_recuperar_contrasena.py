@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from app import db, correo
+from app import db
+from app.services import correo
 from app.models.codigos_recuperacion import CodigoRecuperacion
 from app.models.users import User
 from app.test.conftest import TEST_PASSWORD

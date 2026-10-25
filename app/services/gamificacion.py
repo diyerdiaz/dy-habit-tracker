@@ -5,7 +5,7 @@ from app import db
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.user_progress import UserProgress
-from app.level_config import XP_POR_HABITO, XP_BONUS_RACHA_SEMANAL, PENALIZACION_POR_DIA_PERDIDO
+from app.services.level_config import XP_POR_HABITO, XP_BONUS_RACHA_SEMANAL, PENALIZACION_POR_DIA_PERDIDO
 
 
 def get_or_create_progress(idUser):

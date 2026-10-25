@@ -136,8 +136,10 @@ mi-proyecto-personal/
 │   │   └── js/          # Un .js por vista (+ csrf.js y cursor.js globales)
 │   ├── templates/       # HTML por módulo (medallas/, metodos/, perfil/, menu/, ...)
 │   ├── test/            # Tests con pytest
-│   ├── gamificacion.py  # XP, racha, días de descanso y penalizaciones
-│   ├── level_config.py  # Configuración de niveles (umbrales, bonos)
+│   ├── services/        # Lógica compartida por rutas y modelos
+│   │   ├── correo.py        # Envío de correos (recordatorios, códigos de recuperación)
+│   │   ├── gamificacion.py  # XP, racha, días de descanso y penalizaciones
+│   │   └── level_config.py  # Configuración de niveles (umbrales, bonos)
 │   └── __init__.py      # App factory, blueprints y actualizar_esquema()
 ├── instance/            # ⚠️ Datos reales (no se versiona)
 │   ├── flaskdb.sqlite   #    Base de datos SQLite

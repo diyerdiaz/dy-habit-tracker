@@ -2,8 +2,8 @@ from datetime import date, timedelta
 from app import db
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
-from app.gamificacion import calcular_racha, aplicar_penalizaciones_pendientes, get_or_create_progress
-from app.level_config import PENALIZACION_POR_DIA_PERDIDO
+from app.services.gamificacion import calcular_racha, aplicar_penalizaciones_pendientes, get_or_create_progress
+from app.services.level_config import PENALIZACION_POR_DIA_PERDIDO
 
 HOY = date.today()
 

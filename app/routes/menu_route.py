@@ -6,8 +6,8 @@ from app.models.vocabulario import Vocabulario
 from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app import db
-from app.gamificacion import get_or_create_progress, aplicar_penalizaciones_pendientes, sincronizar_racha, calcular_racha
-from app.level_config import NIVEL_MAXIMO, NIVELES, XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO, calcular_progreso
+from app.services.gamificacion import get_or_create_progress, aplicar_penalizaciones_pendientes, sincronizar_racha, calcular_racha
+from app.services.level_config import NIVEL_MAXIMO, NIVELES, XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO, calcular_progreso
 from collections import defaultdict
 from datetime import datetime, date, timedelta
 from math import ceil

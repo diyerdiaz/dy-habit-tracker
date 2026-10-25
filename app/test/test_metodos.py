@@ -188,3 +188,46 @@ def test_archivo_demasiado_grande(app, logged_client, carpeta_subidas):
     resp = _subir(logged_client, tarjeta, 'grande.pdf', b'x' * 5000)
     assert resp.status_code == 302
     assert Apunte.query.count() == 0
+
+
+# ── Doble clic: no se duplican métodos ni tarjetas ──
+
+def test_doble_envio_no_duplica_la_tarjeta(logged_client):
+    metodo = _crear_metodo(logged_client)
+    datos = {'titulo': 'juego de ingles', 'columna': 'pendiente'}
+    for _ in range(2):
+        respuesta = logged_client.post(f'/metodos/{metodo.idMetodo}/tarjetas/crear', data=datos)
+        assert respuesta.status_code == 302
+    assert KanbanTarjeta.query.filter_by(titulo='juego de ingles').count() == 1
+
+
+def test_doble_envio_no_duplica_el_metodo(logged_client):
+    _crear_metodo(logged_client)
+    _crear_metodo(logged_client)  # .one() falla si quedaron dos
+    assert MetodoEstudio.query.count() == 1
+
+
+def test_tarjeta_con_el_mismo_titulo_pasado_el_lapso_si_se_crea(logged_client):
+    from datetime import datetime
+    from app.routes.metodos_route import VENTANA_DUPLICADO
+    metodo = _crear_metodo(logged_client)
+    primera = _crear_tarjeta(logged_client, metodo, titulo='Repasar')
+    primera.createdAt = datetime.now() - VENTANA_DUPLICADO * 2
+    db.session.commit()
+    logged_client.post(f'/metodos/{metodo.idMetodo}/tarjetas/crear', data={'titulo': 'Repasar', 'columna': 'pendiente'})
+    assert KanbanTarjeta.query.filter_by(titulo='Repasar').count() == 2
+
+
+def test_mismo_titulo_en_otra_columna_si_se_crea(logged_client):
+    metodo = _crear_metodo(logged_client)
+    _crear_tarjeta(logged_client, metodo, titulo='Repasar', columna='pendiente')
+    logged_client.post(f'/metodos/{metodo.idMetodo}/tarjetas/crear', data={'titulo': 'Repasar', 'columna': 'progreso'})
+    assert KanbanTarjeta.query.filter_by(titulo='Repasar').count() == 2
+
+
+def test_paginas_cargan_el_bloqueo_de_doble_envio(logged_client):
+    metodo = _crear_metodo(logged_client)
+    html = logged_client.get(f'/metodos/{metodo.idMetodo}').get_data(as_text=True)
+    assert 'js/envio_unico.js' in html
+    js = logged_client.get('/static/js/envio_unico.js').get_data(as_text=True)
+    assert "dataset.enviando" in js and 'defaultPrevented' in js

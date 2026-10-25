@@ -16,8 +16,8 @@ from app.models.shadowing_sesion import ShadowingSesion
 from app.models.ruleta_castigo import Castigo
 from app.models.metodo_estudio import MetodoEstudio, KanbanTarjeta, Apunte
 from app.models.estadisticas import meses_disponibles, estadisticas_del_mes
-from app.gamificacion import get_or_create_progress, sincronizar_racha
-from app.level_config import calcular_progreso
+from app.services.gamificacion import get_or_create_progress, sincronizar_racha
+from app.services.level_config import calcular_progreso
 
 CATEGORIAS = {
     'habitos':   {'nombre': 'Hábitos',    'icono': 'bi-check2-circle'},
