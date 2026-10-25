@@ -63,6 +63,12 @@ class Config:
     SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '0') == '1'
     REMEMBER_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
+    # Cuántos proxies hay delante de la app (en Coolify: 1, su Traefik). Con eso la
+    # app lee la IP real del visitante en X-Forwarded-For en vez de la del proxy.
+    # En local debe quedar en 0: si no hay proxy, cualquiera podría inventarse esa
+    # cabecera y fingir otra IP.
+    PROXIES_DE_CONFIANZA = int(os.environ.get('PROXIES_DE_CONFIANZA', '0') or 0)
+
     # Archivos de apuntes subidos (instance/ no se versiona) y tamaño máximo por petición
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', os.path.join(INSTANCE_DIR, 'uploads'))
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024

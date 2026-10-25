@@ -18,8 +18,10 @@ def login():
     if request.method == 'POST':
         nameUser = (request.form.get('nameUser') or '').strip()
         passwordUser = request.form.get('passwordUser') or ''
+        # IP real del visitante (en Coolify la pone ProxyFix, ver PROXIES_DE_CONFIANZA)
+        ip = request.remote_addr
 
-        minutos = IntentoLogin.minutos_bloqueado(nameUser)
+        minutos = IntentoLogin.minutos_bloqueado(nameUser, ip)
         if minutos:
             # Bloqueado: ni siquiera se revisa la contraseña
             flash(f"Demasiados intentos fallidos. Por seguridad espera {minutos} "
@@ -27,8 +29,10 @@ def login():
         else:
             user = User.query.filter_by(nameUser=nameUser).first()
             if user and user.check_password(passwordUser):
-                IntentoLogin.limpiar(nameUser)
+                IntentoLogin.limpiar(nameUser, ip)
                 login_user(user)
+                # Si después cambia la contraseña, las sesiones con otra versión se cierran
+                session['sesion_version'] = user.sesionVersion or 0
                 # El saludo de bienvenida sale siempre justo después de iniciar sesión
                 session['bienvenida'] = True
                 # Toda la app toma el color del personaje que salió en el login
@@ -41,7 +45,7 @@ def login():
                 flash("Login successful!", "success")
                 return redirect(url_for('auth.dashboard'))
 
-            restantes = IntentoLogin.registrar_fallo(nameUser) if nameUser else MAX_FALLOS
+            restantes = IntentoLogin.registrar_fallo(nameUser, ip) if nameUser else MAX_FALLOS
             if restantes == 0:
                 flash(f'Demasiados intentos fallidos. Por seguridad el acceso queda bloqueado '
                       f'{MINUTOS_BLOQUEO} minutos. Si olvidaste tu contraseña, recupérala.', 'danger')
@@ -208,7 +212,9 @@ def dashboard():
     )
 
 
-@bp.route('/logout')
+# Solo POST: con GET, cualquier página podría cerrarte la sesión con un simple
+# <img src=".../logout"> (y el token CSRF de los formularios lo impide)
+@bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()

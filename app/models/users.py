@@ -52,6 +52,9 @@ class User(db.Model, UserMixin):
     avatar = db.Column(db.String(64), nullable=True)
     # Correo para los recordatorios de hábitos pendientes; NULL = sin correo
     email = db.Column(db.String(120), nullable=True)
+    # Sube cada vez que cambia la contraseña: las sesiones abiertas con la versión
+    # anterior se cierran solas (ver app/__init__.py, cerrar_sesiones_viejas)
+    sesionVersion = db.Column(db.Integer, nullable=False, default=0)
 
     def __init__(self, nameUser, password=None, **kwargs):
         # Compatibilidad: User(nameUser=..., passwordUser=...) también hashea
@@ -65,6 +68,11 @@ class User(db.Model, UserMixin):
 
     def set_password(self, password):
         self.passwordUser = generate_password_hash(password)
+
+    def cambiar_contrasena(self, password):
+        """Cambio de contraseña hecho por la persona: además cierra sus otras sesiones."""
+        self.set_password(password)
+        self.sesionVersion = (self.sesionVersion or 0) + 1
 
     def password_is_hashed(self):
         return bool(self.passwordUser) and self.passwordUser.startswith(_HASH_PREFIXES)

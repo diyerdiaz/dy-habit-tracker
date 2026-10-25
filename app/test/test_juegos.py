@@ -17,6 +17,11 @@ def _vocabulario(user, cuantas=len(PALABRAS)):
     return Vocabulario.query.filter_by(idUser=user.idUser).all()
 
 
+def _sin_tokens(html):
+    """Quita los tokens CSRF: son texto al azar y podrían contener 'XP' o cualquier palabra."""
+    return re.sub(r'(name="csrf_token" value|name="csrf-token" content)="[^"]*"', '', html)
+
+
 def _palabras_de_la_pagina(html):
     bloque = re.search(r'<script type="application/json" id="unirPalabras">(.*?)</script>', html, re.S)
     return json.loads(bloque.group(1))
@@ -61,7 +66,7 @@ def test_la_pagina_trae_las_palabras_del_usuario(logged_client, user, other_user
     assert 'id="juegoUnir"' in html and 'js/juegos.js' in html and 'css/juegos.css' in html
     datos = _palabras_de_la_pagina(html)
     assert {p['en'] for p in datos} == {en for en, _ in PALABRAS}
-    assert 'secret' not in html  # nunca las palabras de otra persona
+    assert 'secret' not in _sin_tokens(html)  # nunca las palabras de otra persona
 
 
 def test_el_texto_de_las_palabras_va_escapado(logged_client, user):
@@ -133,7 +138,7 @@ def test_menu_muestra_el_resumen(logged_client, user):
     assert '2</span> rondas' in html
     assert '75%</span> precisión' in html   # (100 + 50) / 2
     assert '20s</span> mejor ronda perfecta' in html  # solo cuentan las rondas sin errores
-    assert 'XP' not in html
+    assert 'XP' not in _sin_tokens(html)
 
 
 def test_borrar_usuario_borra_sus_partidas(app, user):

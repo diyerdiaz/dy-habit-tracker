@@ -65,7 +65,7 @@ def test_puede_iniciar_sesion_con_los_datos_nuevos(client, user):
     client.post('/perfil/contrasena', data={
         'contrasena_actual': TEST_PASSWORD, 'nueva_contrasena': 'Otra_clave_99', 'confirmar_contrasena': 'Otra_clave_99',
     })
-    client.get('/logout')
+    client.post('/logout')
     resp = client.post('/', data={'nameUser': 'renombrado', 'passwordUser': 'Otra_clave_99'})
     assert resp.status_code == 302 and '/dashboard' in resp.headers['Location']
 

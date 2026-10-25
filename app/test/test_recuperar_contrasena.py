@@ -73,16 +73,51 @@ def test_pantalla_de_recuperar(client):
     assert 'Usuario o correo electrónico' in html
 
 
-def test_cuenta_que_no_existe_no_deja_seguir(client, smtp):
+def _pantalla(respuesta):
+    """Lo que ve la persona, sin el token CSRF (cambia en cada página)."""
+    html = re.sub(r'name="csrf-token" content="[^"]*"', '', respuesta.get_data(as_text=True))
+    return respuesta.request.path, re.sub(r'data-segundos="\d+"|\d:\d\d', '', html)
+
+
+def test_cuenta_que_no_existe_se_ve_igual_que_una_real(app, con_correo, smtp):
+    # Cada caso con un navegador nuevo, para comparar las pantallas tal cual
+    real = _pantalla(_pedir(app.test_client(), 'test_user'))
+    for falso in ('no_existe', 'nadie@test.com'):
+        assert _pantalla(_pedir(app.test_client(), falso)) == real, falso
+    assert real[0] == '/recuperar/codigo'
+    assert len(smtp.enviados) == 1  # solo la cuenta real recibe correo
+
+
+def test_cuenta_sin_correo_se_ve_igual_pero_no_envia_nada(app, user, other_user, smtp):
+    other_user.email = 'otro@test.com'
+    db.session.commit()
+    con = _pantalla(_pedir(app.test_client(), other_user.nameUser))
+    sin = _pantalla(_pedir(app.test_client(), user.nameUser))
+    assert con == sin
+    assert [m['To'] for m in smtp.enviados] == ['otro@test.com']
+
+
+def test_mensaje_no_dice_si_la_cuenta_existe(client, smtp):
     html = _pedir(client, 'no_existe').get_data(as_text=True)
-    assert 'No encontramos ninguna cuenta' in html
-    assert smtp.enviados == []
+    assert 'Si el usuario o correo corresponde a una cuenta' in html
+    for delator in ('No encontramos', 'no tiene un correo', 'varias cuentas', '***'):
+        assert delator not in html
 
 
-def test_cuenta_sin_correo_no_se_puede_recuperar(client, user, smtp):
-    html = _pedir(client).get_data(as_text=True)
-    assert 'no tiene un correo registrado' in html
-    assert smtp.enviados == []
+def test_codigo_inventado_en_cuenta_falsa_se_comporta_como_uno_real(app, con_correo, smtp):
+    real, falso = app.test_client(), app.test_client()
+    _pedir(real, 'test_user')
+    _pedir(falso, 'no_existe')
+    for esperado in ('Te quedan 2 intentos', 'Te queda 1 intento', 'Usaste los 3 intentos'):
+        for cliente in (real, falso):
+            assert esperado in _escribir(cliente, '000000').get_data(as_text=True)
+    assert _pantalla(real.get('/recuperar/codigo')) == _pantalla(falso.get('/recuperar/codigo'))
+
+
+def test_cuenta_falsa_no_llega_al_paso_3(client, smtp):
+    _pedir(client, 'no_existe')
+    respuesta = client.get('/recuperar/nueva', follow_redirects=True)
+    assert respuesta.request.path == '/recuperar/codigo'  # igual que una real sin verificar
 
 
 def test_por_usuario_envia_el_codigo(client, con_correo, smtp):
@@ -91,8 +126,8 @@ def test_por_usuario_envia_el_codigo(client, con_correo, smtp):
     assert respuesta.request.path == '/recuperar/codigo'
     assert len(smtp.enviados) == 1
     assert smtp.enviados[0]['To'] == 'diyer@test.com'
-    assert 'd***er@test.com' in html          # el correo se muestra oculto
-    assert 'diyer@test.com' not in html
+    # Ni siquiera oculto: mostrar d***er@test.com confirmaría que la cuenta existe
+    assert 'diyer@test.com' not in html and '***' not in html
 
 
 def test_por_correo_sin_importar_mayusculas(client, con_correo, smtp):
@@ -104,7 +139,7 @@ def test_correo_repetido_en_varias_cuentas_pide_usuario(client, con_correo, othe
     other_user.email = 'diyer@test.com'
     db.session.commit()
     html = _pedir(client, 'diyer@test.com').get_data(as_text=True)
-    assert 'varias cuentas' in html
+    assert 'varias cuentas' not in html and 'Si el usuario o correo corresponde' in html
     assert smtp.enviados == []
 
 
@@ -196,7 +231,8 @@ def test_un_codigo_por_minuto(client, con_correo, smtp):
     _pedir(client)
     html = client.post('/recuperar/reenviar', follow_redirects=True).get_data(as_text=True)
     assert len(smtp.enviados) == 1
-    assert 'Espera un minuto' in html
+    # El límite no se anuncia (solo las cuentas reales lo tendrían): mismo mensaje de siempre
+    assert 'Si el usuario o correo corresponde' in html
 
 
 def test_maximo_5_codigos_al_dia(client, con_correo, smtp):
@@ -205,7 +241,7 @@ def test_maximo_5_codigos_al_dia(client, con_correo, smtp):
         _otro_codigo_permitido(con_correo)
     html = _pedir(client).get_data(as_text=True)
     assert len(smtp.enviados) == correo.CODIGO_MAX_DIA_USUARIO
-    assert 'Inténtalo mañana' in html
+    assert 'Inténtalo mañana' not in html and 'Si el usuario o correo corresponde' in html
 
 
 def test_sin_correo_configurado_en_el_servidor(client, con_correo, app):
@@ -218,7 +254,7 @@ def test_sin_correo_configurado_en_el_servidor(client, con_correo, app):
 def test_si_falla_el_smtp_el_codigo_queda_anulado(client, con_correo, smtp):
     smtp.falla = True
     html = _pedir(client).get_data(as_text=True)
-    assert 'No se pudo enviar el correo' in html
+    assert 'Si el usuario o correo corresponde' in html
     assert CodigoRecuperacion.query.one().anulado is True
 
 

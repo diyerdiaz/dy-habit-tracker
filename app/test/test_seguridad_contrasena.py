@@ -5,6 +5,8 @@ import pytest
 
 from app import db
 from app.models.intentos_login import IntentoLogin, MAX_FALLOS, MINUTOS_BLOQUEO
+
+IP = '127.0.0.1'  # la del cliente de pruebas de Flask
 from app.models.users import User, contrasena_segura, requisitos_faltantes, mensaje_requisitos
 from app.test.conftest import TEST_PASSWORD
 
@@ -90,13 +92,13 @@ def test_seis_fallos_bloquean_30_minutos(client, user):
     respuesta = _entrar(client)
     assert respuesta.request.path == '/'
     assert 'Demasiados intentos fallidos' in respuesta.get_data(as_text=True)
-    assert IntentoLogin.minutos_bloqueado('test_user') == MINUTOS_BLOQUEO
+    assert IntentoLogin.minutos_bloqueado('test_user', IP) == MINUTOS_BLOQUEO
 
 
 def test_tras_los_30_minutos_puede_entrar(client, user):
     for _ in range(MAX_FALLOS):
         _entrar(client, clave='mala')
-    registro = db.session.get(IntentoLogin, 'test_user')
+    registro = db.session.get(IntentoLogin, ('test_user', IP))
     registro.bloqueadoHasta = datetime.now() - timedelta(seconds=1)
     db.session.commit()
     assert _entrar(client).request.path == '/dashboard'
@@ -106,7 +108,7 @@ def test_entrar_bien_reinicia_el_contador(client, user):
     for _ in range(MAX_FALLOS - 1):
         _entrar(client, clave='mala')
     assert _entrar(client).request.path == '/dashboard'
-    client.get('/logout')
+    client.post('/logout')
     html = _entrar(client, clave='mala').get_data(as_text=True)
     assert f'Te quedan {MAX_FALLOS - 1} intentos' in html
 
@@ -114,7 +116,7 @@ def test_entrar_bien_reinicia_el_contador(client, user):
 def test_fallos_viejos_se_olvidan(client, user):
     for _ in range(MAX_FALLOS - 1):
         _entrar(client, clave='mala')
-    registro = db.session.get(IntentoLogin, 'test_user')
+    registro = db.session.get(IntentoLogin, ('test_user', IP))
     registro.actualizado = datetime.now() - timedelta(minutes=31)
     db.session.commit()
     html = _entrar(client, clave='mala').get_data(as_text=True)
@@ -125,7 +127,7 @@ def test_bloqueo_tambien_para_usuarios_que_no_existen(client):
     # Mismo comportamiento: el bloqueo no revela si la cuenta existe
     for _ in range(MAX_FALLOS):
         _entrar(client, usuario='no_existe', clave='mala')
-    assert IntentoLogin.minutos_bloqueado('no_existe') > 0
+    assert IntentoLogin.minutos_bloqueado('no_existe', IP) > 0
 
 
 def test_bloquear_un_usuario_no_afecta_a_otro(client, user, other_user):
@@ -137,8 +139,8 @@ def test_bloquear_un_usuario_no_afecta_a_otro(client, user, other_user):
 def test_recuperar_la_contrasena_quita_el_bloqueo(client, user):
     for _ in range(MAX_FALLOS):
         _entrar(client, clave='mala')
-    IntentoLogin.limpiar('test_user')
-    assert IntentoLogin.minutos_bloqueado('test_user') == 0
+    IntentoLogin.limpiar_usuario('test_user')
+    assert IntentoLogin.minutos_bloqueado('test_user', IP) == 0
 
 
 # ── Cambio obligatorio de contraseñas antiguas ──
@@ -165,7 +167,7 @@ def test_no_puede_usar_la_app_sin_cambiarla(client, usuario_debil):
     for url in ('/dashboard', '/perfil/', '/register_habit', '/estadisticas/'):
         assert client.get(url).headers['Location'].endswith('/perfil/actualizar-contrasena'), url
     # Cerrar sesión sí se permite
-    assert client.get('/logout').headers['Location'].endswith('/')
+    assert client.post('/logout').headers['Location'].endswith('/')
 
 
 def test_al_cambiarla_sigue_normal(client, usuario_debil):
@@ -177,7 +179,7 @@ def test_al_cambiarla_sigue_normal(client, usuario_debil):
     assert _usuario('antiguo').check_password(CLAVE_SEGURA)
     assert client.get('/perfil/').status_code == 200
     # La próxima vez entra directo
-    client.get('/logout')
+    client.post('/logout')
     assert _entrar(client, 'antiguo', CLAVE_SEGURA).request.path == '/dashboard'
 
 

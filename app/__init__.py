@@ -1,6 +1,7 @@
 import logging
 import os
 from flask import Flask, request, jsonify, render_template_string
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -19,7 +20,7 @@ def actualizar_esquema():
     db.create_all()
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
-        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)'},
+        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)', 'sesionVersion': 'INTEGER NOT NULL DEFAULT 0'},
         'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
         'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},
@@ -40,6 +41,11 @@ def create_app(config_overrides=None):
     app.config.from_object('config.Config')
     if config_overrides:
         app.config.update(config_overrides)
+
+    proxies = app.config.get('PROXIES_DE_CONFIANZA', 0)
+    if proxies:
+        # IP real del visitante (la usa el bloqueo de intentos de login) y https
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=proxies, x_proto=proxies)
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -82,6 +88,23 @@ def create_app(config_overrides=None):
     PERMITIDAS_SIN_CAMBIAR_CLAVE = {'perfil.actualizar_contrasena', 'auth.logout', 'static'}
 
     @app.before_request
+    def cerrar_sesiones_viejas():
+        """Si la contraseña cambió desde otra sesión (otro equipo o navegador),
+        esta sesión ya no vale: se cierra y se pide entrar de nuevo."""
+        from flask import session, redirect, url_for, flash
+        from flask_login import current_user, logout_user
+        if request.endpoint == 'static' or not current_user.is_authenticated:
+            return None
+        if session.get('sesion_version', 0) != (current_user.sesionVersion or 0):
+            logout_user()
+            session.clear()
+            flash('Tu contraseña cambió. Por seguridad, inicia sesión de nuevo.', 'warning')
+            if _wants_json():
+                return jsonify({'success': False, 'error': 'Sesión cerrada'}), 401
+            return redirect(url_for('auth.login'))
+        return None
+
+    @app.before_request
     def obligar_cambio_de_contrasena():
         from flask import session, redirect, url_for
         from flask_login import current_user
@@ -104,6 +127,19 @@ def create_app(config_overrides=None):
                 values['v'] = int(os.stat(ruta).st_mtime)
             except OSError:
                 pass
+
+    @app.after_request
+    def cabeceras_de_seguridad(respuesta):
+        cabeceras = respuesta.headers
+        # Solo por HTTPS durante un año. Sin includeSubDomains: otros subdominios
+        # (como el panel de Coolify) podrían no tener HTTPS todavía.
+        cabeceras.setdefault('Strict-Transport-Security', 'max-age=31536000')
+        # Nadie puede meter la app dentro de un <iframe> (clickjacking)
+        cabeceras.setdefault('X-Frame-Options', 'DENY')
+        cabeceras.setdefault('Content-Security-Policy', "frame-ancestors 'none'")
+        cabeceras.setdefault('X-Content-Type-Options', 'nosniff')
+        cabeceras.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+        return respuesta
 
     @app.after_request
     def cache_de_estaticos(respuesta):
