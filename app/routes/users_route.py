@@ -30,13 +30,14 @@ def _delete_user_data(idUser):
     from app.models.metodo_estudio import MetodoEstudio
     from app.models.recordatorios import Recordatorio, EnvioPrueba
     from app.models.codigos_recuperacion import CodigoRecuperacion
+    from app.models.juego_partida import JuegoPartida
     from app.routes.metodos_route import _borrar_archivos
     for metodo in MetodoEstudio.query.filter_by(idUser=idUser).all():
         _borrar_archivos([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     for model in (HistHabit, Habit, Castigo, Tarea, UserProgress,
                   VocabularioRegistro, Vocabulario, ShadowingSesion, Recordatorio, EnvioPrueba,
-                  CodigoRecuperacion):
+                  CodigoRecuperacion, JuegoPartida):
         model.query.filter_by(idUser=idUser).delete(synchronize_session=False)
 
 

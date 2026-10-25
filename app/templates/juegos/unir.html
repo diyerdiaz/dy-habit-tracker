@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Unir parejas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'menu/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Unir parejas</h1>
+        <p class="ingles-desc">Toca una palabra en inglés y luego su significado.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras en tu vocabulario para jugar. Tienes {{ palabras | length }}.</p>
+        <a href="{{ url_for('menu.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoUnir"
+         data-por-ronda="{{ parejas_por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='unir') }}">
+
+        <div class="unir-barra">
+            <span><i class="bi bi-link-45deg"></i> <strong id="unirAciertos">0</strong>/<span id="unirTotal">0</span></span>
+            <span><i class="bi bi-x-circle"></i> <strong id="unirErrores">0</strong> errores</span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="unirTiempo">0:00</strong></span>
+            <button type="button" class="unir-sonido" id="unirSonido" aria-pressed="true" title="Pronunciar las palabras al acertar">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="unir-tablero" id="unirTablero">
+            <div class="unir-columna">
+                <h2 class="unir-columna-titulo">English</h2>
+                <div class="unir-lista" id="unirIngles"></div>
+            </div>
+            <div class="unir-columna">
+                <h2 class="unir-columna-titulo">Español</h2>
+                <div class="unir-lista" id="unirEspanol"></div>
+            </div>
+        </div>
+
+        <div class="unir-final" id="unirFinal" hidden>
+            <div class="unir-final-icono" id="unirFinalIcono">🏆</div>
+            <h2 id="unirFinalTitulo">¡Ronda completa!</h2>
+            <ul class="unir-final-stats">
+                <li><span id="unirFinalTiempo">0:00</span> tiempo</li>
+                <li><span id="unirFinalErrores">0</span> errores</li>
+                <li><span id="unirFinalPrecision">100%</span> precisión</li>
+            </ul>
+            <p class="unir-final-nota" id="unirFinalNota" aria-live="polite"></p>
+            <div class="unir-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="unirOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+    <script type="application/json" id="unirPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}
