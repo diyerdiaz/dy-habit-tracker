@@ -95,9 +95,9 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-salir">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
                 <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
-            </a>
+            </button></form>
         </li>
     </ul>
 </div>

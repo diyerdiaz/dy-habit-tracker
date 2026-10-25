@@ -41,9 +41,9 @@
             <button type="submit" class="btn btn-primary btn-block" id="btnNueva">
                 <i class="bi bi-lock-fill"></i> Guardar y continuar
             </button>
-            <a href="{{ url_for('auth.logout') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="forgot-link text-center w-100 d-block mt-2 login-switch">
                 <i class="bi bi-box-arrow-left"></i> Cerrar sesión
-            </a>
+            </button></form>
         </div>
     </form>
 </div>

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file, flash, abort
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file, flash, abort, session
 from flask_login import login_required, current_user, logout_user
 from app.models.users import User, mensaje_requisitos
 from app import db
@@ -102,9 +102,11 @@ def edit(id):
             if mensaje_requisitos(passwordUser):
                 flash(mensaje_requisitos(passwordUser), "danger")
                 return redirect(url_for('user.edit', id=id))
-            user.set_password(passwordUser)
+            user.cambiar_contrasena(passwordUser)
 
         db.session.commit()
+        # Es la propia cuenta: esta sesión sigue, las de otros equipos se cierran
+        session['sesion_version'] = user.sesionVersion
         flash("Cuenta actualizada.", "success")
         return redirect(url_for('user.index'))
 

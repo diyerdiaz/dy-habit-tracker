@@ -173,9 +173,11 @@ def cambiar_contrasena():
     elif current_user.check_password(nueva):
         flash('La nueva contraseña debe ser distinta de la actual.', 'warning')
     else:
-        current_user.set_password(nueva)
+        current_user.cambiar_contrasena(nueva)
         db.session.commit()
-        flash('Tu contraseña se cambió correctamente.', 'success')
+        # Esta sesión sigue abierta; las de otros equipos se cierran
+        session['sesion_version'] = current_user.sesionVersion
+        flash('Tu contraseña se cambió correctamente. Se cerraron tus otras sesiones abiertas.', 'success')
     return redirect(url_for('perfil.index'))
 
 
@@ -196,8 +198,9 @@ def actualizar_contrasena():
         elif current_user.check_password(nueva):
             flash('La nueva contraseña debe ser distinta de la actual.', 'warning')
         else:
-            current_user.set_password(nueva)
+            current_user.cambiar_contrasena(nueva)
             db.session.commit()
+            session['sesion_version'] = current_user.sesionVersion
             session.pop('debe_cambiar_clave', None)
             flash('¡Listo! Tu contraseña ahora es segura.', 'success')
             return redirect(url_for('auth.dashboard'))

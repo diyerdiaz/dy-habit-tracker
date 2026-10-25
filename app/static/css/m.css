@@ -1505,3 +1505,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .puntos-ola span { animation-duration: 2s; }
 }
+
+/* "Cerrar sesión" es un formulario POST (no un enlace): el botón se ve igual que los demás del menú */
+.form-logout { margin: 0; }
+.form-logout > button {
+    width: 100%;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.form-logout > button.forgot-link { text-align: center; border: none; }
