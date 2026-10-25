@@ -22,6 +22,7 @@ def actualizar_esquema():
         'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)'},
         'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
+        'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},
     }
     inspector = inspect(db.engine)
     for tabla, columnas in columnas_nuevas.items():

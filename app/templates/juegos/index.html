@@ -45,11 +45,21 @@
             </ul>
             {% endif %}
         </a>
-        <div class="ingles-card juego-card proximamente" aria-disabled="true">
+        {% set sopa = resumen.get('sopa') %}
+        <a href="{{ url_for('juegos.sopa') }}" class="ingles-card juego-card{% if total_sopa < minimo_sopa %} bloqueado{% endif %}">
             <i class="bi bi-grid-3x3"></i>
             <h3>Sopa de letras</h3>
-            <p class="juego-desc">Muy pronto.</p>
-        </div>
+            <p class="juego-desc">Encuentra en la cuadrícula la palabra en inglés de cada significado.</p>
+            {% if total_sopa < minimo_sopa %}
+            <p class="juego-desc">Necesitas {{ minimo_sopa }} palabras de una sola pieza (tienes {{ total_sopa }}).</p>
+            {% elif sopa %}
+            <ul class="juego-stats">
+                <li><span>{{ sopa.jugadas }}</span> {{ 'ronda' if sopa.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ sopa.precision }}%</span> precisión</li>
+                {% if sopa.mejor_tiempo is not none %}<li><span>{{ sopa.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
     </div>
 </div>
 {% endblock %}

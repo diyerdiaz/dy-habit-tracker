@@ -143,3 +143,154 @@ def test_borrar_usuario_borra_sus_partidas(app, user):
     _delete_user_data(user.idUser)
     db.session.commit()
     assert JuegoPartida.query.count() == 0
+
+
+# ═══════════════ Sopa de letras ═══════════════
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+
+from app.routes.juegos_route import letras_para_sopa
+
+SOPA = [('borrow', 'pedir prestado'), ('enough', 'suficiente'), ('although', 'aunque'),
+        ('wear', 'llevar puesto'), ('learn', 'aprender'), ('break', 'romper'),
+        ('give up', 'rendirse'), ("don't", 'no hacer')]
+
+
+def _vocabulario_sopa(user, pares=SOPA):
+    for en, es in pares:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_sopa(html):
+    bloque = re.search(r'<script type="application/json" id="sopaPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_sopa(client, ids, **extra):
+    datos = {'ids': ids, 'errores': 1, 'segundos': 60, 'pistas': 1, 'nivel': 'normal', **extra}
+    return client.post('/menu/ingles/juegos/sopa/resultado', json=datos)
+
+
+def test_que_palabras_sirven_para_la_sopa():
+    assert letras_para_sopa('Borrow') == 'BORROW'
+    assert letras_para_sopa('  café ') == 'CAFE'           # sin tildes
+    assert letras_para_sopa('although') == 'ALTHOUGH'
+    for mala in ('give up', "don't", 'well-known', 'go', 'understanding', 'R2D2', ''):
+        assert letras_para_sopa(mala) is None, mala
+
+
+def test_sopa_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/sopa').status_code == 302
+
+
+def test_sopa_solo_manda_palabras_de_una_pieza(logged_client, user):
+    _vocabulario_sopa(user)
+    html = logged_client.get('/menu/ingles/juegos/sopa').get_data(as_text=True)
+    assert 'id="juegoSopa"' in html and 'js/juegos.js' in html
+    datos = _palabras_sopa(html)
+    assert {p['letras'] for p in datos} == {'BORROW', 'ENOUGH', 'ALTHOUGH', 'WEAR', 'LEARN', 'BREAK'}
+    assert all(set(p) == {'id', 'en', 'es', 'letras'} for p in datos)
+    for nivel in ('facil', 'normal', 'dificil'):
+        assert f'data-nivel="{nivel}"' in html
+
+
+def test_sopa_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    # 4 de una pieza + 2 frases: no alcanzan las 5 que pide la sopa
+    _vocabulario_sopa(user, SOPA[:4] + SOPA[6:])
+    html = logged_client.get('/menu/ingles/juegos/sopa').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoSopa"' not in html
+    assert 'Tienes 4 de 6' in html
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'Necesitas 5 palabras de una sola pieza (tienes 4)' in menu
+
+
+def test_guardar_ronda_de_sopa(logged_client, user):
+    ids = list(_vocabulario_sopa(user).values())[:6]
+    respuesta = _enviar_sopa(logged_client, ids, errores=2, pistas=1, nivel='dificil', segundos=95)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('sopa', 6, 2, 1, 'dificil', 95)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_sopa_invalido(logged_client, user):
+    ids = list(_vocabulario_sopa(user).values())[:6]
+    for extra in ({'nivel': 'imposible'}, {'nivel': None}, {'pistas': -1}, {'pistas': 7}, {'pistas': '1'}):
+        assert _enviar_sopa(logged_client, ids, **extra).status_code == 400, extra
+    assert JuegoPartida.query.count() == 0
+
+
+def test_unir_no_guarda_nivel_ni_pistas(logged_client, user):
+    ids = [p.idVocab for p in _vocabulario(user)][:4]
+    _enviar(logged_client, ids)
+    partida = JuegoPartida.query.one()
+    assert partida.nivel is None and partida.pistas == 0
+
+
+def test_ronda_con_pistas_no_es_perfecta(logged_client, user):
+    ids = list(_vocabulario_sopa(user).values())[:5]
+    _enviar_sopa(logged_client, ids, errores=0, pistas=2, segundos=30)
+    _enviar_sopa(logged_client, ids, errores=0, pistas=0, segundos=80)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '80s</span> mejor ronda perfecta' in html  # la de 30s usó pistas
+
+
+def test_esquema_agrega_columnas_nuevas_a_partidas():
+    from pathlib import Path as P
+    texto = (P(__file__).resolve().parent.parent / '__init__.py').read_text()
+    assert "'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'}" in texto
+
+
+NODE = shutil.which('node')
+SCRIPT_SOPA = r"""
+const { generarSopa, buscarEnTablero, DIRECCIONES } = require(process.argv[1]);
+const palabras = ['BORROW', 'ENOUGH', 'ALTHOUGH', 'WEAR', 'LEARN', 'BREAK', 'RUN', 'RUNNER', 'LEVEL', 'TEN']
+    .map((letras, id) => ({ id, letras }));
+const problemas = [];
+let tableros = 0;
+for (const nivel of Object.keys(DIRECCIONES)) {
+  for (const n of [8, 10]) {
+    for (let vez = 0; vez < 60; vez++) {
+      const ronda = palabras.filter((p) => p.letras.length <= n).sort(() => Math.random() - 0.5).slice(0, 6);
+      const sopa = generarSopa(ronda, n, DIRECCIONES[nivel]);
+      if (!sopa) { problemas.push(`sin tablero ${nivel} ${n}`); continue; }
+      tableros++;
+      const { tablero, colocadas } = sopa;
+      if (tablero.length !== n || tablero.some((f) => f.length !== n || f.some((l) => !/^[A-Z]$/.test(l)))) problemas.push('tablero mal lleno');
+      if (colocadas.length < 4) problemas.push('menos de 4 palabras');
+      const permitidas = new Set(DIRECCIONES[nivel].map((d) => d.join()));
+      for (const { palabra, celdas } of colocadas) {
+        if (celdas.map(([f, c]) => tablero[f][c]).join('') !== palabra.letras) problemas.push(`${palabra.letras} cortada`);
+        const paso = [celdas[1][0] - celdas[0][0], celdas[1][1] - celdas[0][1]];
+        if (!permitidas.has(paso.join())) problemas.push(`${palabra.letras} en dirección no permitida (${nivel})`);
+        const lugares = new Set(buscarEnTablero(tablero, palabra.letras).map((cs) => cs.map(String).sort().join('|')));
+        if (lugares.size !== 1) problemas.push(`${palabra.letras} aparece ${lugares.size} veces`);
+        // Ninguna palabra puede quedar entera dentro de otra (RUN dentro de RUNNER)
+        const propias = new Set(celdas.map(String));
+        for (const otra of colocadas) {
+          if (otra !== sopa.colocadas.find((x) => x.palabra === palabra) && celdas.every((c) => otra.celdas.map(String).includes(String(c)))) {
+            problemas.push(`${palabra.letras} escondida dentro de ${otra.palabra.letras}`);
+          }
+        }
+      }
+    }
+  }
+}
+console.log(JSON.stringify({ tableros, problemas: [...new Set(problemas)] }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_armado_de_la_sopa_nunca_corta_ni_repite_palabras(tmp_path):
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_SOPA, str(juegos_js)], capture_output=True, text=True, timeout=120)
+    assert salida.returncode == 0, salida.stderr
+    resultado = json.loads(salida.stdout)
+    assert resultado['tableros'] >= 350          # casi siempre logra armar el tablero
+    assert resultado['problemas'] == []

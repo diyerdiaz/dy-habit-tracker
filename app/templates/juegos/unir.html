@@ -29,11 +29,11 @@
          data-por-ronda="{{ parejas_por_ronda }}"
          data-resultado-url="{{ url_for('juegos.resultado', juego='unir') }}">
 
-        <div class="unir-barra">
+        <div class="juego-barra">
             <span><i class="bi bi-link-45deg"></i> <strong id="unirAciertos">0</strong>/<span id="unirTotal">0</span></span>
             <span><i class="bi bi-x-circle"></i> <strong id="unirErrores">0</strong> errores</span>
             <span><i class="bi bi-stopwatch"></i> <strong id="unirTiempo">0:00</strong></span>
-            <button type="button" class="unir-sonido" id="unirSonido" aria-pressed="true" title="Pronunciar las palabras al acertar">
+            <button type="button" class="juego-sonido" id="unirSonido" aria-pressed="true" title="Pronunciar las palabras al acertar">
                 <i class="bi bi-volume-up-fill"></i>
             </button>
         </div>
@@ -49,16 +49,16 @@
             </div>
         </div>
 
-        <div class="unir-final" id="unirFinal" hidden>
-            <div class="unir-final-icono" id="unirFinalIcono">🏆</div>
+        <div class="juego-final" id="unirFinal" hidden>
+            <div class="juego-final-icono" id="unirFinalIcono">🏆</div>
             <h2 id="unirFinalTitulo">¡Ronda completa!</h2>
-            <ul class="unir-final-stats">
+            <ul class="juego-final-stats">
                 <li><span id="unirFinalTiempo">0:00</span> tiempo</li>
                 <li><span id="unirFinalErrores">0</span> errores</li>
                 <li><span id="unirFinalPrecision">100%</span> precisión</li>
             </ul>
-            <p class="unir-final-nota" id="unirFinalNota" aria-live="polite"></p>
-            <div class="unir-final-botones">
+            <p class="juego-final-nota" id="unirFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
                 <button type="button" class="btn btn-juego fw-bold" id="unirOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
                 <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
             </div>

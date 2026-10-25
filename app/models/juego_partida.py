@@ -4,7 +4,9 @@ from datetime import datetime
 # Juegos de vocabulario disponibles (clave guardada en la base -> nombre visible)
 JUEGOS = {
     'unir': 'Unir parejas',
+    'sopa': 'Sopa de letras',
 }
+NIVELES_SOPA = ('facil', 'normal', 'dificil')
 
 
 class JuegoPartida(db.Model):
@@ -16,6 +18,9 @@ class JuegoPartida(db.Model):
     parejas = db.Column(db.Integer, nullable=False)
     errores = db.Column(db.Integer, nullable=False, default=0)
     segundos = db.Column(db.Integer, nullable=False, default=0)
+    # Solo sopa de letras: dificultad elegida y cuántas pistas se usaron
+    nivel = db.Column(db.String(10), nullable=True)
+    pistas = db.Column(db.Integer, nullable=False, default=0)
     fecha = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
     @property
