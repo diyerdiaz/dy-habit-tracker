@@ -1,0 +1,21 @@
+# Respaldo continuo de la base de datos con Litestream (https://litestream.io).
+# Cada cambio de instance/flaskdb.sqlite se sube en segundos a un bucket S3
+# (Cloudflare R2, Backblaze B2, ...). Solo se activa si existe RESPALDO_BUCKET
+# (ver docker-entrypoint.sh). Los valores ${...} salen de las variables de entorno
+# que se llenan en Coolify; aquí nunca van llaves reales.
+dbs:
+  - path: /app/instance/flaskdb.sqlite
+    replica:
+      type: s3
+      bucket: ${RESPALDO_BUCKET}
+      path: flaskdb
+      endpoint: ${RESPALDO_ENDPOINT}
+      region: ${RESPALDO_REGION}
+      access-key-id: ${RESPALDO_ACCESS_KEY_ID}
+      secret-access-key: ${RESPALDO_SECRET_ACCESS_KEY}
+
+# Una copia completa al día y se guardan las de los últimos 7 días: se puede
+# volver a cualquier momento de la última semana (p. ej. si se borró algo por error).
+snapshot:
+  interval: 24h
+  retention: 168h

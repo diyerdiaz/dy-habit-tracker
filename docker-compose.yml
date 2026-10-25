@@ -21,6 +21,12 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       # Dirección pública para los botones del correo (Coolify la llena sola)
       APP_URL: ${SERVICE_URL_APP:-}
+      # Respaldo continuo en un bucket S3 (Cloudflare R2). Vacías = sin respaldo.
+      # Los valores reales se ponen en Coolify (Environment Variables); nunca aquí.
+      RESPALDO_BUCKET: ${RESPALDO_BUCKET:-}
+      RESPALDO_ENDPOINT: ${RESPALDO_ENDPOINT:-}
+      RESPALDO_ACCESS_KEY_ID: ${RESPALDO_ACCESS_KEY_ID:-}
+      RESPALDO_SECRET_ACCESS_KEY: ${RESPALDO_SECRET_ACCESS_KEY:-}
     volumes:
      
       - ./instance:/app/instance:z
