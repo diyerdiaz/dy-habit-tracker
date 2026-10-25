@@ -17,6 +17,19 @@ def test_rutas_siguen_convencion_de_nombre():
         assert archivo.name.endswith("_route.py"), archivo.name
 
 
+def test_app_solo_tiene_init_suelto():
+    # La lógica que no es modelo ni ruta va en app/services/
+    sueltos = {p.name for p in APP.glob("*.py")}
+    assert sueltos == {"__init__.py"}, sueltos
+
+
+def test_services_sin_modelos_ni_rutas():
+    for archivo in (APP / "services").glob("*.py"):
+        texto = archivo.read_text()
+        assert "db.Model" not in texto, archivo.name
+        assert "Blueprint(" not in texto and ".route(" not in texto, archivo.name
+
+
 def test_no_hay_modelos_en_rutas_ni_rutas_en_modelos():
     for archivo in (APP / "routes").glob("*.py"):
         assert "db.Model" not in archivo.read_text(), archivo.name
@@ -86,3 +99,13 @@ def test_menu_sin_historial_de_habitos(logged_client):
         html = logged_client.get(url, follow_redirects=True).get_data(as_text=True)
         assert "Historial de Hábitos" not in html, url
     assert "Calendario" in logged_client.get("/estadisticas/calendario").get_data(as_text=True)
+
+
+def test_github_actions_corre_todos_los_tests():
+    flujo = (APP.parent / ".github" / "workflows" / "python-tests.yml").read_text()
+    assert "pull_request:" in flujo and "push:" in flujo
+    assert "pip install -r requirements.txt pytest" in flujo
+    assert "pytest app/test" in flujo
+    # Misma versión de Python que el Dockerfile de producción
+    version = re.search(r'FROM python:(\d+\.\d+)', (APP.parent / "Dockerfile").read_text()).group(1)
+    assert f'python-version: "{version}"' in flujo

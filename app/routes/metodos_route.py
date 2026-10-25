@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime, timedelta
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, jsonify,
     current_app, send_from_directory, abort,
@@ -52,6 +53,16 @@ def _datos_metodo_del_form():
     }
 
 
+# Si llega otra creación idéntica en este lapso, es un doble clic: se ignora
+VENTANA_DUPLICADO = timedelta(seconds=10)
+
+
+def _recien_creado(modelo, **filtros):
+    """True si el usuario creó hace segundos un registro con los mismos datos."""
+    limite = datetime.now() - VENTANA_DUPLICADO
+    return modelo.query.filter_by(idUser=current_user.idUser, **filtros).filter(modelo.createdAt >= limite).first() is not None
+
+
 # ── Tarjetas de métodos ──
 
 @bp.route('/')
@@ -72,6 +83,8 @@ def crear():
     datos = _datos_metodo_del_form()
     if not datos['nombre']:
         flash('El método necesita un nombre.', 'danger')
+        return redirect(url_for('metodos.index'))
+    if _recien_creado(MetodoEstudio, nombre=datos['nombre']):
         return redirect(url_for('metodos.index'))
     db.session.add(MetodoEstudio(idUser=current_user.idUser, **datos))
     db.session.commit()
@@ -149,6 +162,8 @@ def tarjeta_crear(metodo_id):
         flash('La tarjeta necesita un título.', 'danger')
         return redirect(url_for('metodos.tablero', metodo_id=metodo.idMetodo))
     columna = columna if columna in CLAVES_COLUMNAS else 'pendiente'
+    if _recien_creado(KanbanTarjeta, idMetodo=metodo.idMetodo, titulo=titulo, columna=columna):
+        return redirect(url_for('metodos.tablero', metodo_id=metodo.idMetodo))
     ultimo = max((t.orden for t in metodo.tarjetas if t.columna == columna), default=-1)
     db.session.add(KanbanTarjeta(
         idMetodo=metodo.idMetodo,

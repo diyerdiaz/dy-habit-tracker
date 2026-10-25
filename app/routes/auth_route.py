@@ -9,7 +9,7 @@ from app.models.personajes_login import PERSONAJES, elegir_personaje
 from app import db
 from datetime import date, timedelta
 from collections import defaultdict
-from app.gamificacion import calcular_racha, dias_programados
+from app.services.gamificacion import calcular_racha, dias_programados
 
 bp = Blueprint('auth', __name__)
 

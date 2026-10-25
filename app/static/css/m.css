@@ -1442,3 +1442,10 @@ body {
 .sidebar-item-toggle { margin-top: 24px; }
 .sidebar-link.sidebar-link-salir { color: #ff6666; border-color: rgba(255, 102, 102, 0.2); }
 
+
+/* Botón de un formulario que ya se está enviando (envio_unico.js) */
+.enviando {
+    opacity: .7;
+    pointer-events: none;
+    cursor: progress;
+}

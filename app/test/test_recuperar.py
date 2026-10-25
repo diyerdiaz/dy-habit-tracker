@@ -7,7 +7,7 @@ from app.models.recuperacion import (
     Recuperacion, SesionRecuperacion, VECES_PARA_RECUPERAR, dias_perdidos, dia_libre, inicio_mes,
     dias_libres_que_quedan, cuantos_se_pueden_recuperar,
 )
-from app.level_config import XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO
+from app.services.level_config import XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO
 from app.models.user_progress import UserProgress
 
 # Octubre de 2026: el 1 es jueves. "Hoy" empieza siendo sábado 17.
@@ -34,7 +34,7 @@ class _Hoy(date):
 def hoy(monkeypatch):
     """Fija la fecha de hoy en las rutas y en la gamificación."""
     import app.routes.habits_route as rutas
-    import app.gamificacion as gamificacion
+    import app.services.gamificacion as gamificacion
     monkeypatch.setattr(rutas, 'date', _Hoy)
     monkeypatch.setattr(gamificacion, 'date', _Hoy)
     _Hoy.actual = SAB_17
@@ -264,7 +264,7 @@ def test_devuelve_la_penalizacion_del_dia_vacio(logged_client, user, hoy):
 
 
 def test_completar_restablece_la_racha(logged_client, user, hoy):
-    from app.gamificacion import calcular_racha
+    from app.services.gamificacion import calcular_racha
     habit = _habit(user, [0, 1, 2, 3, 4])
     _lun_a_vie_hechos(user, habit, menos={LUN_12})
     racha_antes = calcular_racha(user.idUser)[1]

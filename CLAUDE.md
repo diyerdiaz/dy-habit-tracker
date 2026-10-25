@@ -6,6 +6,7 @@ Todo código nuevo va en la carpeta que le corresponde dentro de `app/`. No mezc
 | Qué | Dónde | Convención de nombre |
 |---|---|---|
 | Modelos SQLAlchemy | `app/models/` | `<nombre>.py` |
+| Lógica compartida (correo, gamificación, configuración) | `app/services/` | `<nombre>.py` |
 | Rutas / blueprints | `app/routes/` | `<nombre>_route.py` (registrar el blueprint en `app/__init__.py`) |
 | Plantillas HTML | `app/templates/<modulo>/` | `index.html`, `create.html`, `edit.html`, ... |
 | CSS | `app/static/css/` | `<modulo>.css` |

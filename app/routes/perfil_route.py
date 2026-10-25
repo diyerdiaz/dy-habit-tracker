@@ -14,9 +14,9 @@ from app.models.habitos import Habit
 from app.models.medallas import obtener_metricas, evaluar_medallas
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
 from app.models.personajes_login import PERSONAJES
-from app.gamificacion import get_or_create_progress
-from app.level_config import calcular_progreso
-from app.correo import enviar_pendientes, limite_prueba, registrar_prueba
+from app.services.gamificacion import get_or_create_progress
+from app.services.level_config import calcular_progreso
+from app.services.correo import enviar_pendientes, limite_prueba, registrar_prueba
 
 bp = Blueprint('perfil', __name__, url_prefix='/perfil')
 

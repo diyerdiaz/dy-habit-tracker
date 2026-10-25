@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 import pytest
 
 from app import db
-from app import correo
+from app.services import correo
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS

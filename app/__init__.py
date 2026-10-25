@@ -89,7 +89,7 @@ def create_app(config_overrides=None):
             return redirect(url_for('perfil.actualizar_contrasena'))
 
     # Comando `flask enviar-recordatorios` (correos de hábitos pendientes)
-    from app.correo import registrar_comandos
+    from app.services.correo import registrar_comandos
     registrar_comandos(app)
 
     # Los archivos de static/ llevan ?v=<fecha de modificación> en su URL: el navegador

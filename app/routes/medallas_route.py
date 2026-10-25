@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from app.models.medallas import obtener_metricas, evaluar_medallas, CATEGORIAS, RANGOS
-from app.level_config import NIVELES
+from app.services.level_config import NIVELES
 
 bp = Blueprint('medallas', __name__, url_prefix='/medallas')
 
