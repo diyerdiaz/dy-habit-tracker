@@ -10,7 +10,8 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from flask_login import login_required, current_user
 from app import db
 from app.services.archivos import carpeta_avatars, borrar_foto
-from app.models.users import User, mensaje_requisitos, MIN_LARGO_CONTRASENA
+from app.services.cuentas import error_cambio_usuario, error_cambio_contrasena
+from app.models.users import mensaje_requisitos, MIN_LARGO_CONTRASENA
 from app.models.habitos import Habit
 from app.services.medallas import obtener_metricas, evaluar_medallas
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
@@ -21,21 +22,12 @@ from app.services.correo import enviar_pendientes, limite_prueba, registrar_prue
 
 bp = Blueprint('perfil', __name__, url_prefix='/perfil')
 
-MAX_USUARIO = 80
 TAMANO_FOTO = 400          # la foto se guarda recortada en un cuadrado de 400x400
 MAX_FOTO_MB = 8
 EXTENSIONES_FOTO = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_EMAIL = 120
 PATRON_EMAIL = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 PATRON_HORA = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
-
-
-def _contrasena_actual_ok():
-    """Todo cambio de cuenta exige la contraseña actual."""
-    if current_user.check_password(request.form.get('contrasena_actual') or ''):
-        return True
-    flash('La contraseña actual no es correcta.', 'danger')
-    return False
 
 
 @bp.route('/')
@@ -132,14 +124,9 @@ def correo_prueba():
 @login_required
 def cambiar_usuario():
     nuevo = (request.form.get('nuevo_usuario') or '').strip()
-    if not nuevo or len(nuevo) > MAX_USUARIO:
-        flash(f'Escribe un nombre de usuario (máximo {MAX_USUARIO} caracteres).', 'danger')
-    elif nuevo == current_user.nameUser:
-        flash('Ese ya es tu nombre de usuario.', 'warning')
-    elif not _contrasena_actual_ok():
-        pass
-    elif User.query.filter(User.nameUser == nuevo, User.idUser != current_user.idUser).first():
-        flash('Ese nombre de usuario ya está en uso. Elige otro.', 'danger')
+    error = error_cambio_usuario(current_user, nuevo, request.form.get('contrasena_actual'))
+    if error:
+        flash(*error)
     else:
         current_user.nameUser = nuevo
         db.session.commit()
@@ -151,15 +138,10 @@ def cambiar_usuario():
 @login_required
 def cambiar_contrasena():
     nueva = request.form.get('nueva_contrasena') or ''
-    confirmar = request.form.get('confirmar_contrasena') or ''
-    if not _contrasena_actual_ok():
-        pass
-    elif mensaje_requisitos(nueva):
-        flash(mensaje_requisitos(nueva), 'danger')
-    elif nueva != confirmar:
-        flash('La nueva contraseña y su confirmación no coinciden.', 'danger')
-    elif current_user.check_password(nueva):
-        flash('La nueva contraseña debe ser distinta de la actual.', 'warning')
+    error = error_cambio_contrasena(current_user, request.form.get('contrasena_actual'),
+                                    nueva, request.form.get('confirmar_contrasena') or '')
+    if error:
+        flash(*error)
     else:
         current_user.cambiar_contrasena(nueva)
         db.session.commit()

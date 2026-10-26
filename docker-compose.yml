@@ -27,6 +27,10 @@ services:
       RESPALDO_ENDPOINT: ${RESPALDO_ENDPOINT:-}
       RESPALDO_ACCESS_KEY_ID: ${RESPALDO_ACCESS_KEY_ID:-}
       RESPALDO_SECRET_ACCESS_KEY: ${RESPALDO_SECRET_ACCESS_KEY:-}
+      # Administrador que se crea solo al arrancar si todavía no existe (solo ve /admin).
+      # Los valores reales se ponen en Coolify (Environment Variables); nunca aquí.
+      ADMIN_USUARIO: ${ADMIN_USUARIO:-}
+      ADMIN_CONTRASENA: ${ADMIN_CONTRASENA:-}
     volumes:
      
       - ./instance:/app/instance:z

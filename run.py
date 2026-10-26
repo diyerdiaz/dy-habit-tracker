@@ -1,11 +1,15 @@
 import os
 from app import create_app
 from app.services.esquema import actualizar_esquema
+from app.services.admin import asegurar_admin_del_entorno
 
 app = create_app()
 
 with app.app_context():
     actualizar_esquema()
+    # Crea el admin de ADMIN_USUARIO / ADMIN_CONTRASENA si aún no existe
+    if asegurar_admin_del_entorno() == 'creado':
+        print(f"[admin] Administrador '{app.config['ADMIN_USUARIO']}' creado desde las variables de entorno.", flush=True)
 
 if __name__ == '__main__':
     # Por defecto: solo accesible desde este equipo y sin el depurador de Werkzeug.

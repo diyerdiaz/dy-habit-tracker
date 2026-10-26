@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+{% block titulo_pagina %}Mi perfil · Administración{% endblock %}
+
+{% block content %}
+<div class="adm">
+    {% include 'admin/_nav.html' %}
+    <h1 class="adm-titulo">Mi perfil</h1>
+    <p class="adm-correo adm-sub">Entras como <strong>{{ current_user.nameUser }}</strong></p>
+
+    <div class="adm-perfil">
+        <form method="post" action="{{ url_for('admin.cambiar_usuario') }}" class="adm-bloque adm-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="adm-subtitulo">Cambiar usuario</h2>
+            <label>Nuevo usuario
+                <input type="text" name="nuevo_usuario" class="adm-input" maxlength="{{ max_usuario }}" required autocomplete="username">
+            </label>
+            <label>Contraseña actual
+                <input type="password" name="contrasena_actual" class="adm-input" required autocomplete="current-password">
+            </label>
+            <button type="submit" class="adm-boton">Guardar usuario</button>
+        </form>
+
+        <form method="post" action="{{ url_for('admin.cambiar_contrasena') }}" class="adm-bloque adm-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <h2 class="adm-subtitulo">Cambiar contraseña</h2>
+            <label>Contraseña actual
+                <input type="password" name="contrasena_actual" class="adm-input" required autocomplete="current-password">
+            </label>
+            <label>Nueva contraseña
+                <input type="password" name="nueva_contrasena" class="adm-input" required autocomplete="new-password">
+            </label>
+            <label>Repite la nueva contraseña
+                <input type="password" name="confirmar_contrasena" class="adm-input" required autocomplete="new-password">
+            </label>
+            <p class="adm-tenue adm-ayuda">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</p>
+            <button type="submit" class="adm-boton">Guardar contraseña</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

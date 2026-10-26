@@ -41,7 +41,7 @@ def create_app(config_overrides=None):
     from app.routes import (
         users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
         medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
-        perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route,
+        perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route, admin_route,
     )
 
     app.register_blueprint(auth_route.bp)
@@ -61,6 +61,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(temas_route.bp)
     app.register_blueprint(recuperar_route.bp)
     app.register_blueprint(juegos_route.bp)
+    app.register_blueprint(admin_route.bp)
 
     # Quien entró con una contraseña que no cumple los requisitos solo puede
     # cambiarla o cerrar sesión hasta que la actualice (ver auth_route.login)
@@ -74,6 +75,14 @@ def create_app(config_overrides=None):
         from flask_login import current_user, logout_user
         if request.endpoint == 'static' or not current_user.is_authenticated:
             return None
+        if current_user.bloqueado:
+            from app.models.users import MENSAJE_BLOQUEADO
+            logout_user()
+            session.clear()
+            flash(MENSAJE_BLOQUEADO, 'danger')
+            if _wants_json():
+                return jsonify({'success': False, 'error': 'Cuenta bloqueada'}), 401
+            return redirect(url_for('auth.login'))
         if session.get('sesion_version', 0) != (current_user.sesionVersion or 0):
             logout_user()
             session.clear()
@@ -91,6 +100,22 @@ def create_app(config_overrides=None):
                 and request.endpoint not in PERMITIDAS_SIN_CAMBIAR_CLAVE
                 and not (request.endpoint or '').startswith('pwa.')):
             return redirect(url_for('perfil.actualizar_contrasena'))
+
+    # El administrador no usa la app normal: solo ve su panel (/admin)
+    PERMITIDAS_ADMIN = {'auth.logout', 'static', 'perfil.actualizar_contrasena'}
+
+    @app.before_request
+    def admin_solo_en_su_panel():
+        from flask import redirect, url_for
+        from flask_login import current_user
+        endpoint = request.endpoint or ''
+        if (current_user.is_authenticated and current_user.es_admin
+                and not endpoint.startswith(('admin.', 'pwa.')) and endpoint not in PERMITIDAS_ADMIN):
+            return redirect(url_for('admin.index'))
+
+    # Comando `flask crear-admin <usuario>` (cuenta de administrador)
+    from app.services.admin import registrar_comandos as registrar_comandos_admin
+    registrar_comandos_admin(app)
 
     # Comando `flask enviar-recordatorios` (correos de hábitos pendientes)
     from app.services.correo import registrar_comandos

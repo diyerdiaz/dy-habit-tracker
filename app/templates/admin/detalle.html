@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from 'admin/_ultima.html' import ultima %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+{% block titulo_pagina %}{{ e.usuario }} · Administración{% endblock %}
+
+{% block content %}
+<div class="adm">
+    {% include 'admin/_nav.html' %}
+    <a class="adm-volver" href="{{ url_for('admin.index') }}">← Usuarios</a>
+    <h1 class="adm-titulo">{{ e.usuario }}{% if e.bloqueado %} <span class="adm-insignia">Bloqueado</span>{% endif %}</h1>
+    <p class="adm-correo adm-sub">{{ e.correo or 'Sin correo' }} · Última actividad: {{ ultima(e) }}</p>
+
+    <section class="adm-resumen">
+        <div class="adm-dato"><span class="adm-numero">{{ e.nivel }}</span><span class="adm-nombre">Nivel · {{ e.xp }} XP</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.racha }}</span><span class="adm-nombre">Racha (máx. {{ e.racha_maxima }})</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.habitos_activos }}<small>/{{ e.habitos }}</small></span><span class="adm-nombre">Hábitos activos</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.marcados }}</span><span class="adm-nombre">Hábitos marcados</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.tareas_hechas }}<small>/{{ e.tareas }}</small></span><span class="adm-nombre">Tareas hechas</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.metas_logradas }}<small>/{{ e.metas }}</small></span><span class="adm-nombre">Metas logradas</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.palabras }}</span><span class="adm-nombre">Palabras de inglés</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ e.minutos_shadowing }}</span><span class="adm-nombre">Minutos de shadowing</span></div>
+    </section>
+
+    <section class="adm-bloque">
+        <h2 class="adm-subtitulo">Actividad de los últimos 30 días <span class="adm-tenue">· {{ e.dias_activos_30 }} días con hábitos marcados</span></h2>
+        <div class="adm-actividad">
+            {% for dia, activo in e.actividad %}
+            <span class="adm-dia{{ ' activo' if activo else '' }}" title="{{ dia.strftime('%d/%m/%Y') }}{{ ' · activo' if activo else '' }}"></span>
+            {% endfor %}
+        </div>
+        <div class="adm-actividad-pie"><span>{{ e.actividad[0][0].strftime('%d/%m') }}</span><span>Hoy</span></div>
+    </section>
+
+    <section class="adm-bloque adm-acciones">
+        <h2 class="adm-subtitulo">Cuenta</h2>
+        <div class="adm-accion">
+            <div>
+                <strong>{{ 'Desbloquear' if e.bloqueado else 'Bloquear' }}</strong>
+                <p class="adm-tenue">{{ 'Podrá volver a iniciar sesión.' if e.bloqueado else 'No podrá iniciar sesión ni recibirá correos. Su sesión abierta se cierra. No se borra nada.' }}</p>
+            </div>
+            <form method="post" action="{{ url_for('admin.bloquear', id_user=e.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="adm-boton">{{ 'Desbloquear' if e.bloqueado else 'Bloquear' }}</button>
+            </form>
+        </div>
+        <div class="adm-accion adm-peligro">
+            <div>
+                <strong>Eliminar cuenta</strong>
+                <p class="adm-tenue">Borra la cuenta y todos sus datos (hábitos, tareas, metas, fotos…). No se puede deshacer.</p>
+            </div>
+            <form method="post" action="{{ url_for('admin.eliminar', id_user=e.id) }}" class="adm-form-eliminar">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="confirmar" class="adm-input" placeholder="Escribe {{ e.usuario }}" autocomplete="off" required aria-label="Escribe el nombre de usuario para confirmar">
+                <button type="submit" class="adm-boton adm-boton-peligro">Eliminar</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from 'admin/_ultima.html' import ultima %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+{% block titulo_pagina %}Administración{% endblock %}
+
+{% block content %}
+<div class="adm">
+    {% include 'admin/_nav.html' %}
+    <h1 class="adm-titulo">Usuarios</h1>
+
+    <section class="adm-resumen">
+        <div class="adm-dato"><span class="adm-numero">{{ resumen.usuarios }}</span><span class="adm-nombre">Registrados</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ resumen.activos_hoy }}</span><span class="adm-nombre">Activos hoy</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ resumen.activos_7 }}</span><span class="adm-nombre">Activos en 7 días</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ resumen.con_correo }}</span><span class="adm-nombre">Con correo</span></div>
+        <div class="adm-dato"><span class="adm-numero">{{ resumen.marcados }}</span><span class="adm-nombre">Hábitos marcados</span></div>
+    </section>
+
+    {% if usuarios %}
+    <div class="adm-tabla-caja">
+        <table class="adm-tabla">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th class="adm-num">Nivel</th>
+                    <th class="adm-num">Racha</th>
+                    <th class="adm-num">Hábitos</th>
+                    <th class="adm-num">Días activos <span class="adm-tenue">(30)</span></th>
+                    <th class="adm-num">Tareas</th>
+                    <th class="adm-num">Metas</th>
+                    <th>Última actividad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in usuarios %}
+                <tr>
+                    <td>
+                        <a class="adm-usuario" href="{{ url_for('admin.detalle', id_user=e.id) }}">{{ e.usuario }}{% if e.bloqueado %} <span class="adm-insignia">Bloqueado</span>{% endif %}</a>
+                        <span class="adm-correo">{{ e.correo or 'Sin correo' }}</span>
+                    </td>
+                    <td class="adm-num">{{ e.nivel }}</td>
+                    <td class="adm-num">{{ e.racha }}</td>
+                    <td class="adm-num">{{ e.habitos_activos }}<span class="adm-tenue">/{{ e.habitos }}</span></td>
+                    <td class="adm-num">{{ e.dias_activos_30 }}</td>
+                    <td class="adm-num">{{ e.tareas_hechas }}<span class="adm-tenue">/{{ e.tareas }}</span></td>
+                    <td class="adm-num">{{ e.metas_logradas }}<span class="adm-tenue">/{{ e.metas }}</span></td>
+                    <td>{{ ultima(e) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="adm-vacio">Todavía no hay usuarios registrados.</p>
+    {% endif %}
+</div>
+{% endblock %}

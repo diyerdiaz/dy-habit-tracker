@@ -29,3 +29,18 @@ def borrar_foto(user):
         except FileNotFoundError:
             pass
         user.avatar = None
+
+
+def borrar_imagenes_vision(idUser, nombres):
+    """Borra del disco las imágenes indicadas del vision board del usuario (solo
+    esos archivos) y la carpeta si queda vacía. Nunca borra la carpeta con todo."""
+    carpeta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'vision', str(idUser))
+    for nombre in nombres:
+        try:
+            os.remove(os.path.join(carpeta, os.path.basename(nombre)))
+        except FileNotFoundError:
+            pass
+    try:
+        os.rmdir(carpeta)   # solo funciona si está vacía
+    except OSError:
+        pass

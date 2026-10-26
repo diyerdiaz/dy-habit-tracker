@@ -5,9 +5,11 @@ TEST_PASSWORD = "Test_password1"
 
 
 @pytest.fixture
-def app():
+def app(tmp_path_factory):
     # Base de datos EN MEMORIA: los tests nunca tocan instance/flaskdb.sqlite
     app = create_app({
+        # Archivos subidos en una carpeta temporal: los tests nunca tocan instance/uploads
+        "UPLOAD_FOLDER": str(tmp_path_factory.mktemp("uploads")),
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "WTF_CSRF_ENABLED": False,
@@ -19,6 +21,7 @@ def app():
     })
     with app.app_context():
         assert app.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:"
+        assert "instance" not in app.config["UPLOAD_FOLDER"]
         db.create_all()
         yield app
         db.session.remove()

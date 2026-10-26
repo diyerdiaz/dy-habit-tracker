@@ -1,0 +1,12 @@
+{# Barra del panel de administración: secciones y cerrar sesión #}
+<nav class="adm-nav">
+    <span class="adm-marca">Administración</span>
+    <div class="adm-nav-enlaces">
+        <a href="{{ url_for('admin.index') }}" class="{{ 'activo' if request.endpoint in ('admin.index', 'admin.detalle') else '' }}">Usuarios</a>
+        <a href="{{ url_for('admin.perfil') }}" class="{{ 'activo' if request.endpoint == 'admin.perfil' else '' }}">Mi perfil</a>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="adm-boton">Cerrar sesión</button>
+        </form>
+    </div>
+</nav>

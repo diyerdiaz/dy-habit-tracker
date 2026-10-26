@@ -313,9 +313,9 @@ def test_ocultar_email():
 
 
 def test_borrar_usuario_borra_sus_codigos(app, con_correo, smtp):
-    from app.routes.users_route import _delete_user_data
+    from app.services.cuentas import borrar_cuenta
     CodigoRecuperacion.crear(con_correo.idUser)
-    _delete_user_data(con_correo.idUser)
+    borrar_cuenta(con_correo)
     db.session.commit()
     assert CodigoRecuperacion.query.count() == 0
 

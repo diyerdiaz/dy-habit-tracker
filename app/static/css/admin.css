@@ -1,0 +1,323 @@
+/* Panel de administración: minimalista, sin efectos ni letra decorativa */
+body {
+    background: #0e0e11 !important;
+    color: #e8e8ec;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.adm {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 0 48px;
+}
+
+.adm h1, .adm h2 {
+    font-family: inherit;
+}
+
+.adm-cabecera {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.adm-etiqueta {
+    margin: 0;
+    color: #8b8b96;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.adm-titulo {
+    margin: 2px 0 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.adm-boton {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #2c2c35;
+    background: transparent;
+    color: #e8e8ec;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.adm-boton:hover { background: #1b1b21; }
+
+.adm-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.adm-dato {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border: 1px solid #23232b;
+    border-radius: 10px;
+    background: #141418;
+}
+
+.adm-numero {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.adm-numero small {
+    font-size: 0.9rem;
+    color: #8b8b96;
+    font-weight: 400;
+}
+
+.adm-nombre {
+    color: #8b8b96;
+    font-size: 0.85rem;
+}
+
+.adm-tabla-caja {
+    overflow-x: auto;
+    scrollbar-color: #2c2c35 #141418;
+    color-scheme: dark;
+    border: 1px solid #23232b;
+    border-radius: 10px;
+    background: #141418;
+}
+
+.adm-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.adm-tabla th {
+    padding: 12px 16px;
+    text-align: left;
+    color: #8b8b96;
+    font-weight: 500;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #23232b;
+    white-space: nowrap;
+}
+
+.adm-tabla td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #1c1c23;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.adm-tabla tbody tr:last-child td { border-bottom: none; }
+.adm-tabla tbody tr:hover { background: #18181d; }
+
+.adm-num {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+}
+
+.adm-usuario {
+    display: block;
+    color: #fff;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.adm-usuario:hover { text-decoration: underline; }
+
+.adm-correo {
+    display: block;
+    margin: 2px 0 0;
+    color: #8b8b96;
+    font-size: 0.8rem;
+}
+
+.adm-tenue { color: #6b6b75; }
+
+.adm-vacio {
+    padding: 40px;
+    text-align: center;
+    color: #8b8b96;
+    border: 1px dashed #2c2c35;
+    border-radius: 10px;
+}
+
+.adm-volver {
+    color: #8b8b96;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.adm-volver:hover { color: #fff; }
+
+.adm-bloque {
+    padding: 18px;
+    border: 1px solid #23232b;
+    border-radius: 10px;
+    background: #141418;
+}
+
+.adm-subtitulo {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e8e8ec;
+}
+
+.adm-actividad {
+    display: grid;
+    grid-template-columns: repeat(30, 1fr);
+    gap: 4px;
+}
+
+.adm-dia {
+    aspect-ratio: 1 / 1;
+    border-radius: 3px;
+    background: #23232b;
+}
+
+.adm-dia.activo { background: #4ade80; }
+
+.adm-actividad-pie {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    color: #6b6b75;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .adm-cabecera { flex-direction: column; align-items: flex-start; }
+    .adm-actividad { grid-template-columns: repeat(15, 1fr); }
+}
+
+/* Barra de navegación */
+.adm-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #23232b;
+}
+
+.adm-marca {
+    color: #8b8b96;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.adm-nav-enlaces {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.adm-nav-enlaces form { margin: 0; }
+
+.adm-nav-enlaces a {
+    color: #8b8b96;
+    font-size: 0.92rem;
+    text-decoration: none;
+}
+
+.adm-nav-enlaces a:hover,
+.adm-nav-enlaces a.activo { color: #fff; }
+
+.adm-sub { margin: 4px 0 24px; }
+
+.adm > .adm-titulo { margin-bottom: 20px; }
+.adm > .adm-titulo + .adm-sub { margin-top: -14px; }
+
+.adm-insignia {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: rgba(248, 113, 113, 0.12);
+    color: #f87171;
+    font-size: 0.72rem;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+/* Acciones sobre la cuenta (detalle) */
+.adm-acciones { margin-top: 16px; }
+
+.adm-accion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-top: 1px solid #1c1c23;
+}
+
+.adm-accion:first-of-type { border-top: none; padding-top: 0; }
+.adm-accion p { margin: 2px 0 0; font-size: 0.85rem; }
+.adm-accion form { margin: 0; flex-shrink: 0; }
+
+.adm-form-eliminar {
+    display: flex;
+    gap: 8px;
+}
+
+.adm-input {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #2c2c35;
+    background: #0e0e11;
+    color: #fff;
+    font-size: 0.92rem;
+    outline: none;
+}
+
+.adm-input:focus { border-color: #6b6b75; }
+.adm-form-eliminar .adm-input { width: 200px; margin-top: 0; }
+
+.adm-boton-peligro {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #f87171;
+}
+
+.adm-boton-peligro:hover { background: rgba(248, 113, 113, 0.1); }
+
+/* Perfil del administrador */
+.adm-perfil {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.adm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.adm-form label {
+    color: #8b8b96;
+    font-size: 0.85rem;
+}
+
+.adm-form .adm-boton { align-self: flex-start; }
+.adm-ayuda { margin: -4px 0 0; font-size: 0.8rem; }
+
+@media (max-width: 600px) {
+    .adm-nav, .adm-accion { flex-direction: column; align-items: flex-start; }
+    .adm-form-eliminar .adm-input { width: 100%; }
+}
