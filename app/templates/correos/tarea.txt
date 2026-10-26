@@ -1,0 +1,21 @@
+¡Hola, {{ user.nameUser }}!
+
+{% if avisar|length == 1 -%}
+Te recordamos esta tarea de hoy ({{ fecha.strftime('%d/%m/%Y') }}):
+{%- else -%}
+Te recordamos estas tareas de hoy ({{ fecha.strftime('%d/%m/%Y') }}):
+{%- endif %}
+{% for t in avisar %}
+  [ ] {{ t.descripcion }} ({{ t.hora_texto() }})
+{%- endfor %}
+{% if otras %}
+También tienes pendiente:
+{% for t in otras %}
+  [ ] {{ t.descripcion }}
+{%- endfor %}
+{% endif %}
+{% if url_tareas %}
+Ver mis tareas: {{ url_tareas }}
+{% endif %}
+{% if prueba %}(Este es un correo de prueba: así se verá el recordatorio de tus tareas.)
+{% endif %}Recibes este correo porque pusiste un recordatorio en esta tarea. Para quitarlo, toca la campana de la tarea en la app.

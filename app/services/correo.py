@@ -1,7 +1,7 @@
-"""Envío de correos (SMTP) con los hábitos pendientes del día.
+"""Envío de correos (SMTP) con los hábitos y tareas pendientes del día.
 
 El comando `flask --app run enviar-recordatorios` revisa los recordatorios cuya
-hora ya llegó y envía el correo. Hay que ejecutarlo periódicamente (cron cada
+hora ya llegó (los del perfil y los de cada tarea) y envía el correo. Hay que ejecutarlo periódicamente (cron cada
 5-10 minutos, o una tarea programada en Coolify)."""
 
 import logging
@@ -21,6 +21,7 @@ from app.services.personajes_login import PERSONAJES, elegir_personaje
 from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.codigos_recuperacion import CodigoRecuperacion, MINUTOS_VALIDEZ
 from app.models.users import User
+from app.models.tareas import Tarea
 
 logger = logging.getLogger(__name__)
 
@@ -253,13 +254,83 @@ def enviar_recordatorios(ahora=None):
             continue
         rec.ultimoEnvio = ahora.date()
         db.session.commit()
+    return enviados + enviar_recordatorios_tareas(ahora)
+
+
+def toca_enviar_tarea(tarea, ahora):
+    """True si es una tarea de hoy, sin completar, cuya hora de recordatorio ya
+    llegó (dentro de la ventana) y cuyo correo todavía no salió."""
+    if (not tarea.horaRecordatorio or tarea.recordatorioEnviado or tarea.completada
+            or tarea.fecha != ahora.date()):
+        return False
+    programado = datetime.combine(ahora.date(), tarea.hora_time())
+    return programado <= ahora < programado + timedelta(minutes=VENTANA_MINUTOS)
+
+
+def enviar_tareas(user, avisar, fecha, personaje=None, prueba=False):
+    """Correo con las tareas cuyo recordatorio llegó (`avisar`) y las demás
+    tareas pendientes de ese día. Devuelve True si se envió."""
+    if not user.email or not avisar:
+        return False
+    ids = {t.idTarea for t in avisar}
+    otras = (Tarea.query.filter_by(idUser=user.idUser, fecha=fecha, completada=False)
+             .order_by(Tarea.createdAt).all())
+    otras = [t for t in otras if t.idTarea not in ids]
+    if personaje is None:
+        personaje = elegir_personaje()
+    app_url = (current_app.config.get('APP_URL') or '').rstrip('/')
+    datos = dict(
+        user=user, avisar=avisar, otras=otras, fecha=fecha, prueba=prueba,
+        personaje=PERSONAJES[personaje], tema=PERSONAJES[personaje]['tema'],
+        url_tareas=f'{app_url}/tareas/' if app_url else None,
+    )
+    if len(avisar) == 1:
+        asunto = f"⏰ Recordatorio: {avisar[0].descripcion}"
+    else:
+        asunto = f"⏰ Tienes {len(avisar)} tareas pendientes"
+    if prueba:
+        asunto = f"Prueba: {asunto}"
+    return enviar_correo(
+        user.email, asunto,
+        _render('correos/tarea.txt', **datos),
+        _render('correos/tarea.html', **datos),
+        imagenes={'personaje': (imagen_personaje(personaje), 'jpeg')},
+    )
+
+
+def enviar_recordatorios_tareas(ahora=None):
+    """Envía un correo por usuario con sus tareas cuya hora de recordatorio llegó.
+    Devuelve cuántos correos salieron."""
+    ahora = ahora or datetime.now()
+    candidatas = (Tarea.query.join(User, User.idUser == Tarea.idUser)
+                  .filter(Tarea.fecha == ahora.date(), Tarea.horaRecordatorio.isnot(None),
+                          Tarea.recordatorioEnviado.is_(False), Tarea.completada.is_(False),
+                          User.email.isnot(None), User.email != '')
+                  .order_by(Tarea.horaRecordatorio, Tarea.createdAt).all())
+    por_usuario = {}
+    for tarea in candidatas:
+        if toca_enviar_tarea(tarea, ahora):
+            por_usuario.setdefault(tarea.idUser, []).append(tarea)
+    enviados = 0
+    for id_user, tareas in por_usuario.items():
+        user = db.session.get(User, id_user)
+        try:
+            if enviar_tareas(user, tareas, ahora.date()):
+                enviados += 1
+        except (smtplib.SMTPException, OSError):
+            # No se marcan como enviadas: se reintenta en la próxima ejecución
+            logger.exception("No se pudo enviar el recordatorio de tareas del usuario %s", id_user)
+            continue
+        for tarea in tareas:
+            tarea.recordatorioEnviado = True
+        db.session.commit()
     return enviados
 
 
 def registrar_comandos(app):
     @app.cli.command('enviar-recordatorios')
     def enviar_recordatorios_cmd():
-        """Envía los correos de hábitos pendientes cuya hora ya llegó."""
+        """Envía los correos de hábitos y tareas pendientes cuya hora ya llegó."""
         if not app.config.get('MAIL_ENABLED'):
             click.echo('El correo no está configurado (MAIL_USERNAME / MAIL_PASSWORD en .env).')
             return

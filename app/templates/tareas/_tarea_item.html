@@ -1,0 +1,13 @@
+{# Una tarea de la lista (hoy o mañana). tareas.js arma el mismo HTML al agregar una nueva. #}
+<div class="tarea-item{{ ' done' if tarea.completada else '' }}" data-id="{{ tarea.idTarea }}" data-hora="{{ tarea.horaRecordatorio or '' }}">
+    <div class="tarea-circle"><i class="bi bi-check-lg"></i></div>
+    <div class="tarea-cuerpo">
+        <div class="tarea-text">{{ tarea.descripcion }}</div>
+        <span class="tarea-hora"{% if not tarea.horaRecordatorio %} hidden{% endif %}><i class="bi bi-bell-fill"></i> <span class="tarea-hora-texto">{{ tarea.hora_texto() }}</span></span>
+    </div>
+    <div class="tarea-acciones">
+        <button type="button" class="tarea-btn tarea-recordar" title="Recordatorio por correo" aria-label="Recordatorio por correo"><i class="bi bi-bell"></i></button>
+        <button type="button" class="tarea-btn tarea-editar" title="Editar" aria-label="Editar tarea"><i class="bi bi-pencil"></i></button>
+        <button type="button" class="tarea-delete" title="Eliminar" aria-label="Eliminar tarea"><i class="bi bi-trash"></i></button>
+    </div>
+</div>
