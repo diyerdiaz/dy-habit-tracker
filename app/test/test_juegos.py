@@ -142,10 +142,10 @@ def test_menu_muestra_el_resumen(logged_client, user):
 
 
 def test_borrar_usuario_borra_sus_partidas(app, user):
-    from app.routes.users_route import _delete_user_data
+    from app.services.cuentas import borrar_cuenta
     db.session.add(JuegoPartida(idUser=user.idUser, juego='unir', parejas=4))
     db.session.commit()
-    _delete_user_data(user.idUser)
+    borrar_cuenta(user)
     db.session.commit()
     assert JuegoPartida.query.count() == 0
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models.users import User, contrasena_segura
+from app.models.users import User, contrasena_segura, MENSAJE_BLOQUEADO
 from app.models.intentos_login import IntentoLogin, MAX_FALLOS, MINUTOS_BLOQUEO
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
@@ -30,6 +30,10 @@ def login():
             user = User.query.filter_by(nameUser=nameUser).first()
             if user and user.check_password(passwordUser):
                 IntentoLogin.limpiar(nameUser, ip)
+                if user.bloqueado:
+                    # Solo se avisa con la contraseña correcta: así no se revela qué cuentas existen
+                    flash(MENSAJE_BLOQUEADO, 'danger')
+                    return redirect(url_for('auth.login'))
                 login_user(user)
                 # Si después cambia la contraseña, las sesiones con otra versión se cierran
                 session['sesion_version'] = user.sesionVersion or 0

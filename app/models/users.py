@@ -42,6 +42,12 @@ def mensaje_requisitos(clave):
     return 'La contraseña no es segura. Le falta: ' + ', '.join(f.lower() for f in faltan) + '.'
 
 
+# Roles: 'usuario' usa la app normal; 'admin' solo ve el panel de administración (/admin)
+ROL_USUARIO = 'usuario'
+ROL_ADMIN = 'admin'
+MENSAJE_BLOQUEADO = 'Tu cuenta está bloqueada. Si crees que es un error, escríbele al administrador.'
+
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     idUser = db.Column(db.Integer, primary_key=True)
@@ -55,6 +61,14 @@ class User(db.Model, UserMixin):
     # Sube cada vez que cambia la contraseña: las sesiones abiertas con la versión
     # anterior se cierran solas (ver app/__init__.py, cerrar_sesiones_viejas)
     sesionVersion = db.Column(db.Integer, nullable=False, default=0)
+    # El registro público siempre crea 'usuario'; un admin solo se crea con `flask crear-admin`
+    rol = db.Column(db.String(20), nullable=False, default=ROL_USUARIO)
+    # Bloqueado por el administrador: no puede iniciar sesión ni recibe correos
+    bloqueado = db.Column(db.Boolean, nullable=False, default=False)
+
+    @property
+    def es_admin(self):
+        return self.rol == ROL_ADMIN
 
     def __init__(self, nameUser, password=None, **kwargs):
         # Compatibilidad: User(nameUser=..., passwordUser=...) también hashea

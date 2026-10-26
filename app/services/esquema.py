@@ -12,7 +12,7 @@ def actualizar_esquema():
     db.create_all()
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
-        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)', 'sesionVersion': 'INTEGER NOT NULL DEFAULT 0'},
+        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)', 'sesionVersion': 'INTEGER NOT NULL DEFAULT 0', 'rol': "VARCHAR(20) NOT NULL DEFAULT 'usuario'", 'bloqueado': 'BOOLEAN NOT NULL DEFAULT FALSE'},
         'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
         'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},

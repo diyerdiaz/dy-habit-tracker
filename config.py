@@ -90,6 +90,11 @@ class Config:
     # botones del correo. Vacía = el correo sale sin botones.
     APP_URL = os.environ.get('APP_URL', '')
 
+    # Cuenta de administrador que se crea sola al arrancar si todavía no existe
+    # (ver app/services/admin.py, asegurar_admin_del_entorno). Vacías = no se crea.
+    ADMIN_USUARIO = os.environ.get('ADMIN_USUARIO', '').strip()
+    ADMIN_CONTRASENA = os.environ.get('ADMIN_CONTRASENA', '')
+
 #Comandos para descargar en instalar todas las librerias offline  
 #python -m pip download -r requirements.txt -d librerias
 #pip install --no-index --find-links=librerias -r requirements.txt

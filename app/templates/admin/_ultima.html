@@ -1,0 +1,8 @@
+{# Texto corto de la última actividad: hoy / ayer / hace N días / sin actividad #}
+{%- macro ultima(e) -%}
+{%- if e.dias_sin_actividad is none -%}<span class="adm-tenue">Sin actividad</span>
+{%- elif e.dias_sin_actividad == 0 -%}Hoy
+{%- elif e.dias_sin_actividad == 1 -%}Ayer
+{%- else -%}Hace {{ e.dias_sin_actividad }} días
+{%- endif -%}
+{%- endmacro -%}

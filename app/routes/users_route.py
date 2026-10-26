@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, jsonif
 from flask_login import login_required, current_user, logout_user
 from app.models.users import User, mensaje_requisitos
 from app import db
-from app.services.archivos import borrar_apuntes, borrar_foto
+from app.services.cuentas import borrar_cuenta
 from io import BytesIO
 import base64
 import json
@@ -16,29 +16,6 @@ def _own_user_or_403(id):
     if id != current_user.idUser:
         abort(403)
     return db.get_or_404(User, id)
-
-
-def _delete_user_data(idUser):
-    """Borra todos los datos asociados al usuario (SQLite no aplica las FK en cascada)."""
-    from app.models.hist_habits import HistHabit
-    from app.models.habitos import Habit
-    from app.models.ruleta_castigo import Castigo
-    from app.models.tareas import Tarea
-    from app.models.user_progress import UserProgress
-    from app.models.vocabulario_registro import VocabularioRegistro
-    from app.models.vocabulario import Vocabulario
-    from app.models.shadowing_sesion import ShadowingSesion
-    from app.models.metodo_estudio import MetodoEstudio
-    from app.models.recordatorios import Recordatorio, EnvioPrueba
-    from app.models.codigos_recuperacion import CodigoRecuperacion
-    from app.models.juego_partida import JuegoPartida
-    for metodo in MetodoEstudio.query.filter_by(idUser=idUser).all():
-        borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
-        db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
-    for model in (HistHabit, Habit, Castigo, Tarea, UserProgress,
-                  VocabularioRegistro, Vocabulario, ShadowingSesion, Recordatorio, EnvioPrueba,
-                  CodigoRecuperacion, JuegoPartida):
-        model.query.filter_by(idUser=idUser).delete(synchronize_session=False)
 
 
 @bp.route('/')
@@ -124,10 +101,8 @@ def detail(id):
 @login_required
 def delete(id):
     user = _own_user_or_403(id)
-    borrar_foto(user)
-    _delete_user_data(user.idUser)
     logout_user()
-    db.session.delete(user)
+    borrar_cuenta(user)
     db.session.commit()
     flash("Tu cuenta fue eliminada.", "info")
     return redirect(url_for('auth.login'))

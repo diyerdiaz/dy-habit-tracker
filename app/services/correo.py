@@ -240,7 +240,7 @@ def enviar_recordatorios(ahora=None):
     ahora = ahora or datetime.now()
     enviados = 0
     recordatorios = (Recordatorio.query.join(User, User.idUser == Recordatorio.idUser)
-                     .filter(User.email.isnot(None), User.email != '').all())
+                     .filter(User.email.isnot(None), User.email != '', User.bloqueado.is_(False)).all())
     for rec in recordatorios:
         if not toca_enviar(rec, ahora):
             continue
@@ -305,7 +305,7 @@ def enviar_recordatorios_tareas(ahora=None):
     candidatas = (Tarea.query.join(User, User.idUser == Tarea.idUser)
                   .filter(Tarea.fecha == ahora.date(), Tarea.horaRecordatorio.isnot(None),
                           Tarea.recordatorioEnviado.is_(False), Tarea.completada.is_(False),
-                          User.email.isnot(None), User.email != '')
+                          User.email.isnot(None), User.email != '', User.bloqueado.is_(False))
                   .order_by(Tarea.horaRecordatorio, Tarea.createdAt).all())
     por_usuario = {}
     for tarea in candidatas:

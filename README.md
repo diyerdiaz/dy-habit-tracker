@@ -197,6 +197,12 @@ pip install -r requirements.txt
 # 4. (Opcional) crea un usuario desde la terminal (te pide la contraseña)
 python create_user.py tu_usuario
 
+# 4b. (Opcional) crea la cuenta de administrador: solo ve el panel /admin
+#     con los usuarios registrados y sus estadísticas (te pide la contraseña)
+flask --app run crear-admin nombre_admin
+#     O ponla en el .env / en Coolify: ADMIN_USUARIO y ADMIN_CONTRASENA.
+#     Al arrancar se crea si todavía no existe (si ya existe no se toca).
+
 # 5. Levanta la app (solo accesible desde tu equipo, sin depurador)
 python run.py
 #    Modo desarrollo con recarga automática:   FLASK_DEBUG=1 python run.py
