@@ -15,7 +15,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.juego_partida import JuegoPartida, JUEGOS, NIVELES_SOPA
 from app.models.vocabulario import Vocabulario
-from app.routes.menu_route import get_letras_flotantes
+from app.services.ingles import get_letras_flotantes
 
 bp = Blueprint('juegos', __name__, url_prefix='/menu/ingles/juegos')
 

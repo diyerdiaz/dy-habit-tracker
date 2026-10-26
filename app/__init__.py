@@ -1,6 +1,6 @@
 import logging
 import os
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -11,28 +11,6 @@ login_manager = LoginManager()
 csrf = CSRFProtect()
 
 logger = logging.getLogger(__name__)
-
-
-def actualizar_esquema():
-    """Crea las tablas que falten y agrega columnas nuevas a bases de datos
-    existentes (create_all no modifica tablas ya creadas). Nunca borra datos."""
-    from sqlalchemy import inspect, text
-    db.create_all()
-    columnas_nuevas = {
-        'habits': {'diasSemana': 'VARCHAR(20)'},
-        'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)', 'sesionVersion': 'INTEGER NOT NULL DEFAULT 0'},
-        'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
-        'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
-        'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},
-    }
-    inspector = inspect(db.engine)
-    for tabla, columnas in columnas_nuevas.items():
-        existentes = {c['name'] for c in inspector.get_columns(tabla)}
-        for nombre, tipo in columnas.items():
-            if nombre not in existentes:
-                db.session.execute(text(f'ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}'))
-                logger.info("Columna %s.%s agregada", tabla, nombre)
-    db.session.commit()
 
 
 def create_app(config_overrides=None):
@@ -62,7 +40,7 @@ def create_app(config_overrides=None):
     #  contraseñas y no la usaba ninguna pantalla)
     from app.routes import (
         users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
-        medallas_route, motivacion_route, metodos_route, estadisticas_route,
+        medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
         perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route,
     )
 
@@ -70,6 +48,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(users_route.bp)
     app.register_blueprint(habits_route.bp)
     app.register_blueprint(menu_route.bp)
+    app.register_blueprint(ingles_route.bp)
     app.register_blueprint(castigos_route.bp)
     app.register_blueprint(tareas_route.bp)
     app.register_blueprint(medallas_route.bp)
@@ -152,7 +131,7 @@ def create_app(config_overrides=None):
     @app.context_processor
     def tema_de_la_app():
         from flask import session
-        from app.models.personajes_login import tema_del_sitio, personaje_del_sitio
+        from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
         from app.models.users import REQUISITOS_CONTRASENA
         return {
             'tema_sitio': tema_del_sitio(session.get('tema_sitio')),
@@ -170,11 +149,7 @@ def create_app(config_overrides=None):
         msg = 'La sesión del formulario expiró o no es válida. Recarga la página e inténtalo de nuevo.'
         if _wants_json():
             return jsonify({"success": False, "error": msg}), 400
-        return render_template_string(
-            '{% extends "base.html" %}{% block content %}'
-            '<div class="container py-5 text-center"><h3>{{ msg }}</h3>'
-            '<a class="btn btn-primary mt-3" href="javascript:history.back()">Volver</a></div>'
-            '{% endblock %}', msg=msg), 400
+        return render_template('errores/csrf.html', msg=msg), 400
 
     @app.errorhandler(413)
     def handle_too_large(e):

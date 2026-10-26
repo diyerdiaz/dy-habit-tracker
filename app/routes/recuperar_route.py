@@ -16,7 +16,7 @@ from app import db
 from app.models.users import User, mensaje_requisitos, MIN_LARGO_CONTRASENA
 from app.models.intentos_login import IntentoLogin
 from app.models.codigos_recuperacion import CodigoRecuperacion, MAX_INTENTOS, DIGITOS, MINUTOS_VALIDEZ
-from app.models.personajes_login import PERSONAJES
+from app.services.personajes_login import PERSONAJES
 from app.services.correo import enviar_codigo, limite_codigo, avisar_contrasena_cambiada
 
 bp = Blueprint('recuperar', __name__, url_prefix='/recuperar')

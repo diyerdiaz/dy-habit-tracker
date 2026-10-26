@@ -15,7 +15,7 @@ from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.ruleta_castigo import Castigo
 from app.models.metodo_estudio import MetodoEstudio, KanbanTarjeta, Apunte
-from app.models.estadisticas import meses_disponibles, estadisticas_del_mes
+from app.services.estadisticas import meses_disponibles, estadisticas_del_mes
 from app.services.gamificacion import get_or_create_progress, sincronizar_racha
 from app.services.level_config import calcular_progreso
 

@@ -3,10 +3,11 @@ import uuid
 from datetime import datetime, timedelta
 from flask import (
     Blueprint, render_template, request, redirect, url_for, flash, jsonify,
-    current_app, send_from_directory, abort,
+    send_from_directory, abort,
 )
 from flask_login import login_required, current_user
 from app import db
+from app.services.archivos import carpeta_apuntes, borrar_apuntes
 from app.models.metodo_estudio import (
     MetodoEstudio, KanbanTarjeta, Apunte, COLUMNAS_KANBAN, CLAVES_COLUMNAS,
     ICONOS_METODO, COLORES_METODO, METODOS_SUGERIDOS,
@@ -22,21 +23,6 @@ def _metodo_del_usuario(metodo_id):
 
 def _tarjeta_del_usuario(tarjeta_id):
     return KanbanTarjeta.query.filter_by(idTarjeta=tarjeta_id, idUser=current_user.idUser).first_or_404()
-
-
-def _carpeta_apuntes(idUser):
-    return os.path.join(current_app.config['UPLOAD_FOLDER'], 'apuntes', str(idUser))
-
-
-def _borrar_archivos(apuntes):
-    """Borra del disco los archivos de una lista de apuntes (los registros los
-    borra la base de datos en cascada)."""
-    for apunte in apuntes:
-        ruta = os.path.join(_carpeta_apuntes(apunte.idUser), apunte.nombreGuardado)
-        try:
-            os.remove(ruta)
-        except FileNotFoundError:
-            pass
 
 
 def _datos_metodo_del_form():
@@ -124,7 +110,7 @@ def editar(metodo_id):
 def eliminar(metodo_id):
     metodo = _metodo_del_usuario(metodo_id)
     nombre = metodo.nombre
-    _borrar_archivos([a for t in metodo.tarjetas for a in t.apuntes])
+    borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
     db.session.delete(metodo)  # borra también sus tarjetas del tablero y sus apuntes
     db.session.commit()
     flash(f"Método '{nombre}' eliminado.", 'success')
@@ -196,7 +182,7 @@ def tarjeta_editar(tarjeta_id):
 def tarjeta_eliminar(tarjeta_id):
     tarjeta = _tarjeta_del_usuario(tarjeta_id)
     metodo_id = tarjeta.idMetodo
-    _borrar_archivos(tarjeta.apuntes)
+    borrar_apuntes(tarjeta.apuntes)
     db.session.delete(tarjeta)
     db.session.commit()
     return redirect(url_for('metodos.tablero', metodo_id=metodo_id))
@@ -244,7 +230,7 @@ def apunte_subir(tarjeta_id):
         flash('Elige al menos un archivo.', 'warning')
         return volver
 
-    carpeta = _carpeta_apuntes(current_user.idUser)
+    carpeta = carpeta_apuntes(current_user.idUser)
     os.makedirs(carpeta, exist_ok=True)
     subidos, rechazados = 0, []
     for archivo in archivos:
@@ -278,11 +264,11 @@ def apunte_subir(tarjeta_id):
 @login_required
 def apunte_ver(apunte_id):
     apunte = Apunte.query.filter_by(idApunte=apunte_id, idUser=current_user.idUser).first_or_404()
-    if not os.path.exists(os.path.join(_carpeta_apuntes(apunte.idUser), apunte.nombreGuardado)):
+    if not os.path.exists(os.path.join(carpeta_apuntes(apunte.idUser), apunte.nombreGuardado)):
         abort(404)
     descargar = request.args.get('descargar') == '1' or apunte.extension not in EXTENSIONES_EN_LINEA
     respuesta = send_from_directory(
-        _carpeta_apuntes(apunte.idUser), apunte.nombreGuardado,
+        carpeta_apuntes(apunte.idUser), apunte.nombreGuardado,
         as_attachment=descargar, download_name=apunte.nombreOriginal,
     )
     respuesta.headers['X-Content-Type-Options'] = 'nosniff'
@@ -294,7 +280,7 @@ def apunte_ver(apunte_id):
 def apunte_eliminar(apunte_id):
     apunte = Apunte.query.filter_by(idApunte=apunte_id, idUser=current_user.idUser).first_or_404()
     metodo_id = apunte.tarjeta.idMetodo
-    _borrar_archivos([apunte])
+    borrar_apuntes([apunte])
     db.session.delete(apunte)
     db.session.commit()
     flash(f"Apunte '{apunte.nombreOriginal}' eliminado.", 'success')

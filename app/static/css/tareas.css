@@ -149,7 +149,8 @@
     opacity: 0;
 }
 
-.tarea-item:hover .tarea-delete {
+.tarea-item:hover .tarea-delete,
+.tarea-item:focus-within .tarea-delete {
     opacity: 1;
 }
 
@@ -185,7 +186,7 @@
 .tareas-hist-toggle-row {
     display: flex;
     justify-content: center;
-    margin-top: 50px;
+    margin: 0 0 16px 0;
 }
 
 .tareas-hist-toggle-btn {
@@ -212,7 +213,7 @@
 
 .tareas-hist-panel {
     display: none;
-    margin-top: 30px;
+    margin: 0 0 28px 0;
 }
 
 .tareas-hist-panel.open {
@@ -331,4 +332,396 @@
 
 .tareas-hist-items li.done i {
     color: #00ffab;
+}
+
+/* ── Fecha de la tarea: Hoy / Mañana / Otra fecha ── */
+.tareas-fecha-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: 500px;
+    margin: 0 auto 20px auto;
+}
+
+.tareas-fecha-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin: 0;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tareas-fecha-chip:hover {
+    border-color: var(--tema-vivo, #d966ff);
+    color: #fff;
+}
+
+.tareas-fecha-chip.activo {
+    background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.35);
+}
+
+/* ── Calendario grande ── */
+.tareas-calendario {
+    width: 100%;
+    max-width: 660px;
+    box-sizing: border-box;
+    margin: 0 auto 28px auto;
+    padding: 20px;
+    border-radius: 24px;
+    background: rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.18);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.tareas-calendario[hidden] {
+    display: none;
+}
+
+.tareas-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.tareas-cal-mes {
+    color: var(--tema-vivo, #d966ff);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.35rem;
+    text-shadow: 0 0 12px rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.4);
+}
+
+.tareas-cal-nav {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tareas-cal-nav:hover:not(:disabled) {
+    border-color: var(--tema-vivo, #d966ff);
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.15);
+}
+
+.tareas-cal-nav:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.tareas-cal-semana,
+.tareas-cal-dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.tareas-cal-semana {
+    margin-bottom: 8px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tareas-cal-dia {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.tareas-cal-dia:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--tema-vivo, #d966ff);
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.12);
+}
+
+.tareas-cal-dia:disabled {
+    color: rgba(255, 255, 255, 0.2);
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+}
+
+.tareas-cal-dia.hoy {
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6);
+}
+
+.tareas-cal-dia.elegido {
+    background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad));
+    border-color: transparent;
+    box-shadow: 0 4px 16px rgba(var(--tema-grad-1-rgb, 142, 68, 173), 0.5);
+}
+
+.tareas-cal-marca {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--tema-grad-1, #8e44ad);
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.tareas-cal-ayuda {
+    margin: 14px 0 0 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+@media (max-width: 480px) {
+    .tareas-calendario { padding: 14px; }
+    .tareas-cal-semana, .tareas-cal-dias { gap: 5px; }
+    .tareas-cal-dia { border-radius: 10px; font-size: 0.9rem; }
+    .tareas-cal-marca { min-width: 15px; height: 15px; line-height: 15px; font-size: 0.6rem; top: 2px; right: 2px; }
+}
+
+/* ── Próximas tareas ── */
+.tareas-proximas {
+    margin-top: 28px;
+}
+
+.tareas-proximas-title {
+    text-align: center;
+    color: var(--tema-vivo, #b366ff);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin: 0 0 14px 0;
+}
+
+.tareas-proximas-dia {
+    margin-bottom: 16px;
+    border-radius: 24px;
+}
+
+.tareas-proximas-fecha {
+    color: #fff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin: 0 0 8px 6px;
+}
+
+.tareas-proximas-dia.nuevo {
+    animation: tareas-resaltar 1.2s ease;
+}
+
+@keyframes tareas-resaltar {
+    0% { box-shadow: 0 0 0 0 rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6); }
+    100% { box-shadow: 0 0 0 14px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0); }
+}
+
+/* Con el historial abierto solo se ve el historial: nada de fechas ni calendario */
+.tareas-wrapper.viendo-historial #fechaSelector,
+.tareas-wrapper.viendo-historial #calendarioPanel,
+.tareas-wrapper.viendo-historial #proximasPanel {
+    display: none !important;
+}
+
+/* ── Tarea: texto, hora del recordatorio y botones (campana, lápiz, basura) ── */
+.tarea-item {
+    flex-wrap: wrap;
+}
+
+.tarea-cuerpo {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tarea-hora {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.15);
+    color: var(--tema-vivo, #d966ff);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.tarea-hora[hidden] {
+    display: none;
+}
+
+.tarea-acciones {
+    flex-shrink: 0;
+    display: flex;
+    gap: 6px;
+}
+
+.tarea-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: 0.25s ease;
+}
+
+.tarea-item:hover .tarea-btn,
+.tarea-item:focus-within .tarea-btn,
+.tarea-item[data-hora]:not([data-hora=""]) .tarea-recordar {
+    opacity: 1;
+}
+
+.tarea-btn:hover {
+    border-color: var(--tema-vivo, #d966ff);
+    color: #fff;
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.15);
+}
+
+.tarea-item[data-hora]:not([data-hora=""]) .tarea-recordar {
+    color: var(--tema-vivo, #d966ff);
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+}
+
+/* En pantallas táctiles no hay hover: los botones se ven siempre */
+@media (hover: none) {
+    .tarea-btn, .tarea-delete { opacity: 1; }
+}
+
+.tarea-edit-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--tema-vivo, #d966ff);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 600;
+    outline: none;
+    box-shadow: 0 0 12px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+}
+
+.tarea-item.editando {
+    cursor: default;
+}
+
+.tarea-recordatorio {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.08);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.25);
+    cursor: default;
+}
+
+.tarea-rec-label {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.tarea-rec-hora {
+    height: 38px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    color-scheme: dark;
+    font-size: 0.95rem;
+}
+
+.tarea-rec-guardar,
+.tarea-rec-quitar {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tarea-rec-guardar {
+    background: linear-gradient(135deg, var(--tema-vivo, #9b59b6), var(--tema-grad-1, #8e44ad));
+}
+
+.tarea-rec-quitar {
+    background: rgba(255, 102, 102, 0.15);
+    border: 1px solid rgba(255, 102, 102, 0.35);
+    color: #ff8080;
+}
+
+.tarea-rec-quitar[hidden] {
+    display: none;
+}
+
+/* ── Avisos (recordatorio guardado, errores) ── */
+.tareas-aviso {
+    max-width: 500px;
+    margin: 0 auto 14px auto;
+    padding: 10px 16px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.9rem;
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.12);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    color: #fff;
+}
+
+.tareas-aviso.error {
+    background: rgba(255, 170, 0, 0.1);
+    border-color: rgba(255, 170, 0, 0.4);
+    color: #ffd27a;
+}
+
+.tareas-aviso[hidden] {
+    display: none;
 }

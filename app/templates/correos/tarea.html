@@ -1,0 +1,92 @@
+{# Correo HTML: tablas y estilos inline porque Gmail y otros clientes ignoran los .css
+   externos y los <style>. Mismo estilo que correos/recordatorio.html. #}
+{%- set dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'] -%}
+{%- set meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'] -%}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Recordatorio de tareas</title>
+</head>
+<body style="margin:0;padding:0;background:#07000d;" bgcolor="#07000d">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#07000d" style="background:#07000d;">
+<tr><td align="center" style="padding:28px 12px;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+    <tr><td align="center" style="padding:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:{{ tema['vivo'] }};">
+      DY Habit Tracker
+    </td></tr>
+
+    <tr><td bgcolor="{{ tema['oscuro'] }}" style="background:{{ tema['oscuro'] }};background-image:linear-gradient(180deg, {{ tema['oscuro'] }} 0%, {{ tema['oscuro-2'] }} 100%);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.35);border-radius:24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+        <tr><td align="center" style="padding:24px 24px 0;">
+          <img src="cid:personaje" width="160" alt="{{ personaje['nombre'] }}" style="display:block;width:160px;max-width:100%;height:auto;border:0;">
+        </td></tr>
+
+        <tr><td align="center" style="padding:8px 28px 0;font-family:Georgia,'Times New Roman',serif;">
+          <h1 style="margin:0;font-size:28px;font-style:italic;font-weight:700;color:{{ tema['vivo'] }};">⏰ ¡Hola, {{ user.nameUser }}!</h1>
+          <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:rgba(255,255,255,0.55);">
+            {{ dias[fecha.weekday()]|capitalize }} {{ fecha.day }} de {{ meses[fecha.month - 1] }}
+          </p>
+        </td></tr>
+
+        <tr><td style="padding:20px 28px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);">
+            {{ 'Tu recordatorio' if avisar|length == 1 else 'Tus recordatorios' }}
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            {% for t in avisar %}
+            <tr><td style="padding:0 0 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:rgba({{ tema['vivo-rgb'] }}, 0.12);border-left:4px solid {{ tema['vivo'] }};border-radius:12px;">
+                <tr>
+                  <td width="34" valign="middle" style="padding:14px 0 14px 14px;">
+                    <div style="width:16px;height:16px;border:2px solid {{ tema['vivo'] }};border-radius:50%;"></div>
+                  </td>
+                  <td valign="middle" style="padding:14px 14px 14px 6px;">
+                    <div style="font-size:17px;font-weight:700;color:#ffffff;">{{ t.descripcion }}</div>
+                    <div style="margin-top:2px;font-size:12px;color:rgba(255,255,255,0.55);">🔔 {{ t.hora_texto() }}</div>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+            {% endfor %}
+          </table>
+        </td></tr>
+
+        {% if otras %}
+        <tr><td style="padding:12px 28px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);">También tienes pendiente</p>
+          {% for t in otras %}
+          <p style="margin:0 0 6px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.05);font-size:15px;color:#ffffff;">○ {{ t.descripcion }}</p>
+          {% endfor %}
+        </td></tr>
+        {% endif %}
+
+        {% if url_tareas %}
+        <tr><td align="center" style="padding:18px 28px 0;">
+          <a href="{{ url_tareas }}" style="display:inline-block;padding:14px 30px;border-radius:14px;background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['vivo'] }});font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+            Ver mis tareas →
+          </a>
+        </td></tr>
+        {% endif %}
+
+        <tr><td align="center" style="padding:22px 28px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;font-style:italic;color:rgba({{ tema['claro-rgb'] }}, 0.85);">
+          “Hazlo ahora y quítatelo de encima.”
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <tr><td align="center" style="padding:18px 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.4);">
+      {% if prueba %}<span style="color:{{ tema['vivo'] }};">Este es un correo de prueba: así se verá el recordatorio de tus tareas.</span><br>{% endif %}
+      Recibes este correo porque pusiste un recordatorio en esta tarea.<br>
+      Para quitarlo, toca la campana de la tarea en la app.
+    </td></tr>
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>

@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from app import db
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
-from app.models.estadisticas import (
+from app.services.estadisticas import (
     leer_meses, comparar_meses, calendario_del_mes, MAX_MESES_COMPARAR,
 )
 

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, jsonif
 from flask_login import login_required, current_user, logout_user
 from app.models.users import User, mensaje_requisitos
 from app import db
+from app.services.archivos import borrar_apuntes, borrar_foto
 from io import BytesIO
 import base64
 import json
@@ -31,9 +32,8 @@ def _delete_user_data(idUser):
     from app.models.recordatorios import Recordatorio, EnvioPrueba
     from app.models.codigos_recuperacion import CodigoRecuperacion
     from app.models.juego_partida import JuegoPartida
-    from app.routes.metodos_route import _borrar_archivos
     for metodo in MetodoEstudio.query.filter_by(idUser=idUser).all():
-        _borrar_archivos([a for t in metodo.tarjetas for a in t.apuntes])
+        borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     for model in (HistHabit, Habit, Castigo, Tarea, UserProgress,
                   VocabularioRegistro, Vocabulario, ShadowingSesion, Recordatorio, EnvioPrueba,
@@ -124,7 +124,6 @@ def detail(id):
 @login_required
 def delete(id):
     user = _own_user_or_403(id)
-    from app.routes.perfil_route import borrar_foto
     borrar_foto(user)
     _delete_user_data(user.idUser)
     logout_user()

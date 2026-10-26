@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block titulo_pagina %}Calendario de Vocabulario{% endblock %}
+{% block titulo_pagina %}Calendario de Shadowing{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -84,7 +85,7 @@
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
                     <i class="bi bi-house-door"></i> Hábitos
                 </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option active-side">
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
@@ -113,12 +114,12 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('menu.vocabulario') }}" class="vocabulario-back">
-            <i class="bi bi-arrow-left"></i> Volver a Vocabulario
+        <a href="{{ url_for('ingles.shadowing') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Shadowing
         </a>
         <span class="ingles-flag-badge">🇬🇧 Constancia 🇺🇸</span>
         <h1 class="ingles-title">Calendario y Rachas</h1>
-        <p class="ingles-desc">Cada cuadro es un día. Míralo crecer conforme practiques.</p>
+        <p class="ingles-desc">Cada cuadro es un día. Míralo crecer conforme practiques shadowing.</p>
     </div>
 
     <div class="vocab-stats-row fade-in-section">
@@ -141,12 +142,12 @@
 
     <div class="vocab-cal-year-row fade-in-section">
         {% for anio in anios_disponibles %}
-        <a href="{{ url_for('menu.vocabulario_calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
+        <a href="{{ url_for('ingles.shadowing_calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
         {% endfor %}
     </div>
 
     <div class="vocab-cal-card fade-in-section">
-        <div class="vocab-cal-calendar" id="vocabCalScroll">
+        <div class="vocab-cal-calendar" id="shadowCalScroll">
             <div class="vocab-cal-months">
                 {% for semana in semanas %}
                 <span class="vocab-cal-month-label">{{ semana.mes }}</span>
@@ -160,9 +161,8 @@
                         <div class="vocab-cal-day level-{{ dia.nivel }}{{ ' is-future' if dia.es_futuro else '' }}"
                              data-fecha="{{ dia.fecha }}"
                              data-label="{{ dia.label }}"
-                             data-count="{{ dia.count }}"
-                             data-palabras="{{ dia.palabras|join(', ') }}"
-                             title="{{ dia.label }}: {{ dia.count }} palabra{{ 's' if dia.count != 1 else '' }} practicada{{ 's' if dia.count != 1 else '' }}">
+                             data-minutos="{{ dia.minutos }}"
+                             title="{{ dia.label }}: {{ dia.minutos }} minuto{{ 's' if dia.minutos != 1 else '' }} de shadowing">
                         </div>
                         {% endfor %}
                     </div>
@@ -170,10 +170,9 @@
                 </div>
             </div>
 
-            <div class="vocab-day-popup" id="vocabDayPopup">
-                <div class="vocab-day-popup-title" id="vocabDayPopupTitle"></div>
-                <div class="vocab-day-popup-count" id="vocabDayPopupCount"></div>
-                <div class="vocab-day-popup-words" id="vocabDayPopupWords"></div>
+            <div class="vocab-day-popup" id="shadowDayPopup">
+                <div class="vocab-day-popup-title" id="shadowDayPopupTitle"></div>
+                <div class="vocab-day-popup-count" id="shadowDayPopupCount"></div>
             </div>
         </div>
 
@@ -193,7 +192,7 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
-<script src="{{ url_for('static', filename='js/vocabulario.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
 {% endblock %}
 
 {% block footer %}
@@ -201,18 +200,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
             </div>
         </div>
     </div>

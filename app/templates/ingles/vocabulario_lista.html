@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
-{% block titulo_pagina %}Shadowing{% endblock %}
+{% block titulo_pagina %}Mis Palabras{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -83,7 +84,7 @@
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
                     <i class="bi bi-house-door"></i> Hábitos
                 </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option active-side">
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
@@ -112,34 +113,104 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('menu.ingles') }}" class="vocabulario-back">
-            <i class="bi bi-arrow-left"></i> Volver a Aprende Inglés
+        <a href="{{ url_for('ingles.vocabulario') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Shadowing 🇺🇸</span>
-        <h1 class="ingles-title">Shadowing</h1>
-        <p class="ingles-desc">Repite en voz alta lo que escuchas en inglés y sigue tu constancia.</p>
+        <span class="ingles-flag-badge">🇬🇧 Mis Palabras 🇺🇸</span>
+        <h1 class="ingles-title">Mis Palabras</h1>
+        <p class="ingles-desc">Revisa, modifica o elimina las palabras que has agregado.</p>
     </div>
 
-    <div class="ingles-grid fade-in-section">
-        <a href="{{ url_for('menu.shadowing_temporizador') }}" class="ingles-card">
-            <i class="bi bi-hourglass-split"></i>
-            <h3>Temporizador</h3>
+    <form method="GET" action="{{ url_for('ingles.vocabulario_lista') }}" class="vocab-search-form fade-in-section">
+        <i class="bi bi-search"></i>
+        <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar una palabra..." class="form-control glass-input">
+        {% if busqueda %}
+        <a href="{{ url_for('ingles.vocabulario_lista') }}" class="vocab-search-clear" title="Limpiar búsqueda">
+            <i class="bi bi-x-circle"></i>
         </a>
-        <a href="{{ url_for('menu.shadowing_calendario') }}" class="ingles-card">
-            <i class="bi bi-calendar3"></i>
-            <h3>Calendario y Rachas</h3>
+        {% endif %}
+    </form>
+
+    {% if palabras %}
+    <div class="vocab-history-table-wrapper fade-in-section">
+        <table class="vocab-history-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Significado</th>
+                    <th>Ejemplo</th>
+                    <th>Veces Practicada</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in palabras %}
+                <tr>
+                    <td>{{ p.nombre }}</td>
+                    <td>{{ p.significado }}</td>
+                    <td>{{ p.ejemplos or '—' }}</td>
+                    <td>
+                        {% set veces = conteo_por_palabra.get(p.idVocab, 0) %}
+                        {% if veces > 0 %}
+                        <span class="vocab-history-badge vocab-rating-medium">{{ veces }}x</span>
+                        {% else %}
+                        <span class="vocab-veces-nunca">Aún no</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="vocab-row-btn vocab-row-edit"
+                            onclick="openVocabEditModal({{ p.idVocab }}, {{ (p.nombre)|tojson|forceescape }}, {{ (p.significado)|tojson|forceescape }}, {{ ((p.ejemplos or ''))|tojson|forceescape }})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="vocab-row-btn vocab-row-delete"
+                            onclick="openVocabDeleteModal({{ p.idVocab }}, {{ (p.nombre)|tojson|forceescape }})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_paginas > 1 %}
+    <div class="vocab-pagination fade-in-section">
+        <a href="{{ url_for('ingles.vocabulario_lista', page=pagina - 1, q=busqueda if busqueda else None) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
+            <i class="bi bi-arrow-left"></i> Anterior
         </a>
-        <a href="{{ url_for('menu.shadowing_registro') }}" class="ingles-card">
-            <i class="bi bi-list-ul"></i>
-            <h3>Registro de Sesiones</h3>
+        <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
+        <a href="{{ url_for('ingles.vocabulario_lista', page=pagina + 1, q=busqueda if busqueda else None) }}"
+           class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
+            Siguiente <i class="bi bi-arrow-right"></i>
         </a>
     </div>
+    {% endif %}
+    {% elif busqueda %}
+    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
+        <p class="ingles-desc">
+            <i class="bi bi-search" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            No encontramos ninguna palabra que coincida con "<strong>{{ busqueda }}</strong>".
+        </p>
+    </div>
+    {% else %}
+    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
+        <p class="ingles-desc">
+            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            Aún no has agregado palabras. Vuelve a Vocabulario y usa "Agregar Vocabulario" para crear la primera.
+        </p>
+    </div>
+    {% endif %}
 </div>
+
+{% include 'ingles/vocabulario_edit.html' %}
+{% include 'ingles/vocabulario_delete.html' %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vocabulario.js') }}"></script>
 {% endblock %}
 
 {% block footer %}
@@ -147,18 +218,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
             </div>
         </div>
     </div>

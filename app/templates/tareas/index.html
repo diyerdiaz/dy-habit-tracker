@@ -83,7 +83,7 @@
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
                     <i class="bi bi-house-door"></i> Hábitos
                 </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option">
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option">
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
@@ -120,29 +120,15 @@
 
     <div class="text-center mb-4" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
         <h1 class="tareas-title">Tareas del Día</h1>
-        <p style="text-align: center; max-width: 600px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Agrega pendientes sueltos de hoy, sin necesidad de convertirlos en un hábito.</p>
+        <p style="text-align: center; max-width: 600px; margin: 10px auto 0 auto; color: rgba(255,255,255,0.65);">Agrega pendientes sueltos de hoy o prográmalos para otro día, sin necesidad de convertirlos en un hábito.</p>
     </div>
+
+    <p class="tareas-aviso" id="tareasAviso" role="status" hidden></p>
 
     <form class="tareas-add-form" id="addTaskForm">
         <input type="text" id="newTaskInput" class="tareas-input" placeholder="Escribe una nueva tarea..." maxlength="255" required>
         <button type="submit" class="tareas-add-btn"><i class="bi bi-plus-lg"></i></button>
     </form>
-
-    <div class="tareas-card" id="tareasList" style="{{ 'display:none;' if not tareas else '' }}">
-        {% for tarea in tareas %}
-        <div class="tarea-item{{ ' done' if tarea.completada else '' }}" data-id="{{ tarea.idTarea }}">
-            <div class="tarea-circle"><i class="bi bi-check-lg"></i></div>
-            <div class="tarea-text">{{ tarea.descripcion }}</div>
-            <button type="button" class="tarea-delete" title="Eliminar">
-                <i class="bi bi-trash"></i>
-            </button>
-        </div>
-        {% endfor %}
-    </div>
-    <div class="tareas-empty" id="tareasEmpty" style="{{ 'display:none;' if tareas else '' }}">
-        <i class="bi bi-clipboard-check"></i>
-        <span>No tienes tareas para hoy. ¡Agrega una!</span>
-    </div>
 
     <div class="tareas-hist-toggle-row">
         <button type="button" class="tareas-hist-toggle-btn" id="toggleHistBtn">
@@ -185,6 +171,48 @@
             <span>Aún no tienes historial de días anteriores.</span>
         </div>
         {% endif %}
+    </div>
+
+    <div class="tareas-fecha-row" id="fechaSelector" data-hoy="{{ hoy }}" data-manana="{{ manana }}" data-maxima="{{ fecha_maxima }}">
+        <button type="button" class="tareas-fecha-chip activo" data-fecha="{{ hoy }}">Hoy</button>
+        <button type="button" class="tareas-fecha-chip" data-fecha="{{ manana }}">Mañana</button>
+        <button type="button" class="tareas-fecha-chip tareas-fecha-otra" id="fechaOtraChip" aria-expanded="false" aria-controls="calendarioPanel">
+            <i class="bi bi-calendar3"></i> <span id="fechaOtraTexto">Otra fecha</span>
+        </button>
+    </div>
+
+    <div class="tareas-calendario" id="calendarioPanel" hidden data-conteos='{{ conteos|tojson }}'>
+        <div class="tareas-cal-header">
+            <button type="button" class="tareas-cal-nav" id="calAnterior" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+            <span class="tareas-cal-mes" id="calMes"></span>
+            <button type="button" class="tareas-cal-nav" id="calSiguiente" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+        </div>
+        <div class="tareas-cal-semana">
+            <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+        </div>
+        <div class="tareas-cal-dias" id="calDias"></div>
+        <p class="tareas-cal-ayuda" id="calAyuda">Toca un día y escribe la tarea arriba.</p>
+    </div>
+
+    <div class="tareas-card" id="tareasList" style="{{ 'display:none;' if not tareas else '' }}">
+        {% for tarea in tareas %}
+        {% include 'tareas/_tarea_item.html' %}
+        {% endfor %}
+    </div>
+    <div class="tareas-empty" id="tareasEmpty" style="{{ 'display:none;' if tareas else '' }}">
+        <i class="bi bi-clipboard-check"></i>
+        <span>No tienes tareas para hoy. ¡Agrega una!</span>
+    </div>
+
+    <div class="tareas-proximas" id="proximasPanel"{% if not tareas_manana %} hidden{% endif %}>
+        <h2 class="tareas-proximas-title"><i class="bi bi-calendar-event"></i> Tareas de mañana</h2>
+        <div class="tareas-proximas-dia" data-fecha="{{ manana }}">
+            <div class="tareas-card" id="mananaLista">
+                {% for tarea in tareas_manana %}
+                {% include 'tareas/_tarea_item.html' %}
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 

@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from app import db
-from app.models.medallas import MEDALLAS, RANGOS, obtener_metricas, evaluar_medallas
+from app.services.medallas import MEDALLAS, RANGOS, obtener_metricas, evaluar_medallas
 
 
 def test_hay_130_medallas_unicas():

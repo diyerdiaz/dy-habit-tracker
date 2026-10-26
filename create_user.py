@@ -5,7 +5,8 @@ La contraseña se pide por teclado (no queda en el historial de la terminal).
 """
 import sys
 import getpass
-from app import create_app, db, actualizar_esquema
+from app import create_app, db
+from app.services.esquema import actualizar_esquema
 from app.models.users import User
 
 app = create_app()

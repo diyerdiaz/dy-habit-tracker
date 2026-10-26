@@ -1,7 +1,7 @@
 from datetime import date
 from flask import Blueprint, render_template
 from flask_login import login_required
-from app.models.motivacion import frase_del_dia, reto_del_dia, frases_anteriores
+from app.services.motivacion import frase_del_dia, reto_del_dia, frases_anteriores
 from app.models.habitos import DIAS_SEMANA
 
 bp = Blueprint('motivacion', __name__, url_prefix='/motivacion')
