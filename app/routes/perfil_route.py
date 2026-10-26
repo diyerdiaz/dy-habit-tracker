@@ -9,11 +9,12 @@ from flask import (
 from PIL import Image, ImageOps, UnidentifiedImageError
 from flask_login import login_required, current_user
 from app import db
+from app.services.archivos import carpeta_avatars, borrar_foto
 from app.models.users import User, mensaje_requisitos, MIN_LARGO_CONTRASENA
 from app.models.habitos import Habit
-from app.models.medallas import obtener_metricas, evaluar_medallas
+from app.services.medallas import obtener_metricas, evaluar_medallas
 from app.models.recordatorios import Recordatorio, MAX_RECORDATORIOS
-from app.models.personajes_login import PERSONAJES
+from app.services.personajes_login import PERSONAJES
 from app.services.gamificacion import get_or_create_progress
 from app.services.level_config import calcular_progreso
 from app.services.correo import enviar_pendientes, limite_prueba, registrar_prueba
@@ -27,19 +28,6 @@ EXTENSIONES_FOTO = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_EMAIL = 120
 PATRON_EMAIL = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 PATRON_HORA = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
-
-
-def carpeta_avatars():
-    return os.path.join(current_app.config['UPLOAD_FOLDER'], 'avatars')
-
-
-def borrar_foto(user):
-    if user.avatar:
-        try:
-            os.remove(os.path.join(carpeta_avatars(), user.avatar))
-        except FileNotFoundError:
-            pass
-        user.avatar = None
 
 
 def _contrasena_actual_ok():

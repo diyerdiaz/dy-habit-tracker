@@ -5,7 +5,7 @@ from app.models.intentos_login import IntentoLogin, MAX_FALLOS, MINUTOS_BLOQUEO
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes
-from app.models.personajes_login import PERSONAJES, elegir_personaje
+from app.services.personajes_login import PERSONAJES, elegir_personaje
 from app import db
 from datetime import date, timedelta
 from collections import defaultdict

@@ -140,14 +140,14 @@ def test_meta_general_usa_el_color_del_tema():
 
 
 def test_personaje_del_sitio_valida_el_indice():
-    from app.models.personajes_login import personaje_del_sitio, PERSONAJES
+    from app.services.personajes_login import personaje_del_sitio, PERSONAJES
     assert personaje_del_sitio(1) is PERSONAJES[1]
     assert personaje_del_sitio(None) is None
     assert personaje_del_sitio(99) is None
 
 
 def test_el_personaje_del_login_pregunta_por_el_plan(client, user):
-    from app.models.personajes_login import PERSONAJES
+    from app.services.personajes_login import PERSONAJES
     from app.test.conftest import TEST_PASSWORD
     client.get('/')
     with client.session_transaction() as s:

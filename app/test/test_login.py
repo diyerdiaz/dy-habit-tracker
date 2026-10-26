@@ -1,5 +1,5 @@
 import re
-from app.models.personajes_login import PERSONAJES, elegir_personaje, tema_del_sitio
+from app.services.personajes_login import PERSONAJES, elegir_personaje, tema_del_sitio
 from app.test.conftest import TEST_PASSWORD
 
 

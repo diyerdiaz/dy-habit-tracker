@@ -129,18 +129,20 @@ lateral con todas las secciones:
 ```text
 mi-proyecto-personal/
 ├── app/
-│   ├── models/          # Un archivo por entidad + lógica de medallas, motivación y estadísticas
+│   ├── models/          # Un archivo por entidad (solo modelos SQLAlchemy)
 │   ├── routes/          # Blueprints de Flask (auth, habits, medallas, metodos, perfil, ...)
 │   ├── static/
 │   │   ├── css/         # Un .css por vista (m.css = estilos globales)
 │   │   └── js/          # Un .js por vista (+ csrf.js y cursor.js globales)
-│   ├── templates/       # HTML por módulo (medallas/, metodos/, perfil/, menu/, ...)
+│   ├── templates/       # HTML por módulo (medallas/, metodos/, perfil/, ingles/, ...)
 │   ├── test/            # Tests con pytest
-│   ├── services/        # Lógica compartida por rutas y modelos
+│   ├── services/        # Lógica compartida (medallas, motivación, estadísticas, personajes, ...)
 │   │   ├── correo.py        # Envío de correos (recordatorios, códigos de recuperación)
+│   │   ├── esquema.py       # actualizar_esquema(): crea tablas y columnas nuevas al arrancar
 │   │   ├── gamificacion.py  # XP, racha, días de descanso y penalizaciones
+│   │   ├── ingles.py        # Rangos de vocabulario y fondo animado de Inglés
 │   │   └── level_config.py  # Configuración de niveles (umbrales, bonos)
-│   └── __init__.py      # App factory, blueprints y actualizar_esquema()
+│   └── __init__.py      # App factory y registro de blueprints
 ├── instance/            # ⚠️ Datos reales (no se versiona)
 │   ├── flaskdb.sqlite   #    Base de datos SQLite
 │   ├── secret_key       #    Clave de sesión generada automáticamente

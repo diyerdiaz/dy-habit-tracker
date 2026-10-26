@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from app.models.motivacion import FRASES, frase_del_dia, frases_anteriores
+from app.services.motivacion import FRASES, frase_del_dia, frases_anteriores
 
 
 def test_misma_frase_todo_el_dia_y_cambia_al_siguiente():

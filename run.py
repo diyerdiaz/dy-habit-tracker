@@ -1,5 +1,6 @@
 import os
-from app import create_app, actualizar_esquema
+from app import create_app
+from app.services.esquema import actualizar_esquema
 
 app = create_app()
 

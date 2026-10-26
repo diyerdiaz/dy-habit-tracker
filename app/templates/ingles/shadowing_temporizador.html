@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block titulo_pagina %}Historial de Vocabulario{% endblock %}
+{% block titulo_pagina %}Temporizador de Shadowing{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -84,7 +85,7 @@
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
                     <i class="bi bi-house-door"></i> Hábitos
                 </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option active-side">
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
@@ -113,95 +114,99 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('menu.vocabulario_aprender') }}" class="vocabulario-back">
-            <i class="bi bi-arrow-left"></i> Volver a Aprender Vocabulario
+        <a href="{{ url_for('ingles.shadowing') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Shadowing
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Tu Progreso 🇺🇸</span>
-        <h1 class="ingles-title">Historial de Aprendizaje</h1>
-        <p class="ingles-desc">Así te ha ido calificando cada palabra que has practicado.</p>
+        <span class="ingles-flag-badge">🇬🇧 Shadowing 🇺🇸</span>
+        <h1 class="ingles-title">Temporizador</h1>
+        <p class="ingles-desc">Repite en voz alta lo que escuchas en inglés mientras cronometras tu práctica.</p>
     </div>
 
-    {% if total == 0 %}
-    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
-        <p class="ingles-desc">
-            <i class="bi bi-graph-up" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
-            Aún no has calificado ninguna palabra. Ve a "Aprender Vocabulario" y completa una sesión para ver tu historial aquí.
-        </p>
-    </div>
-    {% else %}
-
-    <!-- Tarjetas de Resumen -->
     <div class="vocab-stats-row fade-in-section">
-        <div class="ingles-card vocab-stat-card vocab-stat-easy">
-            <i class="bi bi-emoji-smile"></i>
-            <h3>{{ total_facil }}</h3>
-            <p>Fácil</p>
-            <span class="vocab-stat-pct">{{ pct_facil }}%</span>
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-clock-history"></i>
+            <h3 id="shadowTotalTiempo">{{ (total_segundos // 60) }}m {{ (total_segundos % 60) }}s</h3>
+            <p>Tiempo Total</p>
         </div>
-        <div class="ingles-card vocab-stat-card vocab-stat-medium">
-            <i class="bi bi-emoji-neutral"></i>
-            <h3>{{ total_medio }}</h3>
-            <p>Medio fácil</p>
-            <span class="vocab-stat-pct">{{ pct_medio }}%</span>
-        </div>
-        <div class="ingles-card vocab-stat-card vocab-stat-hard">
-            <i class="bi bi-emoji-frown"></i>
-            <h3>{{ total_dificil }}</h3>
-            <p>Difícil</p>
-            <span class="vocab-stat-pct">{{ pct_dificil }}%</span>
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-collection-play"></i>
+            <h3>{{ total_sesiones }}</h3>
+            <p>Sesiones</p>
         </div>
     </div>
 
-    <!-- Barra de proporción -->
-    <div class="vocab-proportion-bar fade-in-section" title="Distribución de calificaciones">
-        {% if pct_facil > 0 %}<div class="vocab-proportion-segment vocab-rating-easy" style="width: {{ pct_facil }}%;"></div>{% endif %}
-        {% if pct_medio > 0 %}<div class="vocab-proportion-segment vocab-rating-medium" style="width: {{ pct_medio }}%;"></div>{% endif %}
-        {% if pct_dificil > 0 %}<div class="vocab-proportion-segment vocab-rating-hard" style="width: {{ pct_dificil }}%;"></div>{% endif %}
+    <!-- Selector de modo: Cronómetro o Agregar Tiempo -->
+    <div class="shadow-mode-toggle fade-in-section" id="shadowModeToggle">
+        <span class="shadow-mode-thumb"></span>
+        <button type="button" class="shadow-mode-option active-side" data-mode="timer">
+            <i class="bi bi-hourglass-split"></i> Cronómetro
+        </button>
+        <button type="button" class="shadow-mode-option" data-mode="manual">
+            <i class="bi bi-pencil-square"></i> Agregar Tiempo
+        </button>
     </div>
 
-    <!-- Tabla de Registro -->
+    <!-- Temporizador -->
+    <div class="shadow-timer-card fade-in-section" id="shadowTimerCard">
+        <div class="shadow-hourglass paused" id="shadowHourglass">
+            <div class="shadow-glass-top">
+                <div class="shadow-sand-top"></div>
+            </div>
+            <div class="shadow-glass-neck"></div>
+            <div class="shadow-glass-bottom">
+                <div class="shadow-sand-bottom"></div>
+            </div>
+        </div>
+
+        <div class="shadow-timer-display" id="shadowTimerDisplay">00:00</div>
+
+        <div class="shadow-timer-buttons">
+            <button type="button" id="shadowStartBtn" class="btn btn-vocab-accent shadow-timer-btn">
+                <i class="bi bi-play-fill"></i> Iniciar
+            </button>
+            <button type="button" id="shadowStopBtn" class="btn shadow-timer-btn shadow-stop-btn" style="display: none;">
+                <i class="bi bi-stop-fill"></i> Detener y Guardar
+            </button>
+            <button type="button" id="shadowResetBtn" class="btn shadow-timer-btn shadow-reset-btn">
+                <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+            </button>
+        </div>
+    </div>
+
+    <form id="shadowManualForm" class="shadow-manual-card fade-in-section" style="display: none;">
+        <div class="shadow-manual-inputs">
+            <div>
+                <label class="form-label text-white-50">Minutos</label>
+                <input type="number" id="shadowManualMin" min="0" class="form-control glass-input" placeholder="0">
+            </div>
+            <div>
+                <label class="form-label text-white-50">Segundos</label>
+                <input type="number" id="shadowManualSeg" min="0" max="59" class="form-control glass-input" placeholder="0">
+            </div>
+        </div>
+        <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Registrar Tiempo</button>
+    </form>
+
+    {% if sesiones %}
+    <p class="vocab-rank-subtitle fade-in-section">Últimas sesiones</p>
     <div class="vocab-history-table-wrapper fade-in-section">
         <table class="vocab-history-table">
             <thead>
                 <tr>
-                    <th>Palabra</th>
-                    <th>Calificación</th>
+                    <th>Duración</th>
                     <th>Fecha</th>
                 </tr>
             </thead>
             <tbody>
-                {% for r in registros %}
+                {% for s in sesiones %}
                 <tr>
-                    <td>{{ r.palabraNombre }}</td>
-                    <td>
-                        {% if r.calificacion == 'facil' %}
-                        <span class="vocab-history-badge vocab-rating-easy">Fácil</span>
-                        {% elif r.calificacion == 'medio' %}
-                        <span class="vocab-history-badge vocab-rating-medium">Medio fácil</span>
-                        {% else %}
-                        <span class="vocab-history-badge vocab-rating-hard">Difícil</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ r.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s</td>
+                    <td>{{ s.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
-    {% if total_paginas > 1 %}
-    <div class="vocab-pagination fade-in-section">
-        <a href="{{ url_for('menu.vocabulario_historial', page=pagina - 1) }}"
-           class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
-            <i class="bi bi-arrow-left"></i> Anterior
-        </a>
-        <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
-        <a href="{{ url_for('menu.vocabulario_historial', page=pagina + 1) }}"
-           class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
-            Siguiente <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-    {% endif %}
     {% endif %}
 </div>
 {% endblock %}
@@ -209,6 +214,7 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
 {% endblock %}
 
 {% block footer %}
@@ -216,18 +222,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
             </div>
         </div>
     </div>

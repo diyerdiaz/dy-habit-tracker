@@ -243,5 +243,5 @@ def test_crear_cuenta_o_migrar_clave_vieja_no_cuenta_como_cambio(app):
 
 
 def test_esquema_agrega_la_columna_en_bases_existentes():
-    texto = (RAIZ / 'app' / '__init__.py').read_text()
+    texto = (RAIZ / 'app' / 'services' / 'esquema.py').read_text()
     assert "'sesionVersion': 'INTEGER NOT NULL DEFAULT 0'" in texto

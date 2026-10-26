@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from app import db
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
-from app.models.estadisticas import estadisticas_del_mes, leer_mes, meses_disponibles
+from app.services.estadisticas import estadisticas_del_mes, leer_mes, meses_disponibles
 
 # Mes de prueba fijo: septiembre 2026 (1 = martes)
 HOY = date(2026, 10, 15)

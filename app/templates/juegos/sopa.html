@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'menu/_sidebar_ingles.html' %}
+{% include 'ingles/_sidebar_ingles.html' %}
 
 <div class="ingles-wrapper juegos-wrapper">
     <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
@@ -23,7 +23,7 @@
         <i class="bi bi-journal-plus"></i>
         <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza (de 3 a 10 letras, sin espacios) para jugar.
             Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
-        <a href="{{ url_for('menu.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
     </div>
     {% else %}
     <div id="juegoSopa"

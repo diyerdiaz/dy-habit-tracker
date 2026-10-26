@@ -1,7 +1,7 @@
 from datetime import date
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
-from app.models.estadisticas import (
+from app.services.estadisticas import (
     leer_mes, meses_disponibles, estadisticas_del_mes, nombre_mes,
     leer_meses, comparar_meses, calendario_del_mes, MAX_MESES_COMPARAR,
 )

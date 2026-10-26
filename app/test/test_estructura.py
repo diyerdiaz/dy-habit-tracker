@@ -123,3 +123,88 @@ def test_animacion_de_carga_en_todas_las_paginas(client, logged_client):
     assert "download" in js and "data-bs-toggle" in js
     css = client.get("/static/css/m.css").get_data(as_text=True)
     assert "@keyframes ola-puntos" in css and ".capa-cargando.visible" in css
+
+
+def test_models_solo_tiene_modelos():
+    # Un archivo en models/ define al menos un modelo; la lógica suelta va en services/
+    for archivo in (APP / "models").glob("*.py"):
+        if archivo.name == "__init__.py":
+            continue
+        assert "db.Model" in archivo.read_text(), f"{archivo.name} no tiene modelos: va en services/"
+
+
+def test_rutas_no_importan_de_otras_rutas():
+    # Lo que usan dos blueprints a la vez va en services/, no en otro *_route.py
+    for archivo in (APP / "routes").glob("*.py"):
+        assert not re.search(r"from app\.routes\.\w+ import", archivo.read_text()), archivo.name
+
+
+def test_rutas_importan_todo_arriba():
+    # Nada de imports a mitad de archivo después de las rutas
+    for archivo in (APP / "routes").glob("*.py"):
+        lineas = archivo.read_text().splitlines()
+        primera_ruta = next((i for i, l in enumerate(lineas) if l.startswith(("@bp.", "def "))), len(lineas))
+        tardios = [l for l in lineas[primera_ruta:] if l.startswith(("import ", "from "))]
+        assert tardios == [], f"{archivo.name}: {tardios}"
+
+
+def test_sin_html_escrito_en_python():
+    # El HTML va en templates/, no en cadenas dentro de .py
+    for archivo in APP.rglob("*.py"):
+        if "test" in archivo.parts:
+            continue
+        assert "render_template_string" not in archivo.read_text(), archivo
+
+
+def test_cada_ruta_usa_plantillas_de_su_carpeta():
+    carpetas = {"ingles_route.py": "ingles/", "juegos_route.py": "juegos/", "menu_route.py": "menu/"}
+    for nombre, carpeta in carpetas.items():
+        texto = (APP / "routes" / nombre).read_text()
+        plantillas = re.findall(r"render_template\(\s*'([^']+)'", texto)
+        assert plantillas, nombre
+        assert all(p.startswith(carpeta) for p in plantillas), f"{nombre}: {plantillas}"
+
+
+def test_menu_ya_no_tiene_rutas_de_ingles():
+    texto = (APP / "routes" / "menu_route.py").read_text()
+    assert "/ingles" not in texto
+    assert not list((APP / "templates" / "menu").glob("vocabulario*.html"))
+    assert not list((APP / "templates" / "menu").glob("shadowing*.html"))
+
+
+def test_error_csrf_usa_su_plantilla(app, logged_client):
+    assert (APP / "templates" / "errores" / "csrf.html").exists()
+    app.config["WTF_CSRF_ENABLED"] = True
+    respuesta = logged_client.post("/menu/ingles/shadowing/guardar", data={})
+    assert respuesta.status_code == 400
+    html = respuesta.get_data(as_text=True)
+    assert "La sesión del formulario expiró" in html and "Volver" in html
+
+
+def test_actualizar_esquema_vive_en_services(app):
+    import app as paquete
+    from app.services.esquema import actualizar_esquema
+    assert not hasattr(paquete, "actualizar_esquema")
+    with app.app_context():
+        actualizar_esquema()  # en una base ya creada no falla ni borra nada
+
+
+def test_borrar_archivos_de_usuario_desde_services(app, tmp_path):
+    from types import SimpleNamespace
+    from app.services.archivos import carpeta_apuntes, borrar_apuntes, carpeta_avatars, borrar_foto
+    app.config["UPLOAD_FOLDER"] = str(tmp_path)
+    with app.app_context():
+        carpeta = tmp_path / "apuntes" / "7"
+        carpeta.mkdir(parents=True)
+        (carpeta / "a.pdf").write_text("x")
+        assert carpeta_apuntes(7) == str(carpeta)
+        borrar_apuntes([SimpleNamespace(idUser=7, nombreGuardado="a.pdf"),
+                        SimpleNamespace(idUser=7, nombreGuardado="no-existe.pdf")])
+        assert not (carpeta / "a.pdf").exists()
+
+        (tmp_path / "avatars").mkdir()
+        (tmp_path / "avatars" / "f.jpg").write_text("x")
+        usuario = SimpleNamespace(avatar="f.jpg")
+        borrar_foto(usuario)
+        assert usuario.avatar is None and not (tmp_path / "avatars" / "f.jpg").exists()
+        assert carpeta_avatars() == str(tmp_path / "avatars")

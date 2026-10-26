@@ -261,7 +261,7 @@ def _html(mensaje):
 
 
 def test_correo_trae_el_personaje_incrustado_con_sus_colores(user, smtp):
-    from app.models.personajes_login import PERSONAJES
+    from app.services.personajes_login import PERSONAJES
     _con_correo(user)
     _habito(user, 'Leer')
     correo.enviar_pendientes(user, HOY, personaje=3)
@@ -276,7 +276,7 @@ def test_correo_trae_el_personaje_incrustado_con_sus_colores(user, smtp):
 
 
 def test_hay_imagen_de_correo_para_cada_personaje(app):
-    from app.models.personajes_login import PERSONAJES
+    from app.services.personajes_login import PERSONAJES
     for i in range(len(PERSONAJES)):
         assert correo.imagen_personaje(i)[:2] == b'\xff\xd8'
 

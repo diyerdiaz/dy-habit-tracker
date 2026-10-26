@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 
-{% block titulo_pagina %}Registro de Shadowing{% endblock %}
+{% block titulo_pagina %}Calendario de Vocabulario{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/shadowing.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -85,7 +84,7 @@
                 <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
                     <i class="bi bi-house-door"></i> Hábitos
                 </a>
-                <a href="{{ url_for('menu.ingles') }}" class="sidebar-toggle-option active-side">
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option active-side">
                     <i class="bi bi-translate"></i> Inglés
                 </a>
             </div>
@@ -114,76 +113,87 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('menu.shadowing') }}" class="vocabulario-back">
-            <i class="bi bi-arrow-left"></i> Volver a Shadowing
+        <a href="{{ url_for('ingles.vocabulario') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Mis Sesiones 🇺🇸</span>
-        <h1 class="ingles-title">Registro de Sesiones</h1>
-        <p class="ingles-desc">Revisa, modifica o elimina tus sesiones de shadowing.</p>
+        <span class="ingles-flag-badge">🇬🇧 Constancia 🇺🇸</span>
+        <h1 class="ingles-title">Calendario y Rachas</h1>
+        <p class="ingles-desc">Cada cuadro es un día. Míralo crecer conforme practiques.</p>
     </div>
 
-    {% if sesiones %}
-    <div class="vocab-history-table-wrapper fade-in-section">
-        <table class="vocab-history-table">
-            <thead>
-                <tr>
-                    <th>Duración</th>
-                    <th>Fecha</th>
-                    <th style="text-align: right;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in sesiones %}
-                <tr>
-                    <td>{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s</td>
-                    <td>{{ s.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
-                    <td style="text-align: right; white-space: nowrap;">
-                        <button type="button" class="vocab-row-btn vocab-row-edit"
-                            onclick="openShadowEditModal({{ s.idSesion }}, {{ s.duracionSegundos // 60 }}, {{ s.duracionSegundos % 60 }})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="vocab-row-btn vocab-row-delete"
-                            onclick="openShadowDeleteModal({{ s.idSesion }}, '{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s')">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+    <div class="vocab-stats-row fade-in-section">
+        <div class="ingles-card vocab-stat-card vocab-stat-streak">
+            <i class="bi bi-fire"></i>
+            <h3>{{ racha_actual }}</h3>
+            <p>Racha Actual</p>
+        </div>
+        <div class="ingles-card vocab-stat-card vocab-stat-streak-max">
+            <i class="bi bi-trophy-fill"></i>
+            <h3>{{ racha_maxima }}</h3>
+            <p>Racha Máxima</p>
+        </div>
+        <div class="ingles-card vocab-stat-card">
+            <i class="bi bi-calendar-check"></i>
+            <h3>{{ dias_activos }}</h3>
+            <p>Días Practicados</p>
+        </div>
+    </div>
+
+    <div class="vocab-cal-year-row fade-in-section">
+        {% for anio in anios_disponibles %}
+        <a href="{{ url_for('ingles.vocabulario_calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="vocab-cal-card fade-in-section">
+        <div class="vocab-cal-calendar" id="vocabCalScroll">
+            <div class="vocab-cal-months">
+                {% for semana in semanas %}
+                <span class="vocab-cal-month-label">{{ semana.mes }}</span>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            </div>
+            <div class="vocab-cal-grid-row">
+                <div class="vocab-cal-weeks">
+                    {% for semana in semanas %}
+                    <div class="vocab-cal-week">
+                        {% for dia in semana.dias %}
+                        <div class="vocab-cal-day level-{{ dia.nivel }}{{ ' is-future' if dia.es_futuro else '' }}"
+                             data-fecha="{{ dia.fecha }}"
+                             data-label="{{ dia.label }}"
+                             data-count="{{ dia.count }}"
+                             data-palabras="{{ dia.palabras|join(', ') }}"
+                             title="{{ dia.label }}: {{ dia.count }} palabra{{ 's' if dia.count != 1 else '' }} practicada{{ 's' if dia.count != 1 else '' }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-    {% if total_paginas > 1 %}
-    <div class="vocab-pagination fade-in-section">
-        <a href="{{ url_for('menu.shadowing_registro', page=pagina - 1) }}"
-           class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
-            <i class="bi bi-arrow-left"></i> Anterior
-        </a>
-        <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
-        <a href="{{ url_for('menu.shadowing_registro', page=pagina + 1) }}"
-           class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
-            Siguiente <i class="bi bi-arrow-right"></i>
-        </a>
+            <div class="vocab-day-popup" id="vocabDayPopup">
+                <div class="vocab-day-popup-title" id="vocabDayPopupTitle"></div>
+                <div class="vocab-day-popup-count" id="vocabDayPopupCount"></div>
+                <div class="vocab-day-popup-words" id="vocabDayPopupWords"></div>
+            </div>
+        </div>
+
+        <div class="vocab-cal-legend">
+            Menos
+            <span class="vocab-cal-day level-0"></span>
+            <span class="vocab-cal-day level-1"></span>
+            <span class="vocab-cal-day level-2"></span>
+            <span class="vocab-cal-day level-3"></span>
+            <span class="vocab-cal-day level-4"></span>
+            Más
+        </div>
     </div>
-    {% endif %}
-    {% else %}
-    <div class="ingles-hero fade-in-section" style="max-width: 500px;">
-        <p class="ingles-desc">
-            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
-            Aún no tienes sesiones registradas. Ve al Temporizador y practica tu primera sesión de shadowing.
-        </p>
-    </div>
-    {% endif %}
 </div>
-
-{% include 'menu/shadowing_edit.html' %}
-{% include 'menu/shadowing_delete.html' %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
-<script src="{{ url_for('static', filename='js/shadowing.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vocabulario.js') }}"></script>
 {% endblock %}
 
 {% block footer %}
@@ -191,18 +201,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
-                <span>Shadowing &bull; Vocabulario &bull; Aprende Inglés &bull; Práctica &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
             </div>
         </div>
     </div>

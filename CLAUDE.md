@@ -15,6 +15,11 @@ Todo código nuevo va en la carpeta que le corresponde dentro de `app/`. No mezc
 | Tests | `app/test/` | `test_<modulo>.py` (usar los fixtures de `app/test/conftest.py`) |
 
 - No definir modelos dentro de archivos de rutas, ni rutas dentro de modelos.
+- `models/` solo tiene modelos: si un archivo no define ningún `db.Model`, va en `services/`.
+- Una ruta no importa de otra ruta: lo que usan dos blueprints va en `services/`.
+- Un blueprint por módulo, con sus plantillas en `templates/<modulo>/` (no meter un módulo entero dentro de otro, como pasó con Inglés en `menu`).
+- Imports arriba del archivo, nunca a mitad de las rutas.
+- Nada de HTML en cadenas de Python (`render_template_string`): va en `templates/`.
 - No poner CSS ni JS grandes dentro de los `.html`; van en `static/`.
 - Si algo no encaja en ninguna carpeta, preguntar antes de crear una carpeta nueva.
 

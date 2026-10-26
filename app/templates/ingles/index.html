@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'menu/_sidebar_ingles.html' %}
+{% include 'ingles/_sidebar_ingles.html' %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -24,11 +24,11 @@
     </div>
 
     <div class="ingles-grid fade-in-section">
-        <a href="{{ url_for('menu.vocabulario') }}" class="ingles-card">
+        <a href="{{ url_for('ingles.vocabulario') }}" class="ingles-card">
             <i class="bi bi-journal-text"></i>
             <h3>Vocabulario</h3>
         </a>
-        <a href="{{ url_for('menu.shadowing') }}" class="ingles-card">
+        <a href="{{ url_for('ingles.shadowing') }}" class="ingles-card">
             <i class="bi bi-headphones"></i>
             <h3>Shadowing</h3>
         </a>
