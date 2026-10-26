@@ -124,6 +124,10 @@
             <i class="bi {{ c.icono }}"></i> {{ c.nombre }}
         </a>
         {% endfor %}
+        <button type="button" class="vision-filtro vision-descargar" id="btnDescargarPoster"
+            data-metas='{{ poster | tojson }}'{% if not poster %} disabled title="Agrega metas para descargar tu vision board"{% endif %}>
+            <i class="bi bi-download"></i> <span>Descargar imagen</span>
+        </button>
     </div>
 
     <!-- Collage: las fotos alrededor del título, como un tablero de recortes -->
@@ -268,4 +272,5 @@
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/vision.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vision_poster.js') }}"></script>
 {% endblock %}

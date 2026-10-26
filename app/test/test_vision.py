@@ -235,3 +235,58 @@ def test_metas_viejas_sin_medidas_se_completan(logged_client, user, carpeta_subi
     logged_client.get('/vision/')
     meta = MetaVision.query.one()
     assert (meta.ancho, meta.alto) == (50, 100)
+
+
+# ── Póster descargable para imprimir ──
+
+def _datos_poster(html):
+    import json
+    import re
+    from html import unescape
+    return json.loads(unescape(re.search(r"data-metas='([^']*)'", html).group(1)))
+
+
+def test_boton_descargar_imagen_junto_a_los_filtros(logged_client, carpeta_subidas):
+    _crear_meta(logged_client, 'Viajar a Japón', categoria='viajes')
+    html = logged_client.get('/vision/').get_data(as_text=True)
+    # Va después del último filtro (Trabajo)
+    assert html.index('Trabajo') < html.index('id="btnDescargarPoster"') < html.index('class="vision-board')
+    assert 'Descargar imagen' in html and 'js/vision_poster.js' in html
+    js = logged_client.get('/static/js/vision_poster.js').get_data(as_text=True)
+    assert 'toBlob' in js and "'vision-board-'" in js and 'ANCHO = 2480, ALTO = 3508' in js
+
+
+def test_poster_lleva_todas_las_metas_aunque_haya_filtro(logged_client, carpeta_subidas):
+    _crear_meta(logged_client, 'Viajar a Japón', categoria='viajes')
+    _crear_meta(logged_client, "Correr 10K 'rápido'", categoria='salud')
+    meta = MetaVision.query.filter_by(titulo='Viajar a Japón').first()
+    logged_client.post(f'/vision/{meta.idMeta}/cumplida')
+
+    html = logged_client.get('/vision/?categoria=salud').get_data(as_text=True)
+    datos = {m['titulo']: m for m in _datos_poster(html)}
+    assert set(datos) == {'Viajar a Japón', "Correr 10K 'rápido'"}   # la comilla no rompe el atributo
+    japon = datos['Viajar a Japón']
+    assert japon['cumplida'] is True and japon['categoria'] == 'Viajes' and japon['color'] == '#ff8c42'
+    assert japon['imagen'] == f'/vision/{meta.idMeta}/imagen'
+    assert logged_client.get(japon['imagen']).status_code == 200
+
+
+def test_poster_sin_metas_deshabilita_el_boton(logged_client):
+    html = logged_client.get('/vision/').get_data(as_text=True)
+    boton = html[html.index('id="btnDescargarPoster"'):]
+    boton = boton[:boton.index('>')]
+    assert "data-metas='[]'" in boton and 'disabled' in boton
+
+
+def test_poster_no_incluye_metas_de_otro_usuario(app, logged_client, other_user, carpeta_subidas):
+    db.session.add(MetaVision(idUser=other_user.idUser, titulo='Ajena', imagen='ajena.png'))
+    db.session.commit()
+    _crear_meta(logged_client, 'Mía')
+    titulos = [m['titulo'] for m in _datos_poster(logged_client.get('/vision/').get_data(as_text=True))]
+    assert titulos == ['Mía']
+
+
+def test_poster_solo_muestra_el_anio_sin_conteos(logged_client):
+    js = logged_client.get('/static/js/vision_poster.js').get_data(as_text=True)
+    assert 'String(new Date().getFullYear())' in js
+    assert "' metas'" not in js and "' logradas'" not in js and "' lograda'" not in js

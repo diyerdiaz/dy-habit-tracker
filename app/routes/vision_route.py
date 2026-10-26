@@ -127,6 +127,14 @@ def index():
         visibles = [m for m in metas if m.categoria == filtro]
     else:
         filtro, visibles = None, metas
+    # Para el póster descargable: siempre todas las metas, aunque haya un filtro puesto
+    poster = [{
+        'titulo': m.titulo,
+        'categoria': m.info_categoria['nombre'],
+        'color': m.info_categoria['color'],
+        'imagen': url_for('vision.imagen', meta_id=m.idMeta),
+        'cumplida': m.cumplida,
+    } for m in metas]
     return render_template(
         'vision/index.html',
         metas=visibles,
@@ -134,6 +142,7 @@ def index():
         cumplidas=sum(1 for m in metas if m.cumplida),
         categorias=CATEGORIAS_META,
         filtro=filtro,
+        poster=poster,
         extensiones=sorted(EXTENSIONES_IMAGEN),
         tamano_maximo_mb=TAMANO_MAXIMO_MB,
     )
