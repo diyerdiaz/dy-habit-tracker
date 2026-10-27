@@ -6,6 +6,12 @@ from app.services.cuentas import borrar_cuenta
 from io import BytesIO
 import base64
 import json
+from PIL import Image
+
+try:  # opcional: necesita la librería zbar del sistema
+    from pyzbar.pyzbar import decode
+except ImportError:
+    decode = None
 
 bp = Blueprint('user', __name__, url_prefix='/User')
 
@@ -119,11 +125,8 @@ def generate_qr(id):
 @bp.route('/read_qr', methods=['POST'])
 @login_required
 def read_qr():
-    try:
-        from pyzbar.pyzbar import decode
-    except ImportError:
+    if decode is None:
         return "La lectura de QR en el servidor requiere instalar 'pyzbar' (y la librería zbar del sistema).", 501
-    from PIL import Image
 
     if 'qr_image' not in request.files:
         return "No se ha proporcionado una imagen de QR", 400

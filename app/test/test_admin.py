@@ -10,6 +10,7 @@ from app.models.tareas import Tarea
 from app.models.users import User, ROL_ADMIN, ROL_USUARIO
 from app.models.vision_board import MetaVision
 from app.services import admin as servicio_admin
+from app.test.conftest import TEST_PASSWORD
 
 CLAVE_ADMIN = 'Admin_clave1!'
 
@@ -71,6 +72,40 @@ def test_admin_no_ve_la_parte_de_usuario(admin_client, url):
 def test_admin_puede_cerrar_sesion(admin_client):
     assert admin_client.post('/logout', follow_redirects=True).status_code == 200
     assert admin_client.get('/admin/').status_code == 302   # ya no hay sesión: pide login
+
+
+def test_usuario_entra_despues_de_que_el_admin_sale(admin_client, user):
+    admin_client.post('/logout')
+    respuesta = admin_client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD})
+    assert respuesta.headers['Location'].endswith('/dashboard')
+    assert admin_client.get('/dashboard').status_code == 200
+    assert admin_client.get('/admin/').status_code == 404   # ya no es admin
+
+
+def test_usuario_entra_con_la_sesion_del_admin_aun_abierta(admin_client, user):
+    # Pestaña cerrada sin "Salir" o login viejo desde el botón Atrás: los datos
+    # nuevos no se ignoran, se entra con la otra cuenta
+    respuesta = admin_client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD})
+    assert respuesta.headers['Location'].endswith('/dashboard')
+    assert admin_client.get('/dashboard').status_code == 200
+    assert admin_client.get('/admin/').status_code == 404
+
+
+def test_clave_equivocada_no_cierra_la_sesion_del_admin(admin_client, user):
+    admin_client.post('/', data={'nameUser': user.nameUser, 'passwordUser': 'mala'})
+    assert admin_client.get('/admin/').status_code == 200
+
+
+def test_cerrar_sesion_borra_todo_lo_de_la_sesion(admin_client):
+    with admin_client.session_transaction() as s:
+        s['debe_cambiar_clave'] = True
+    admin_client.post('/logout')
+    with admin_client.session_transaction() as s:
+        assert 'debe_cambiar_clave' not in s and 'sesion_version' not in s
+
+
+def test_login_no_se_guarda_en_cache(client):
+    assert client.get('/').headers['Cache-Control'] == 'no-store'
 
 
 def test_usuario_normal_no_ve_el_panel(logged_client, user):

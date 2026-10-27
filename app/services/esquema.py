@@ -1,5 +1,7 @@
 import logging
 
+from sqlalchemy import inspect, text
+
 from app import db
 
 logger = logging.getLogger(__name__)
@@ -8,7 +10,6 @@ logger = logging.getLogger(__name__)
 def actualizar_esquema():
     """Crea las tablas que falten y agrega columnas nuevas a bases de datos
     existentes (create_all no modifica tablas ya creadas). Nunca borra datos."""
-    from sqlalchemy import inspect, text
     db.create_all()
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
