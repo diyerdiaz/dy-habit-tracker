@@ -66,7 +66,7 @@ def create_app(config_overrides=None):
 
     # Quien entró con una contraseña que no cumple los requisitos solo puede
     # cambiarla o cerrar sesión hasta que la actualice (ver auth_route.login)
-    PERMITIDAS_SIN_CAMBIAR_CLAVE = {'perfil.actualizar_contrasena', 'auth.logout', 'static'}
+    PERMITIDAS_SIN_CAMBIAR_CLAVE = {'perfil.actualizar_contrasena', 'auth.login', 'auth.logout', 'static'}
 
     @app.before_request
     def cerrar_sesiones_viejas():
@@ -98,8 +98,10 @@ def create_app(config_overrides=None):
                 and not (request.endpoint or '').startswith('pwa.')):
             return redirect(url_for('perfil.actualizar_contrasena'))
 
-    # El administrador no usa la app normal: solo ve su panel (/admin)
-    PERMITIDAS_ADMIN = {'auth.logout', 'static', 'perfil.actualizar_contrasena'}
+    # El administrador no usa la app normal: solo ve su panel (/admin).
+    # El login sí se deja pasar: si otra persona entra con su cuenta en el mismo
+    # navegador, la sesión del admin se reemplaza (antes se ignoraba y seguía como admin).
+    PERMITIDAS_ADMIN = {'auth.login', 'auth.logout', 'static', 'perfil.actualizar_contrasena'}
 
     @app.before_request
     def admin_solo_en_su_panel():

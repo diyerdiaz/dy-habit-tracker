@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, session, make_response
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.users import User, contrasena_segura, MENSAJE_BLOQUEADO
 from app.models.intentos_login import IntentoLogin, MAX_FALLOS, MINUTOS_BLOQUEO
@@ -34,13 +34,17 @@ def login():
                     # Solo se avisa con la contraseña correcta: así no se revela qué cuentas existen
                     flash(MENSAJE_BLOQUEADO, 'danger')
                     return redirect(url_for('auth.login'))
+                # Nada de la sesión anterior (otra cuenta, como el admin) pasa a la nueva
+                personaje = session.get('personaje_login', 0)
+                logout_user()
+                session.clear()
                 login_user(user)
                 # Si después cambia la contraseña, las sesiones con otra versión se cierran
                 session['sesion_version'] = user.sesionVersion or 0
                 # El saludo de bienvenida sale siempre justo después de iniciar sesión
                 session['bienvenida'] = True
                 # Toda la app toma el color del personaje que salió en el login
-                session['tema_sitio'] = session.get('personaje_login', 0)
+                session['tema_sitio'] = personaje
                 if not contrasena_segura(passwordUser):
                     # Contraseña antigua que no cumple los requisitos: se mantiene,
                     # pero no puede usar la app hasta cambiarla (ver app/__init__.py)
@@ -62,7 +66,11 @@ def login():
     # Cada vez que se carga el login aparece un personaje distinto al anterior
     indice = elegir_personaje(session.get('personaje_login'))
     session['personaje_login'] = indice
-    return render_template("auth/login.html", personaje=PERSONAJES[indice])
+    respuesta = make_response(render_template("auth/login.html", personaje=PERSONAJES[indice]))
+    # Sin caché: con el botón Atrás el navegador no muestra un login viejo
+    # mientras la sesión de otra cuenta sigue abierta
+    respuesta.headers['Cache-Control'] = 'no-store'
+    return respuesta
 
 @bp.route('/dashboard')
 @login_required
@@ -222,6 +230,7 @@ def dashboard():
 @login_required
 def logout():
     logout_user()
+    session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 
