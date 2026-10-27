@@ -181,7 +181,14 @@ Las medallas de rango piden cumplir la meta **y** haber llegado al nivel del ran
   <img src="https://img.shields.io/badge/gunicorn-producción-16a34a?style=flat-square&logo=gunicorn&logoColor=white">
   <img src="https://img.shields.io/badge/Docker-despliegue-0ea5e9?style=flat-square&logo=docker&logoColor=white">
   <img src="https://img.shields.io/badge/pytest-tests-6366f1?style=flat-square&logo=pytest&logoColor=white">
+  <img src="https://img.shields.io/badge/licencia-MIT-22c55e?style=flat-square">
 </p>
+
+<br>
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**: puedes usarlo, copiarlo y modificarlo libremente, siempre que mantengas el aviso de copyright. Consulta el archivo [LICENSE](LICENSE) para ver el texto completo.
 
 <br>
 

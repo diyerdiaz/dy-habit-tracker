@@ -231,3 +231,10 @@ def test_imports_arriba_en_routes_models_y_services():
     for carpeta in ("routes", "models", "services"):
         for archivo in (APP / carpeta).glob("*.py"):
             assert _imports_dentro_de_funciones(archivo) == [], f"{carpeta}/{archivo.name}"
+
+
+def test_proyecto_tiene_licencia_mit():
+    licencia = (APP.parent / "LICENSE").read_text()
+    assert licencia.startswith("MIT License") and "Diyer Diaz" in licencia
+    readme = (APP.parent / "README.md").read_text()
+    assert "[LICENSE](LICENSE)" in readme and "licencia-MIT" in readme
