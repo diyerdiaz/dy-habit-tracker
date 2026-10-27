@@ -13,6 +13,16 @@ from app.services.gamificacion import calcular_racha, dias_programados
 
 bp = Blueprint('auth', __name__)
 
+# Lo único que sobrevive al entrar o salir: el token CSRF (los formularios ya
+# abiertos lo siguen usando) y el personaje del login
+CONSERVAR_EN_SESION = ('csrf_token', 'personaje_login')
+
+
+def _vaciar_sesion():
+    conservar = {k: session[k] for k in CONSERVAR_EN_SESION if k in session}
+    session.clear()
+    session.update(conservar)
+
 @bp.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -37,7 +47,7 @@ def login():
                 # Nada de la sesión anterior (otra cuenta, como el admin) pasa a la nueva
                 personaje = session.get('personaje_login', 0)
                 logout_user()
-                session.clear()
+                _vaciar_sesion()
                 login_user(user)
                 # Si después cambia la contraseña, las sesiones con otra versión se cierran
                 session['sesion_version'] = user.sesionVersion or 0
@@ -230,7 +240,7 @@ def dashboard():
 @login_required
 def logout():
     logout_user()
-    session.clear()
+    _vaciar_sesion()
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.login'))
 
