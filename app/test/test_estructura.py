@@ -1,4 +1,5 @@
 """Comprueba que cada cosa esté en su carpeta (reglas de CLAUDE.md)."""
+import ast
 import re
 from pathlib import Path
 
@@ -208,3 +209,25 @@ def test_borrar_archivos_de_usuario_desde_services(app, tmp_path):
         borrar_foto(usuario)
         assert usuario.avatar is None and not (tmp_path / "avatars" / "f.jpg").exists()
         assert carpeta_avatars() == str(tmp_path / "avatars")
+
+
+def test_habitos_usa_plantillas_de_su_carpeta():
+    # Las plantillas del blueprint de hábitos van en templates/habits/ (antes en register/)
+    assert not (APP / "templates" / "register").exists()
+    texto = (APP / "routes" / "habits_route.py").read_text()
+    plantillas = re.findall(r"render_template\(\s*[\"']([^\"']+)", texto)
+    assert plantillas and all(p.startswith("habits/") for p in plantillas), plantillas
+
+
+def _imports_dentro_de_funciones(archivo):
+    arbol = ast.parse(archivo.read_text())
+    return [f"línea {n.lineno}" for f in ast.walk(arbol)
+            if isinstance(f, (ast.FunctionDef, ast.AsyncFunctionDef))
+            for n in ast.walk(f) if isinstance(n, (ast.Import, ast.ImportFrom))]
+
+
+def test_imports_arriba_en_routes_models_y_services():
+    # Nada de imports dentro de funciones: van arriba del archivo
+    for carpeta in ("routes", "models", "services"):
+        for archivo in (APP / carpeta).glob("*.py"):
+            assert _imports_dentro_de_funciones(archivo) == [], f"{carpeta}/{archivo.name}"

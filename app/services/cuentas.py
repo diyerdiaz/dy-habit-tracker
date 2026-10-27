@@ -3,6 +3,22 @@ con todos sus datos (la propia persona o el administrador) y validar el cambio
 de nombre de usuario o de contraseña (perfil normal y perfil del administrador)."""
 
 from app import db
+from app.models.codigos_recuperacion import CodigoRecuperacion
+from app.models.habitos import Habit
+from app.models.hist_habits import HistHabit
+from app.models.juego_partida import JuegoPartida
+from app.models.metodo_estudio import MetodoEstudio
+from app.models.plan_mensual import PlanMensual
+from app.models.recordatorios import Recordatorio, EnvioPrueba
+from app.models.recuperacion import Recuperacion, SesionRecuperacion
+from app.models.ruleta_castigo import Castigo
+from app.models.shadowing_sesion import ShadowingSesion
+from app.models.tareas import Tarea
+from app.models.temas import SesionExplicacion, TemaExplicar
+from app.models.user_progress import UserProgress
+from app.models.vision_board import MetaVision
+from app.models.vocabulario import Vocabulario
+from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.users import User, mensaje_requisitos
 from app.services.archivos import borrar_apuntes, borrar_foto, borrar_imagenes_vision
 
@@ -12,23 +28,6 @@ MAX_USUARIO = 80
 def borrar_cuenta(user):
     """Borra la cuenta con todos sus datos y archivos (SQLite no aplica las FK en
     cascada). No hace commit: lo hace quien llama."""
-    from app.models.codigos_recuperacion import CodigoRecuperacion
-    from app.models.habitos import Habit
-    from app.models.hist_habits import HistHabit
-    from app.models.juego_partida import JuegoPartida
-    from app.models.metodo_estudio import MetodoEstudio
-    from app.models.plan_mensual import PlanMensual
-    from app.models.recordatorios import Recordatorio, EnvioPrueba
-    from app.models.recuperacion import Recuperacion, SesionRecuperacion
-    from app.models.ruleta_castigo import Castigo
-    from app.models.shadowing_sesion import ShadowingSesion
-    from app.models.tareas import Tarea
-    from app.models.temas import SesionExplicacion, TemaExplicar
-    from app.models.user_progress import UserProgress
-    from app.models.vision_board import MetaVision
-    from app.models.vocabulario import Vocabulario
-    from app.models.vocabulario_registro import VocabularioRegistro
-
     id_user = user.idUser
     borrar_foto(user)
     borrar_imagenes_vision(id_user, [m.imagen for m in MetaVision.query.filter_by(idUser=id_user).all()])

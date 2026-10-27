@@ -57,7 +57,7 @@ def plan_mes():
         return redirect(url_for('auth.dashboard'))
 
     return render_template(
-        "register/plan_mes.html",
+        "habits/plan_mes.html",
         habits=habits,
         plan=plan,
         mes=nombre_mes(hoy),
@@ -94,7 +94,7 @@ def register_habit():
     habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.createdAt.desc()).all()
     hoy = date.today()
     return render_template(
-        "register/index.html",
+        "habits/index.html",
         habits=habits,
         plan=PlanMensual.del_mes(current_user.idUser),
         mes=nombre_mes(hoy),
@@ -118,7 +118,7 @@ def habits_check():
     completados_hoy = sum(1 for h in tocan_hoy if h in marcados_hoy)
     pct_hoy = round((completados_hoy / total_habitos * 100)) if total_habitos > 0 else 0
     return render_template(
-        "register/check.html",
+        "habits/check.html",
         habits=habits,
         marcados_hoy=marcados_hoy,
         tocan_hoy=tocan_hoy,
@@ -256,7 +256,7 @@ def recuperar():
                    .filter(Recuperacion.fechaRecuperada >= inicio_mes(hoy))
                    .order_by(Recuperacion.fechaRecuperada.desc()).all())
     nombres = {h.idHabit: h.habitName for h in habits}
-    return render_template("register/recuperar.html", estados=estados, recuperados=recuperados,
+    return render_template("habits/recuperar.html", estados=estados, recuperados=recuperados,
                            sesion_hoy=sesion_hoy, nombres=nombres, hoy=hoy,
                            veces_para_recuperar=VECES_PARA_RECUPERAR)
 

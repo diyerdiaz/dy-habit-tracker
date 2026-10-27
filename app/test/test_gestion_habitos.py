@@ -44,7 +44,7 @@ def test_filas_vacias_ocupan_las_cinco_columnas(logged_client):
 
 
 def test_plantilla_sin_estilos_inline_fijos():
-    with open('app/templates/register/index.html') as f:
+    with open('app/templates/habits/index.html') as f:
         texto = f.read()
     estilos = re.findall(r'style="([^"]*)"', texto)
     # solo queda el display:none que habits.js prende y apaga

@@ -5,6 +5,7 @@ import qrcode
 import json
 from io import BytesIO
 import base64
+import hmac
 
 # Prefijos de los hashes que genera werkzeug (scrypt por defecto, pbkdf2 en versiones viejas)
 _HASH_PREFIXES = ('scrypt:', 'pbkdf2:')
@@ -132,5 +133,4 @@ class User(db.Model, UserMixin):
 
 
 def secrets_compare(a, b):
-    import hmac
     return hmac.compare_digest(str(a).encode('utf-8'), str(b).encode('utf-8'))

@@ -1,9 +1,10 @@
 import logging
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
+from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user, logout_user
 from flask_wtf.csrf import CSRFProtect, CSRFError
 
 db = SQLAlchemy()
@@ -71,8 +72,6 @@ def create_app(config_overrides=None):
     def cerrar_sesiones_viejas():
         """Si la contraseña cambió desde otra sesión (otro equipo o navegador),
         esta sesión ya no vale: se cierra y se pide entrar de nuevo."""
-        from flask import session, redirect, url_for, flash
-        from flask_login import current_user, logout_user
         if request.endpoint == 'static' or not current_user.is_authenticated:
             return None
         if current_user.bloqueado:
@@ -94,8 +93,6 @@ def create_app(config_overrides=None):
 
     @app.before_request
     def obligar_cambio_de_contrasena():
-        from flask import session, redirect, url_for
-        from flask_login import current_user
         if (session.get('debe_cambiar_clave') and current_user.is_authenticated
                 and request.endpoint not in PERMITIDAS_SIN_CAMBIAR_CLAVE
                 and not (request.endpoint or '').startswith('pwa.')):
@@ -106,8 +103,6 @@ def create_app(config_overrides=None):
 
     @app.before_request
     def admin_solo_en_su_panel():
-        from flask import redirect, url_for
-        from flask_login import current_user
         endpoint = request.endpoint or ''
         if (current_user.is_authenticated and current_user.es_admin
                 and not endpoint.startswith(('admin.', 'pwa.')) and endpoint not in PERMITIDAS_ADMIN):
@@ -155,7 +150,6 @@ def create_app(config_overrides=None):
 
     @app.context_processor
     def tema_de_la_app():
-        from flask import session
         from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
         from app.models.users import REQUISITOS_CONTRASENA
         return {
@@ -178,14 +172,12 @@ def create_app(config_overrides=None):
 
     @app.errorhandler(413)
     def handle_too_large(e):
-        from flask import flash, redirect
         mb = app.config['MAX_CONTENT_LENGTH'] // (1024 * 1024)
         flash(f'El archivo es demasiado grande. El máximo es {mb} MB.', 'danger')
         return redirect(request.referrer or '/')
 
     @app.errorhandler(Exception)
     def handle_error(e):
-        from werkzeug.exceptions import HTTPException
         if isinstance(e, HTTPException):
             return {"error": e.name}, e.code
         # El detalle técnico va al log, no al navegador
