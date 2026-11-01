@@ -123,9 +123,9 @@ def dashboard():
     disciplina_pct = min(100, racha_actual * 10)
 
     # ── Consistencia: % de los días que tocaba algo (últimos 7) con actividad ──
-    programados = dias_programados(current_user.idUser)
+    tocaba = dias_programados(current_user.idUser)
     dias_semana = [hoy - timedelta(days=i) for i in range(7)]
-    dias_que_tocaban = [d for d in dias_semana if d.weekday() in programados]
+    dias_que_tocaban = [d for d in dias_semana if tocaba(d)]
     dias_activos_semana = sum(1 for d in dias_que_tocaban if d in dias_con_actividad)
     pct_consistencia = round(dias_activos_semana / len(dias_que_tocaban) * 100) if dias_que_tocaban else 100
 

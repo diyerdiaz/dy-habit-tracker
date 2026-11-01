@@ -9,8 +9,9 @@ from calendar import Calendar, monthrange
 from datetime import date, timedelta
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
+from app.services.plan_habitos import dias_del_mes
 
-MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+MESES =['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
          'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 
@@ -66,10 +67,13 @@ def estadisticas_del_mes(idUser, anio, mes, hoy=None):
     ).all():
         hechos_por_habito.setdefault(registro.idHabit, set()).add(registro.fecha)
 
+    todos = Habit.query.filter_by(idUser=idUser).order_by(Habit.habitName).all()
+    dias_por_habito = dias_del_mes(idUser, todos, anio, mes)
+
     habitos = []
-    for habit in Habit.query.filter_by(idUser=idUser).order_by(Habit.habitName).all():
+    for habit in todos:
         desde = max(inicio_mes, habit.createdAt.date())
-        dias_semana = set(habit.dias_lista())
+        dias_semana = dias_por_habito[habit.idHabit]
         programados = []
         dia = desde
         while dia <= fin_mes:
@@ -203,6 +207,7 @@ def calendario_del_mes(idUser, anio, mes, hoy=None):
 
     habitos = Habit.query.filter_by(idUser=idUser).order_by(Habit.habitName).all()
     por_id = {h.idHabit: h for h in habitos}
+    dias_por_habito = dias_del_mes(idUser, habitos, anio, mes)
 
     hechos_por_dia = {}
     for registro in HistHabit.query.filter(
@@ -224,7 +229,7 @@ def calendario_del_mes(idUser, anio, mes, hoy=None):
                 continue
             hechos_ids = hechos_por_dia.get(dia, set())
             tocaban = [h for h in habitos
-                       if h.createdAt.date() <= dia and dia.weekday() in h.dias_lista()]
+                       if h.createdAt.date() <= dia and dia.weekday() in dias_por_habito[h.idHabit]]
             hechos = [por_id[i].habitName for i in sorted(hechos_ids, key=lambda i: por_id[i].habitName.lower())]
             futuro = dia > hoy
             pendientes = [] if futuro else [h.habitName for h in tocaban if h.idHabit not in hechos_ids]

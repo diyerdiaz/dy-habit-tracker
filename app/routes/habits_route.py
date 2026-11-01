@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 from app.models.habitos import Habit
+from app.models.habito_mes import HabitoMes
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes, primer_dia_mes_siguiente
 from app.models.recuperacion import (
@@ -9,6 +10,7 @@ from app.models.recuperacion import (
 )
 from app import db
 from app.services.gamificacion import registrar_toggle_habito, registrar_recuperacion
+from app.services.plan_habitos import guardar_mes_anterior
 from app.services.resumen_mes import resumen_pendiente
 from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
@@ -43,6 +45,7 @@ def plan_mes():
             return redirect(url_for('habits.plan_mes'))
         ids_incluidos = {h.idHabit for h in incluidos}
         for h in habits:
+            guardar_mes_anterior(h, hoy)
             if h.idHabit in ids_incluidos:
                 h.habitState = 'Activo'
                 h.set_dias(request.form.getlist(f'dias_{h.idHabit}'))
@@ -145,6 +148,7 @@ def habit_edit(habit_id):
     if bloqueo:
         return bloqueo
     habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    guardar_mes_anterior(habit)
     habit.habitName = request.form.get('habitName', habit.habitName)
     habit.habitDesc = request.form.get('habitDesc', habit.habitDesc)
     habit.habitFreq = request.form.get('habitFreq', habit.habitFreq)
@@ -163,6 +167,7 @@ def habit_change_state(habit_id):
     habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
     new_state = request.form.get('habitState')
     if new_state in ('Activo', 'Pausado', 'Completado'):
+        guardar_mes_anterior(habit)
         habit.habitState = new_state
         db.session.commit()
         flash(f"Estado del hábito '{habit.habitName}' cambiado a '{new_state}'.", "success")
@@ -200,6 +205,7 @@ def habit_delete(habit_id):
     name = habit.habitName
     SesionRecuperacion.query.filter_by(idHabit=habit.idHabit).delete()
     Recuperacion.query.filter_by(idHabit=habit.idHabit).delete()
+    HabitoMes.query.filter_by(idHabit=habit.idHabit).delete()
     db.session.delete(habit)
     db.session.commit()
     flash(f"Hábito '{name}' eliminado permanentemente.", "success")

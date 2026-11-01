@@ -5,6 +5,13 @@ from datetime import datetime
 DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 
+def leer_dias(texto):
+    """'0,2,4' -> [0, 2, 4]. Vacío o NULL = todos los días."""
+    if not texto:
+        return list(range(7))
+    return sorted({int(d) for d in texto.split(',') if d.strip().isdigit() and int(d) < 7})
+
+
 class Habit(db.Model):
     __tablename__ = 'habits'
 
@@ -22,9 +29,7 @@ class Habit(db.Model):
     createdAt = db.Column(db.DateTime, default=datetime.now)
 
     def dias_lista(self):
-        if not self.diasSemana:
-            return list(range(7))
-        return sorted({int(d) for d in self.diasSemana.split(',') if d.strip().isdigit() and int(d) < 7})
+        return leer_dias(self.diasSemana)
 
     def set_dias(self, dias):
         """Recibe una lista de índices (0-6). Vacía o completa = todos los días."""

@@ -3,6 +3,9 @@ import logging
 from sqlalchemy import inspect, text
 
 from app import db
+from app.models.habito_mes import HabitoMes
+from app.models.habitos import Habit
+from app.services.plan_habitos import guardar_mes_anterior
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +13,7 @@ logger = logging.getLogger(__name__)
 def actualizar_esquema():
     """Crea las tablas que falten y agrega columnas nuevas a bases de datos
     existentes (create_all no modifica tablas ya creadas). Nunca borra datos."""
+    sin_meses_guardados = HabitoMes.__tablename__ not in inspect(db.engine).get_table_names()
     db.create_all()
     columnas_nuevas = {
         'habits': {'diasSemana': 'VARCHAR(20)'},
@@ -26,4 +30,8 @@ def actualizar_esquema():
             if nombre not in existentes:
                 db.session.execute(text(f'ALTER TABLE {tabla} ADD COLUMN {nombre} {tipo}'))
                 logger.info("Columna %s.%s agregada", tabla, nombre)
+    if sin_meses_guardados:
+        # Los hábitos ya creados contaban en los meses pasados aunque hoy estén pausados
+        for habit in Habit.query.all():
+            guardar_mes_anterior(habit, estado='Activo')
     db.session.commit()

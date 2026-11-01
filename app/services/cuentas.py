@@ -4,6 +4,7 @@ de nombre de usuario o de contraseña (perfil normal y perfil del administrador)
 
 from app import db
 from app.models.codigos_recuperacion import CodigoRecuperacion
+from app.models.habito_mes import HabitoMes
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.juego_partida import JuegoPartida
@@ -36,7 +37,7 @@ def borrar_cuenta(user):
         borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     # Primero lo que apunta a otras tablas del mismo usuario (sesiones -> temas, historial -> hábitos)
-    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, Habit,
+    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, HabitoMes, Habit,
                    Castigo, Tarea, UserProgress, VocabularioRegistro, Vocabulario, ShadowingSesion,
                    Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, ResumenVisto, MetaVision):
         modelo.query.filter_by(idUser=id_user).delete(synchronize_session=False)
