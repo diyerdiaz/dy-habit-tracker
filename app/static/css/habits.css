@@ -300,6 +300,15 @@
     .chip { min-width: 0; }
 }
 
+/* En celulares pequeños base.html ya no deja margen (ver m.css) */
+@media (max-width: 576px) {
+    .habits-card {
+        width: calc(100% - 24px) !important;
+        margin-left: 12px !important;
+        margin-right: 12px !important;
+    }
+}
+
 /* ── Celular: cada hábito es una tarjeta ── */
 @media (max-width: 767.98px) {
     .login-wrapper.habits-page { padding: 64px 0 0; }

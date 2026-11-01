@@ -267,6 +267,36 @@ def url_for_sin_peticion(app, endpoint):
         return url_for(endpoint)
 
 
+def _css(nombre):
+    return (APP / "static" / "css" / nombre).read_text()
+
+
+def _bloques_celular(css):
+    return "\n".join(re.findall(r"@media \(max-width: 576px\) \{(.*?)\n\}", css, re.S))
+
+
+def test_celular_base_no_suma_margenes_a_los_de_la_pagina():
+    celular = _bloques_celular(_css("m.css"))
+    assert "main > .container," in celular and "col-md-10" in celular
+    assert "main > .container > .row" in celular
+    assert ".container-fluid.p-3" in celular
+
+
+def test_celular_dashboard_y_tareas_pueden_encogerse():
+    # Sin esto se salen por la derecha: la columna del grid y el input no bajan de su contenido
+    m = _css("m.css")
+    assert "grid-template-columns: minmax(0, 1fr);" in m
+    assert "grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);" in m
+    input_tarea = re.search(r"\.tareas-input \{(.*?)\}", _css("tareas.css"), re.S).group(1)
+    assert "min-width: 0" in input_tarea
+
+
+def test_celular_paginas_sin_margen_propio_lo_tienen():
+    # Inglés, Juegos y Hábitos usaban el margen de base.html, que en celular ya no existe
+    assert "padding-left: 16px" in _bloques_celular(_css("ingles.css"))
+    assert "margin-left: 12px" in _bloques_celular(_css("habits.css"))
+
+
 def test_proyecto_tiene_licencia_mit():
     licencia = (APP.parent / "LICENSE").read_text()
     assert licencia.startswith("MIT License") and "Diyer Diaz" in licencia

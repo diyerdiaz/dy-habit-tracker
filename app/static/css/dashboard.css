@@ -196,6 +196,11 @@
     .radar-chart-wrapper {
         min-height: 250px !important;
     }
+    .radar-chart-wrapper,
+    .radar-stats {
+        flex-basis: 100%;
+        min-width: 0;
+    }
     .responsive-card h2 {
         font-size: 1.8rem !important;
     }

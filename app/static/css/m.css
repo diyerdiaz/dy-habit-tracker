@@ -988,7 +988,8 @@ body {
 ========================= */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    /* minmax(0, ...): sin esto la columna no baja del ancho de su contenido */
+    grid-template-columns: minmax(0, 1fr);
     gap: 40px;
     width: 92%;
     max-width: 1500px;
@@ -998,7 +999,7 @@ body {
 
 @media(min-width: 992px) {
     .dashboard-grid {
-        grid-template-columns: 1.2fr 1fr;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
         align-items: start;
     }
 }
@@ -1009,6 +1010,31 @@ body {
     margin: 0 auto;
     padding: 0 20px;
     box-sizing: border-box;
+}
+
+/* Celulares: los contenedores de base.html suman 40px de margen a cada lado,
+   y cada página ya trae el suyo. Aquí solo queda el de la página. */
+@media (max-width: 576px) {
+    main > .container,
+    main > .container > .row > .col-md-10 {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    main > .container > .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    main .card-body > .container-fluid.p-3 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .flash-message {
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+    .dashboard-grid {
+        width: 100%;
+    }
 }
 
 /* =========================
