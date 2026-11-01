@@ -13,6 +13,17 @@ csrf = CSRFProtect()
 
 logger = logging.getLogger(__name__)
 
+# Van después de crear db: modelos, rutas y servicios hacen `from app import db`
+from app.models.users import User, MENSAJE_BLOQUEADO, REQUISITOS_CONTRASENA
+from app.routes import (
+    users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
+    medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
+    perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route, admin_route,
+)
+from app.services.admin import registrar_comandos as registrar_comandos_admin
+from app.services.correo import registrar_comandos
+from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
+
 
 def create_app(config_overrides=None):
 
@@ -33,18 +44,11 @@ def create_app(config_overrides=None):
 
     @login_manager.user_loader
     def load_user(idUser):
-        from .models.users import User
         return db.session.get(User, int(idUser))
 
     # Register blueprints
     # (se eliminó users_route_async: era una API sin autenticación que exponía
     #  contraseñas y no la usaba ninguna pantalla)
-    from app.routes import (
-        users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
-        medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
-        perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route, admin_route,
-    )
-
     app.register_blueprint(auth_route.bp)
     app.register_blueprint(users_route.bp)
     app.register_blueprint(habits_route.bp)
@@ -75,7 +79,6 @@ def create_app(config_overrides=None):
         if request.endpoint == 'static' or not current_user.is_authenticated:
             return None
         if current_user.bloqueado:
-            from app.models.users import MENSAJE_BLOQUEADO
             logout_user()
             session.clear()
             flash(MENSAJE_BLOQUEADO, 'danger')
@@ -111,11 +114,9 @@ def create_app(config_overrides=None):
             return redirect(url_for('admin.index'))
 
     # Comando `flask crear-admin <usuario>` (cuenta de administrador)
-    from app.services.admin import registrar_comandos as registrar_comandos_admin
     registrar_comandos_admin(app)
 
     # Comando `flask enviar-recordatorios` (correos de hábitos pendientes)
-    from app.services.correo import registrar_comandos
     registrar_comandos(app)
 
     # Los archivos de static/ llevan ?v=<fecha de modificación> en su URL: el navegador
@@ -152,8 +153,6 @@ def create_app(config_overrides=None):
 
     @app.context_processor
     def tema_de_la_app():
-        from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
-        from app.models.users import REQUISITOS_CONTRASENA
         return {
             'tema_sitio': tema_del_sitio(session.get('tema_sitio')),
             'personaje_sitio': personaje_del_sitio(session.get('tema_sitio')),

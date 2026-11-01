@@ -3,7 +3,12 @@ import ast
 import re
 from pathlib import Path
 
-APP = Path(__file__).resolve().parent.parent
+from flask import url_for
+
+from app import db
+from app.models.ruleta_castigo import Castigo
+
+APP =Path(__file__).resolve().parent.parent
 
 # offline.html lleva su CSS adentro a propósito: el service worker la guarda
 # sola en caché y se muestra sin internet, cuando no se puede pedir un .css.
@@ -231,6 +236,35 @@ def test_imports_arriba_en_routes_models_y_services():
     for carpeta in ("routes", "models", "services"):
         for archivo in (APP / carpeta).glob("*.py"):
             assert _imports_dentro_de_funciones(archivo) == [], f"{carpeta}/{archivo.name}"
+
+
+def test_imports_arriba_en_init_de_app():
+    # Un archivo más que antes se saltaba la regla: todo se importa fuera de create_app
+    assert _imports_dentro_de_funciones(APP / "__init__.py") == []
+
+
+def test_ruleta_vive_en_el_modulo_de_castigos(app, logged_client, user):
+    assert not (APP / "templates" / "menu" / "ruleta.html").exists()
+    assert (APP / "templates" / "castigos" / "ruleta.html").exists()
+    with app.app_context():
+        castigo = Castigo(idUser=user.idUser, castigoName="Sin postre", castigoDesc="d",
+                          castigoCategory="salud", castigoState="Pendiente")
+        db.session.add(castigo)
+        db.session.commit()
+        id_castigo = castigo.idCastigo
+        # Las URLs no cambian: ruleta.js llama a /menu/castigo/<id>/completar
+        assert url_for_sin_peticion(app, "castigos.ruleta") == "/menu/ruleta"
+
+    assert logged_client.get("/menu/ruleta").status_code == 200
+    respuesta = logged_client.post(f"/menu/castigo/{id_castigo}/completar")
+    assert respuesta.get_json() == {"success": True, "name": "Sin postre"}
+    with app.app_context():
+        assert db.session.get(Castigo, id_castigo).castigoState == "Completado"
+
+
+def url_for_sin_peticion(app, endpoint):
+    with app.test_request_context():
+        return url_for(endpoint)
 
 
 def test_proyecto_tiene_licencia_mit():
