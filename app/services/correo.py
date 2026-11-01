@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 # cron atrasado), aún se envía dentro de esta ventana; después se salta ese día.
 VENTANA_MINUTOS = 60
 
+# Hora del primer día del mes desde la que sale el resumen del mes anterior
+HORA_RESUMEN = 6
+
 # Límites del botón "Enviarme un correo de prueba" del perfil
 PRUEBA_ESPERA_SEGUNDOS = 60      # entre dos pruebas del mismo usuario
 PRUEBA_MAX_DIA_USUARIO = 5
@@ -288,13 +291,28 @@ def enviar_recordatorios(ahora=None):
             continue
         rec.ultimoEnvio = ahora.date()
         db.session.commit()
+    return enviados + enviar_recordatorios_tareas(ahora) + enviar_resumenes_mes(ahora)
+
+
+def enviar_resumenes_mes(ahora=None):
+    """Desde las HORA_RESUMEN del primer día del mes revisa quién no ha recibido el
+    resumen y se lo envía: si no salió, sale en la próxima ejecución, cualquier día del mes.
+    Solo a quien pidió correos (tiene un recordatorio). Devuelve cuántos salieron."""
+    ahora = ahora or datetime.now()
+    if ahora.day == 1 and ahora.hour < HORA_RESUMEN:
+        return 0
+    usuarios = (User.query.join(Recordatorio, Recordatorio.idUser == User.idUser)
+                .filter(User.email.isnot(None), User.email != '', User.bloqueado.is_(False))
+                .distinct().all())
+    enviados = 0
+    for user in usuarios:
         try:
             if enviar_resumen_mes(user, ahora.date()):
                 enviados += 1
         except (smtplib.SMTPException, OSError):
-            # Queda sin marcar: se reintenta con el próximo recordatorio
+            # Queda sin marcar: se reintenta en la próxima ejecución
             logger.exception("No se pudo enviar el resumen del mes al usuario %s", user.idUser)
-    return enviados + enviar_recordatorios_tareas(ahora)
+    return enviados
 
 
 def toca_enviar_tarea(tarea, ahora):

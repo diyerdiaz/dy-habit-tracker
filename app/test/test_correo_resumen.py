@@ -5,7 +5,6 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.recordatorios import Recordatorio
 from app.models.resumen_mensual import ResumenEnviado, ResumenVisto
-from app.models.users import User
 from app.services import correo
 from app.services.cuentas import borrar_cuenta
 
@@ -37,17 +36,35 @@ def _capturar(monkeypatch, app):
     return enviados
 
 
-def test_resumen_sale_con_el_recordatorio_del_mes_nuevo(app, user, monkeypatch):
+def test_resumen_sale_aunque_no_sea_la_hora_del_recordatorio(app, user, monkeypatch):
     _preparar(user)
     enviados = _capturar(monkeypatch, app)
 
-    correo.enviar_recordatorios(AHORA)
+    correo.enviar_recordatorios(datetime(2026, 11, 1, 6, 0))  # el recordatorio es a las 8:00
 
     resumenes = [c for c in enviados if 'resumen de octubre' in c['asunto']]
     assert len(resumenes) == 1
     assert resumenes[0]['destino'] == 'persona@test.com'
     assert 'Tu mejor hábito' in resumenes[0]['texto'] and 'Meditar' in resumenes[0]['html']
     assert ResumenEnviado.query.filter_by(idUser=user.idUser, anio=2026, mes=10).count() == 1
+
+
+def test_primer_dia_del_mes_espera_a_la_hora_del_resumen(app, user, monkeypatch):
+    _preparar(user)
+    enviados = _capturar(monkeypatch, app)
+
+    assert correo.enviar_resumenes_mes(datetime(2026, 11, 1, 5, 55)) == 0
+    assert correo.enviar_resumenes_mes(datetime(2026, 11, 1, 6, 0)) == 1
+    assert len(enviados) == 1
+
+
+def test_si_no_se_ha_enviado_sale_otro_dia_del_mes(app, user, monkeypatch):
+    _preparar(user)
+    enviados = _capturar(monkeypatch, app)
+
+    assert correo.enviar_resumenes_mes(datetime(2026, 11, 20, 3, 0)) == 1
+    assert correo.enviar_resumenes_mes(datetime(2026, 11, 20, 3, 5)) == 0
+    assert len(enviados) == 1
 
 
 def test_resumen_por_correo_sale_una_sola_vez_al_mes(app, user, monkeypatch):
@@ -85,13 +102,11 @@ def test_sin_correo_o_sin_datos_no_se_envia(app, user, monkeypatch):
     assert enviados == []
 
 
-def test_si_falla_se_reintenta_y_no_corta_el_recordatorio(app, user, monkeypatch):
+def test_si_falla_se_reintenta_en_la_proxima_ejecucion(app, user, monkeypatch):
     _preparar(user)
     app.config['MAIL_ENABLED'] = True
-    intentos = []
 
     def falla_resumen(destino, asunto, texto, html=None, imagenes=None):
-        intentos.append(asunto)
         if 'resumen de' in asunto:
             raise smtplib.SMTPException('caído')
         return True
@@ -100,10 +115,19 @@ def test_si_falla_se_reintenta_y_no_corta_el_recordatorio(app, user, monkeypatch
     correo.enviar_recordatorios(AHORA)
 
     assert ResumenEnviado.query.count() == 0
-    assert Recordatorio.query.first().ultimoEnvio == HOY
+    assert Recordatorio.query.first().ultimoEnvio == HOY  # el recordatorio sí salió
 
     enviados = _capturar(monkeypatch, app)
-    assert correo.enviar_resumen_mes(db.session.get(User, user.idUser), HOY) is True
+    assert correo.enviar_resumenes_mes(AHORA) == 1
+    assert len(enviados) == 1 and ResumenEnviado.query.count() == 1
+
+
+def test_varios_recordatorios_reciben_un_solo_resumen(app, user, monkeypatch):
+    _preparar(user)
+    db.session.add(Recordatorio(idUser=user.idUser, hora='20:00'))
+    db.session.commit()
+    enviados = _capturar(monkeypatch, app)
+    assert correo.enviar_resumenes_mes(AHORA) == 1
     assert len(enviados) == 1
 
 

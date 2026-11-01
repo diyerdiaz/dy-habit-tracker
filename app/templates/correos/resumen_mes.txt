@@ -20,4 +20,4 @@ Todos tus hábitos:
 {% if url_estadisticas %}
 Ver más estadísticas: {{ url_estadisticas }}
 {% endif %}
-Recibes este correo porque tienes un recordatorio activo. Sale una vez al mes.
+Recibes este correo porque tienes un recordatorio activo. Sale una vez, al empezar cada mes.
