@@ -129,16 +129,64 @@ def test_actualizar_esquema_conserva_los_meses_de_habitos_existentes(app, user):
     assert HabitoMes.query.count() == 1
 
 
-def test_borrar_habito_y_cuenta_borran_sus_meses(logged_client, user):
+def test_eliminar_habito_lo_conserva_en_los_meses_anteriores(logged_client, user):
     habito = _habito(user, '0')
-    otro = _habito(user, '1', 'Correr')
-    guardar_mes_anterior(habito)
-    guardar_mes_anterior(otro)
-    db.session.commit()
+    id_habito = habito.idHabit
+    _marcar(habito, _lunes_del_mes_pasado())
 
+    logged_client.post(f'/habit/{id_habito}/delete')
+
+    eliminado = db.session.get(Habit, id_habito)
+    assert eliminado.habitState == 'Eliminado'
+    pasado = estadisticas_del_mes(user.idUser, ANIO, MES)
+    assert [h['nombre'] for h in pasado['habitos']] == ['Leer'] and pasado['promedio'] == 100
+    assert estadisticas_del_mes(user.idUser, HOY.year, HOY.month)['habitos'] == []
+    assert dias_del_mes(user.idUser, [eliminado], HOY.year, HOY.month)[id_habito] == set()
+
+
+def test_habito_eliminado_no_se_ve_ni_se_puede_usar(logged_client, user):
+    habito = _habito(user, None, 'Tejer mantas')
+    id_habito = habito.idHabit
+    logged_client.post(f'/habit/{id_habito}/delete', follow_redirects=True)  # consume el aviso
+    logged_client.post('/estadisticas/resumen-mes/visto')  # esa tarjeta sí lo muestra: es del mes pasado
+
+    assert 'Tejer mantas' not in logged_client.get('/register_habit').get_data(as_text=True)
+    assert 'Tejer mantas' not in logged_client.get('/habitos/check').get_data(as_text=True)
+    assert 'Tejer mantas' not in logged_client.get('/dashboard').get_data(as_text=True)
+    assert 'Tejer mantas' not in logged_client.get('/habitos/plan-mes').get_data(as_text=True)
+    assert logged_client.post(f'/habit/{id_habito}/toggle_today').status_code == 404
+    assert logged_client.post(f'/habit/{id_habito}/edit', data={'diasSemana': ['1']}).status_code == 404
+
+
+def test_confirmar_plan_no_revive_un_habito_eliminado(logged_client, user):
+    habito = _habito(user, '0')
+    otro = _habito(user, '0', 'Correr')
     logged_client.post(f'/habit/{habito.idHabit}/delete')
-    assert HabitoMes.query.filter_by(idHabit=habito.idHabit).count() == 0
+
+    logged_client.post('/habitos/plan-mes', data={
+        f'incluir_{habito.idHabit}': '1', f'incluir_{otro.idHabit}': '1', f'dias_{otro.idHabit}': ['0'],
+    })
+
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Eliminado'
+
+
+def test_borrar_cuenta_borra_habitos_eliminados_y_sus_meses(logged_client, user):
+    habito = _habito(user, '0')
+    id_user = user.idUser
+    logged_client.post(f'/habit/{habito.idHabit}/delete')
+    assert HabitoMes.query.count() == 1
 
     borrar_cuenta(user)
     db.session.commit()
     assert HabitoMes.query.count() == 0
+    assert Habit.query.filter_by(idUser=id_user).count() == 0
+
+
+def test_historial_conserva_el_nombre_del_habito_eliminado(logged_client, user):
+    habito = _habito(user, '0')
+    _marcar(habito, _lunes_del_mes_pasado())
+    logged_client.post(f'/habit/{habito.idHabit}/delete', follow_redirects=True)
+
+    html = logged_client.get(f'/menu/historial?anio={ANIO}').get_data(as_text=True)
+
+    assert 'Leer' in html and 'Hábito eliminado' not in html

@@ -80,5 +80,5 @@ def castigo_completar(castigo_id):
 @login_required
 def ruleta():
     castigos = [c.to_dict() for c in Castigo.query.filter_by(idUser=current_user.idUser).all()]
-    habits = [h.to_dict() for h in Habit.query.filter_by(idUser=current_user.idUser).all()]
+    habits = [h.to_dict() for h in Habit.visibles(current_user.idUser).all()]
     return render_template('castigos/ruleta.html', habits=habits, castigos=castigos)

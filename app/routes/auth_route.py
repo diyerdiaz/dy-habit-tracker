@@ -86,7 +86,7 @@ def login():
 @bp.route('/dashboard')
 @login_required
 def dashboard():
-    habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.createdAt.desc()).all()
+    habits = Habit.visibles(current_user.idUser).order_by(Habit.createdAt.desc()).all()
     hoy = date.today()
 
     marcados_hoy = {

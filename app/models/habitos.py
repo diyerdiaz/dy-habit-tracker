@@ -3,6 +3,7 @@ from datetime import datetime
 
 # Índices de date.weekday(): 0 = lunes ... 6 = domingo
 DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+ELIMINADO = 'Eliminado'
 
 
 def leer_dias(texto):
@@ -27,6 +28,11 @@ class Habit(db.Model):
     # ni afectan el puntaje.
     diasSemana = db.Column(db.String(20), nullable=True)
     createdAt = db.Column(db.DateTime, default=datetime.now)
+
+    @classmethod
+    def visibles(cls, id_user):
+        """Los eliminados no se muestran, pero siguen contando en los meses que se hicieron."""
+        return cls.query.filter(cls.idUser == id_user, cls.habitState != ELIMINADO)
 
     def dias_lista(self):
         return leer_dias(self.diasSemana)
