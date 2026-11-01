@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
-from app.models.habitos import Habit
+from app.models.habitos import ELIMINADO, Habit
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes, primer_dia_mes_siguiente
 from app.models.recuperacion import (
@@ -9,6 +9,7 @@ from app.models.recuperacion import (
 )
 from app import db
 from app.services.gamificacion import registrar_toggle_habito, registrar_recuperacion
+from app.services.plan_habitos import guardar_mes_anterior
 from app.services.resumen_mes import resumen_pendiente
 from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
@@ -32,7 +33,7 @@ def _plan_bloqueado():
 def plan_mes():
     hoy = date.today()
     plan = PlanMensual.del_mes(current_user.idUser)
-    habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.habitName).all()
+    habits = Habit.visibles(current_user.idUser).order_by(Habit.habitName).all()
 
     if request.method == 'POST':
         if plan:
@@ -43,6 +44,7 @@ def plan_mes():
             return redirect(url_for('habits.plan_mes'))
         ids_incluidos = {h.idHabit for h in incluidos}
         for h in habits:
+            guardar_mes_anterior(h, hoy)
             if h.idHabit in ids_incluidos:
                 h.habitState = 'Activo'
                 h.set_dias(request.form.getlist(f'dias_{h.idHabit}'))
@@ -92,7 +94,7 @@ def register_habit():
         flash(f"Hábito '{habit_name}' registrado exitosamente!", "success")
         return redirect(url_for('habits.register_habit'))
     
-    habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.createdAt.desc()).all()
+    habits = Habit.visibles(current_user.idUser).order_by(Habit.createdAt.desc()).all()
     hoy = date.today()
     return render_template(
         "habits/index.html",
@@ -106,7 +108,7 @@ def register_habit():
 @login_required
 def habits_check():
     hoy = date.today()
-    habits = Habit.query.filter_by(idUser=current_user.idUser).order_by(Habit.habitName).all()
+    habits = Habit.visibles(current_user.idUser).order_by(Habit.habitName).all()
     marcados_hoy = {
         h.idHabit for h in HistHabit.query.filter_by(idUser=current_user.idUser, fecha=hoy).all()
     }
@@ -135,7 +137,7 @@ def habits_check():
 @bp.route('/habit/<int:habit_id>/json')
 @login_required
 def habit_detail_json(habit_id):
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
     return jsonify(habit.to_dict())
 
 @bp.route('/habit/<int:habit_id>/edit', methods=['POST'])
@@ -144,7 +146,8 @@ def habit_edit(habit_id):
     bloqueo = _plan_bloqueado()
     if bloqueo:
         return bloqueo
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
+    guardar_mes_anterior(habit)
     habit.habitName = request.form.get('habitName', habit.habitName)
     habit.habitDesc = request.form.get('habitDesc', habit.habitDesc)
     habit.habitFreq = request.form.get('habitFreq', habit.habitFreq)
@@ -160,9 +163,10 @@ def habit_change_state(habit_id):
     bloqueo = _plan_bloqueado()
     if bloqueo:
         return bloqueo
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
     new_state = request.form.get('habitState')
     if new_state in ('Activo', 'Pausado', 'Completado'):
+        guardar_mes_anterior(habit)
         habit.habitState = new_state
         db.session.commit()
         flash(f"Estado del hábito '{habit.habitName}' cambiado a '{new_state}'.", "success")
@@ -171,7 +175,7 @@ def habit_change_state(habit_id):
 @bp.route('/habit/<int:habit_id>/toggle_today', methods=['POST'])
 @login_required
 def habit_toggle_today(habit_id):
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
     hoy = date.today()
     entry = HistHabit.query.filter_by(idHabit=habit.idHabit, fecha=hoy).first()
     if entry:
@@ -196,13 +200,12 @@ def habit_delete(habit_id):
     bloqueo = _plan_bloqueado()
     if bloqueo:
         return bloqueo
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
-    name = habit.habitName
-    SesionRecuperacion.query.filter_by(idHabit=habit.idHabit).delete()
-    Recuperacion.query.filter_by(idHabit=habit.idHabit).delete()
-    db.session.delete(habit)
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
+    # No se borra la fila: sus meses anteriores siguen en las estadísticas
+    guardar_mes_anterior(habit)
+    habit.habitState = ELIMINADO
     db.session.commit()
-    flash(f"Hábito '{name}' eliminado permanentemente.", "success")
+    flash(f"Hábito '{habit.habitName}' eliminado. Sus meses anteriores siguen en Estadísticas.", "success")
     return redirect(url_for('habits.register_habit'))
 
 
@@ -267,7 +270,7 @@ def recuperar():
 @login_required
 def habit_sesion_recuperacion(habit_id):
     """Registra que hoy, día libre del hábito, se hizo igual: suma 1 de 3."""
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
     hoy = date.today()
     sesion_hoy = _sesion_de_hoy(hoy)
     estado = _estado_recuperacion(habit, hoy, sesion_hoy)
@@ -302,7 +305,7 @@ def habit_sesion_recuperacion(habit_id):
 @login_required
 def habit_recuperar(habit_id):
     """Con VECES_PARA_RECUPERAR veces en días libres, completa un día perdido del mes."""
-    habit = Habit.query.filter_by(idHabit=habit_id, idUser=current_user.idUser).first_or_404()
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
     hoy = date.today()
     estado = _estado_recuperacion(habit, hoy, _sesion_de_hoy(hoy))
 

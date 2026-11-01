@@ -34,7 +34,7 @@ PATRON_HORA = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
 @login_required
 def index():
     progress = get_or_create_progress(current_user.idUser)
-    habitos = Habit.query.filter_by(idUser=current_user.idUser).count()
+    habitos = Habit.visibles(current_user.idUser).count()
     progreso = calcular_progreso(progress.xpTotal, habitos)
     medallas = evaluar_medallas(obtener_metricas(current_user.idUser))
     return render_template(

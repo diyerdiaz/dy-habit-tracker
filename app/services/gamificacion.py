@@ -6,6 +6,7 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.user_progress import UserProgress
 from app.services.level_config import XP_POR_HABITO, XP_BONUS_RACHA_SEMANAL, PENALIZACION_POR_DIA_PERDIDO
+from app.services.plan_habitos import dias_del_mes
 
 
 def get_or_create_progress(idUser):
@@ -18,12 +19,18 @@ def get_or_create_progress(idUser):
 
 
 def dias_programados(idUser):
-    """Días de la semana (0-6) en que el usuario tiene al menos un hábito activo.
-    Los días que no aparecen aquí son de descanso: no rompen la racha ni restan XP."""
-    dias = set()
-    for habit in Habit.query.filter_by(idUser=idUser, habitState='Activo').all():
-        dias.update(habit.dias_lista())
-    return dias
+    """Función que dice si una fecha tenía al menos un hábito programado, con el
+    plan de su mes. Los demás son de descanso: no rompen la racha ni restan XP."""
+    habits = Habit.query.filter_by(idUser=idUser).all()
+    por_mes = {}
+
+    def tocaba(fecha):
+        clave = (fecha.year, fecha.month)
+        if clave not in por_mes:
+            por_mes[clave] = set().union(*dias_del_mes(idUser, habits, *clave).values())
+        return fecha.weekday() in por_mes[clave]
+
+    return tocaba
 
 
 def calcular_racha(idUser):
@@ -33,7 +40,7 @@ def calcular_racha(idUser):
     if not dias:
         return 0, 0
 
-    programados = dias_programados(idUser)
+    tocaba = dias_programados(idUser)
     hoy = date.today()
     racha_maxima = racha_temp = 0
     cursor = min(dias)
@@ -41,7 +48,7 @@ def calcular_racha(idUser):
         if cursor in dias:
             racha_temp += 1
             racha_maxima = max(racha_maxima, racha_temp)
-        elif cursor != hoy and cursor.weekday() in programados:
+        elif cursor != hoy and tocaba(cursor):
             # Día que tocaba y no se hizo nada. Hoy aún no cuenta: queda tiempo.
             racha_temp = 0
         cursor += timedelta(days=1)
@@ -63,12 +70,12 @@ def aplicar_penalizaciones_pendientes(progress):
     dias_con_actividad = {
         h.fecha for h in HistHabit.query.filter_by(idUser=progress.idUser).all()
     }
-    programados = dias_programados(progress.idUser)
+    tocaba = dias_programados(progress.idUser)
 
-    cursor = (progress.ultimaFechaPenalizada or progress.ultimaFechaActividad) + timedelta(days=1)
+    cursor =(progress.ultimaFechaPenalizada or progress.ultimaFechaActividad) + timedelta(days=1)
     penalizado = False
     while cursor < hoy:
-        if cursor not in dias_con_actividad and cursor.weekday() in programados:
+        if cursor not in dias_con_actividad and tocaba(cursor):
             progress.xpTotal = max(0, progress.xpTotal - PENALIZACION_POR_DIA_PERDIDO)
             penalizado = True
         progress.ultimaFechaPenalizada = cursor

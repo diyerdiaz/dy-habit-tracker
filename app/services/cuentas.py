@@ -4,6 +4,7 @@ de nombre de usuario o de contraseña (perfil normal y perfil del administrador)
 
 from app import db
 from app.models.codigos_recuperacion import CodigoRecuperacion
+from app.models.habito_mes import HabitoMes
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.juego_partida import JuegoPartida
@@ -11,7 +12,7 @@ from app.models.metodo_estudio import MetodoEstudio
 from app.models.plan_mensual import PlanMensual
 from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.recuperacion import Recuperacion, SesionRecuperacion
-from app.models.resumen_mensual import ResumenVisto
+from app.models.resumen_mensual import ResumenEnviado, ResumenVisto
 from app.models.ruleta_castigo import Castigo
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.tareas import Tarea
@@ -36,9 +37,9 @@ def borrar_cuenta(user):
         borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     # Primero lo que apunta a otras tablas del mismo usuario (sesiones -> temas, historial -> hábitos)
-    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, Habit,
+    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, HabitoMes, Habit,
                    Castigo, Tarea, UserProgress, VocabularioRegistro, Vocabulario, ShadowingSesion,
-                   Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, ResumenVisto, MetaVision):
+                   Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, ResumenVisto, ResumenEnviado, MetaVision):
         modelo.query.filter_by(idUser=id_user).delete(synchronize_session=False)
     db.session.delete(user)
 

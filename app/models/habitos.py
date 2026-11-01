@@ -3,6 +3,14 @@ from datetime import datetime
 
 # Índices de date.weekday(): 0 = lunes ... 6 = domingo
 DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+ELIMINADO = 'Eliminado'
+
+
+def leer_dias(texto):
+    """'0,2,4' -> [0, 2, 4]. Vacío o NULL = todos los días."""
+    if not texto:
+        return list(range(7))
+    return sorted({int(d) for d in texto.split(',') if d.strip().isdigit() and int(d) < 7})
 
 
 class Habit(db.Model):
@@ -21,10 +29,13 @@ class Habit(db.Model):
     diasSemana = db.Column(db.String(20), nullable=True)
     createdAt = db.Column(db.DateTime, default=datetime.now)
 
+    @classmethod
+    def visibles(cls, id_user):
+        """Los eliminados no se muestran, pero siguen contando en los meses que se hicieron."""
+        return cls.query.filter(cls.idUser == id_user, cls.habitState != ELIMINADO)
+
     def dias_lista(self):
-        if not self.diasSemana:
-            return list(range(7))
-        return sorted({int(d) for d in self.diasSemana.split(',') if d.strip().isdigit() and int(d) < 7})
+        return leer_dias(self.diasSemana)
 
     def set_dias(self, dias):
         """Recibe una lista de índices (0-6). Vacía o completa = todos los días."""

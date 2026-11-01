@@ -1,0 +1,23 @@
+¡Hola, {{ user.nameUser }}!
+
+Este fue tu resumen de {{ resumen.mes }}:
+
+Cumplimiento general: {{ resumen.promedio }}%
+{%- if resumen.diferencia is not none %} ({{ '%+d' % resumen.diferencia }} puntos frente a {{ resumen.mes_comparado }}){% endif %}
+Tu mejor hábito: {{ resumen.mejor.nombre }} ({{ resumen.mejor.pct }}%)
+{% if resumen.peor %}El que más te costó: {{ resumen.peor.nombre }} ({{ resumen.peor.pct }}%)
+{% endif %}
+Veces cumplidas: {{ resumen.total_cumplidos }}
+Días activos: {{ resumen.dias_activos }} de {{ resumen.dias_del_mes }}
+Días perfectos: {{ resumen.dias_perfectos }}
+Mejor racha: {{ resumen.mejor_racha }} días
+{% if resumen.mejor_dia %}Tu mejor día: {{ resumen.mejor_dia }}
+{% endif %}
+Todos tus hábitos:
+{% for h in resumen.habitos %}
+  {{ h.nombre }}: {{ h.pct }}% ({{ h.cumplidos }} de {{ h.programados }} días)
+{%- endfor %}
+{% if url_estadisticas %}
+Ver más estadísticas: {{ url_estadisticas }}
+{% endif %}
+Recibes este correo porque tienes un recordatorio activo. Sale una vez, al empezar cada mes.

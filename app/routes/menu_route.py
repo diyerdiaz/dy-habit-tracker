@@ -15,7 +15,7 @@ bp = Blueprint('menu', __name__, url_prefix='/menu')
 @bp.route('/estadisticas')
 @login_required
 def estadisticas():
-    habits = Habit.query.filter_by(idUser=current_user.idUser).all()
+    habits = Habit.visibles(current_user.idUser).all()
 
     # ── Tarjetas Resumen ──
     total = len(habits)
@@ -183,7 +183,7 @@ def nivel():
     racha_actual, racha_maxima = sincronizar_racha(progress)
     db.session.commit()
 
-    habitos_creados = Habit.query.filter_by(idUser=current_user.idUser).count()
+    habitos_creados = Habit.visibles(current_user.idUser).count()
     progreso = calcular_progreso(progress.xpTotal, habitos_creados)
 
     # ── Tabla completa de niveles (para mostrar el mapa de progresión) ──
