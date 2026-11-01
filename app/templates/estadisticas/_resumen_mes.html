@@ -1,0 +1,73 @@
+<!-- Modal: al empezar el mes muestra una sola vez cómo le fue en el mes que terminó -->
+<div class="modal fade" id="resumenMesModal" tabindex="-1" aria-labelledby="resumenMesTitulo" aria-hidden="true"
+    data-visto-url="{{ url_for('estadisticas.resumen_visto') }}">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content resumen-modal">
+            <div class="modal-header resumen-cabecera">
+                <h5 class="modal-title" id="resumenMesTitulo"><i class="bi bi-graph-up-arrow"></i> Así te fue en {{ resumen_mes.mes }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="resumen-principal nivel-{{ resumen_mes.nivel_promedio }}">
+                    <strong>{{ resumen_mes.promedio }}%</strong>
+                    <span>de cumplimiento general</span>
+                    {% if resumen_mes.diferencia is not none %}
+                    <small>
+                        {% if resumen_mes.diferencia > 0 %}+{{ resumen_mes.diferencia }} puntos frente a {{ resumen_mes.mes_comparado }}
+                        {% elif resumen_mes.diferencia < 0 %}{{ resumen_mes.diferencia }} puntos frente a {{ resumen_mes.mes_comparado }}
+                        {% else %}Igual que en {{ resumen_mes.mes_comparado }}{% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+
+                <div class="resumen-destacados">
+                    <div class="resumen-destacado resumen-mejor">
+                        <span><i class="bi bi-trophy-fill"></i> Tu mejor hábito</span>
+                        <strong>{{ resumen_mes.mejor.nombre }}</strong>
+                        <small>{{ resumen_mes.mejor.pct }}% · {{ resumen_mes.mejor.cumplidos }} de {{ resumen_mes.mejor.programados }} días</small>
+                    </div>
+                    <div class="resumen-destacado resumen-peor">
+                        <span><i class="bi bi-lightning-charge-fill"></i> El que más te costó</span>
+                        {% if resumen_mes.peor %}
+                        <strong>{{ resumen_mes.peor.nombre }}</strong>
+                        <small>{{ resumen_mes.peor.pct }}% · {{ resumen_mes.peor.cumplidos }} de {{ resumen_mes.peor.programados }} días</small>
+                        {% else %}
+                        <strong>Ninguno</strong>
+                        <small>Tus hábitos quedaron parejos este mes.</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h6 class="resumen-subtitulo">Tu cumplimiento día a día</h6>
+                <div class="resumen-grafica">
+                    <canvas id="resumenMesGrafica" role="img" aria-label="Porcentaje de cumplimiento de cada día de {{ resumen_mes.mes }}"></canvas>
+                </div>
+
+                <div class="resumen-datos">
+                    <div><strong>{{ resumen_mes.total_cumplidos }}</strong><span>veces cumpliste</span></div>
+                    <div><strong>{{ resumen_mes.dias_activos }}/{{ resumen_mes.dias_del_mes }}</strong><span>días activos</span></div>
+                    <div><strong>{{ resumen_mes.dias_perfectos }}</strong><span>días perfectos</span></div>
+                    <div><strong>{{ resumen_mes.mejor_racha }}</strong><span>días de mejor racha</span></div>
+                    {% if resumen_mes.mejor_dia %}
+                    <div><strong>{{ resumen_mes.mejor_dia }}</strong><span>tu mejor día</span></div>
+                    {% endif %}
+                </div>
+
+                <h6 class="resumen-subtitulo">Todos tus hábitos</h6>
+                <ul class="resumen-habitos">
+                    {% for habito in resumen_mes.habitos %}
+                    <li>
+                        <div class="resumen-habito-texto"><span>{{ habito.nombre }}</span><strong>{{ habito.pct }}%</strong></div>
+                        <div class="resumen-barra nivel-{{ habito.nivel }}"><span style="width: {{ habito.pct }}%"></span></div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer resumen-pie">
+                <a href="{{ url_for('estadisticas.index', mes=resumen_mes.valor) }}" class="resumen-enlace">Ver más estadísticas</a>
+                <button type="button" class="resumen-cerrar" data-bs-dismiss="modal">Continuar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>window.RESUMEN_MES = {{ resumen_mes.grafica | tojson }};</script>

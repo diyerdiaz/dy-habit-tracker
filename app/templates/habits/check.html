@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/habits.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/plan_mes.css') }}">
 {% endif %}
+{% if resumen_mes %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/resumen_mes.css') }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -182,12 +185,18 @@
     {% endif %}
 </div>
 
+{% if resumen_mes %}{% include 'estadisticas/_resumen_mes.html' %}{% endif %}
 {% if necesita_plan %}{% include 'habits/plan_aviso.html' %}{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/check.js') }}"></script>
+{% if resumen_mes %}
+<!-- Chart.js solo se carga en las páginas que tienen gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/resumen_mes.js') }}"></script>
+{% endif %}
 {% if necesita_plan %}
 <script src="{{ url_for('static', filename='js/plan_mes.js') }}"></script>
 {% endif %}

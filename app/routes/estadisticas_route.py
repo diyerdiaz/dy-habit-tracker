@@ -1,10 +1,12 @@
 from datetime import date
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
+from app import db
 from app.services.estadisticas import (
     leer_mes, meses_disponibles, estadisticas_del_mes, nombre_mes,
     leer_meses, comparar_meses, calendario_del_mes, MAX_MESES_COMPARAR,
 )
+from app.services.resumen_mes import marcar_resumen_visto
 
 bp = Blueprint('estadisticas', __name__, url_prefix='/estadisticas')
 
@@ -26,6 +28,14 @@ def _navegacion_mes(anio, mes, hoy):
         'mes_siguiente': valores[posicion - 1] if posicion > 0 else None,
         'es_mes_en_curso': (anio, mes) == (hoy.year, hoy.month),
     }
+
+
+@bp.route('/resumen-mes/visto', methods=['POST'])
+@login_required
+def resumen_visto():
+    marcar_resumen_visto(current_user.idUser)
+    db.session.commit()
+    return jsonify({'success': True})
 
 
 @bp.route('/')
