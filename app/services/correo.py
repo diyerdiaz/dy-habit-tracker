@@ -19,6 +19,8 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.services.personajes_login import PERSONAJES, elegir_personaje
 from app.models.recordatorios import Recordatorio, EnvioPrueba
+from app.models.resumen_mensual import ResumenEnviado
+from app.services.resumen_mes import mes_anterior, resumen_del_mes
 from app.models.codigos_recuperacion import CodigoRecuperacion, MINUTOS_VALIDEZ
 from app.models.users import User
 from app.models.tareas import Tarea
@@ -133,6 +135,38 @@ def enviar_pendientes(user, fecha=None, prueba=False, personaje=None):
         _render('correos/recordatorio.html', **datos),
         imagenes={'personaje': (imagen_personaje(datos['indice_personaje']), 'jpeg')},
     )
+
+
+def enviar_resumen_mes(user, fecha=None, personaje=None):
+    """Envía una sola vez el resumen del mes que terminó. No se manda si ese mes
+    no tuvo nada programado. Devuelve True si se envió."""
+    if not user.email:
+        return False
+    fecha = fecha or date.today()
+    anio, mes = mes_anterior(fecha)
+    if ResumenEnviado.query.filter_by(idUser=user.idUser, anio=anio, mes=mes).first():
+        return False
+    resumen = resumen_del_mes(user.idUser, anio, mes, fecha)
+    if not resumen:
+        return False
+    if personaje is None:
+        personaje = elegir_personaje()
+    app_url = (current_app.config.get('APP_URL') or '').rstrip('/')
+    datos = dict(
+        user=user, resumen=resumen, personaje=PERSONAJES[personaje], tema=PERSONAJES[personaje]['tema'],
+        url_estadisticas=f"{app_url}/estadisticas/?mes={resumen['valor']}" if app_url else None,
+    )
+    enviado = enviar_correo(
+        user.email,
+        f"Tu resumen de {resumen['mes']}: {resumen['promedio']}% de cumplimiento",
+        _render('correos/resumen_mes.txt', **datos),
+        _render('correos/resumen_mes.html', **datos),
+        imagenes={'personaje': (imagen_personaje(personaje), 'jpeg')},
+    )
+    if enviado:
+        db.session.add(ResumenEnviado(idUser=user.idUser, anio=anio, mes=mes))
+        db.session.commit()
+    return enviado
 
 
 def _render(plantilla, **datos):
@@ -254,6 +288,12 @@ def enviar_recordatorios(ahora=None):
             continue
         rec.ultimoEnvio = ahora.date()
         db.session.commit()
+        try:
+            if enviar_resumen_mes(user, ahora.date()):
+                enviados += 1
+        except (smtplib.SMTPException, OSError):
+            # Queda sin marcar: se reintenta con el próximo recordatorio
+            logger.exception("No se pudo enviar el resumen del mes al usuario %s", user.idUser)
     return enviados + enviar_recordatorios_tareas(ahora)
 
 
