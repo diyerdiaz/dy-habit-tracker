@@ -3,7 +3,12 @@ import ast
 import re
 from pathlib import Path
 
-APP = Path(__file__).resolve().parent.parent
+from flask import url_for
+
+from app import db
+from app.models.ruleta_castigo import Castigo
+
+APP =Path(__file__).resolve().parent.parent
 
 # offline.html lleva su CSS adentro a propósito: el service worker la guarda
 # sola en caché y se muestra sin internet, cuando no se puede pedir un .css.
@@ -231,6 +236,65 @@ def test_imports_arriba_en_routes_models_y_services():
     for carpeta in ("routes", "models", "services"):
         for archivo in (APP / carpeta).glob("*.py"):
             assert _imports_dentro_de_funciones(archivo) == [], f"{carpeta}/{archivo.name}"
+
+
+def test_imports_arriba_en_init_de_app():
+    # Un archivo más que antes se saltaba la regla: todo se importa fuera de create_app
+    assert _imports_dentro_de_funciones(APP / "__init__.py") == []
+
+
+def test_ruleta_vive_en_el_modulo_de_castigos(app, logged_client, user):
+    assert not (APP / "templates" / "menu" / "ruleta.html").exists()
+    assert (APP / "templates" / "castigos" / "ruleta.html").exists()
+    with app.app_context():
+        castigo = Castigo(idUser=user.idUser, castigoName="Sin postre", castigoDesc="d",
+                          castigoCategory="salud", castigoState="Pendiente")
+        db.session.add(castigo)
+        db.session.commit()
+        id_castigo = castigo.idCastigo
+        # Las URLs no cambian: ruleta.js llama a /menu/castigo/<id>/completar
+        assert url_for_sin_peticion(app, "castigos.ruleta") == "/menu/ruleta"
+
+    assert logged_client.get("/menu/ruleta").status_code == 200
+    respuesta = logged_client.post(f"/menu/castigo/{id_castigo}/completar")
+    assert respuesta.get_json() == {"success": True, "name": "Sin postre"}
+    with app.app_context():
+        assert db.session.get(Castigo, id_castigo).castigoState == "Completado"
+
+
+def url_for_sin_peticion(app, endpoint):
+    with app.test_request_context():
+        return url_for(endpoint)
+
+
+def _css(nombre):
+    return (APP / "static" / "css" / nombre).read_text()
+
+
+def _bloques_celular(css):
+    return "\n".join(re.findall(r"@media \(max-width: 576px\) \{(.*?)\n\}", css, re.S))
+
+
+def test_celular_base_no_suma_margenes_a_los_de_la_pagina():
+    celular = _bloques_celular(_css("m.css"))
+    assert "main > .container," in celular and "col-md-10" in celular
+    assert "main > .container > .row" in celular
+    assert ".container-fluid.p-3" in celular
+
+
+def test_celular_dashboard_y_tareas_pueden_encogerse():
+    # Sin esto se salen por la derecha: la columna del grid y el input no bajan de su contenido
+    m = _css("m.css")
+    assert "grid-template-columns: minmax(0, 1fr);" in m
+    assert "grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);" in m
+    input_tarea = re.search(r"\.tareas-input \{(.*?)\}", _css("tareas.css"), re.S).group(1)
+    assert "min-width: 0" in input_tarea
+
+
+def test_celular_paginas_sin_margen_propio_lo_tienen():
+    # Inglés, Juegos y Hábitos usaban el margen de base.html, que en celular ya no existe
+    assert "padding-left: 16px" in _bloques_celular(_css("ingles.css"))
+    assert "margin-left: 12px" in _bloques_celular(_css("habits.css"))
 
 
 def test_proyecto_tiene_licencia_mit():

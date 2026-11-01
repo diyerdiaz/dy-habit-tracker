@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
-from app.models.ruleta_castigo import Castigo
 from app import db
 from app.services.gamificacion import get_or_create_progress, aplicar_penalizaciones_pendientes, sincronizar_racha, calcular_racha
 from app.services.level_config import NIVEL_MAXIMO, NIVELES, XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO, calcular_progreso
@@ -233,18 +232,3 @@ def nivel():
         'nivel_max_titulo': nivel_max_info['titulo'],
     }
     return render_template('menu/nivel.html', data=data)
-
-@bp.route('/castigo/<int:castigo_id>/completar', methods=['POST'])
-@login_required
-def castigo_completar(castigo_id):
-    castigo = Castigo.query.filter_by(idCastigo=castigo_id, idUser=current_user.idUser).first_or_404()
-    castigo.castigoState = 'Completado'
-    db.session.commit()
-    return jsonify({'success': True, 'name': castigo.castigoName})
-
-@bp.route('/ruleta')
-@login_required
-def ruleta():
-    castigos = [c.to_dict() for c in Castigo.query.filter_by(idUser=current_user.idUser).all()]
-    habits = [h.to_dict() for h in Habit.query.filter_by(idUser=current_user.idUser).all()]
-    return render_template('menu/ruleta.html', habits=habits, castigos=castigos)

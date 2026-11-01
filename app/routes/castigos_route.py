@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
+from app.models.habitos import Habit
 from app.models.ruleta_castigo import Castigo
 from app import db
 
@@ -66,3 +67,18 @@ def castigo_delete(castigo_id):
     db.session.commit()
     flash(f"Castigo '{name}' eliminado permanentemente.", "success")
     return redirect(url_for('castigos.castigos_index'))
+
+@bp.route('/menu/castigo/<int:castigo_id>/completar', methods=['POST'])
+@login_required
+def castigo_completar(castigo_id):
+    castigo = Castigo.query.filter_by(idCastigo=castigo_id, idUser=current_user.idUser).first_or_404()
+    castigo.castigoState = 'Completado'
+    db.session.commit()
+    return jsonify({'success': True, 'name': castigo.castigoName})
+
+@bp.route('/menu/ruleta')
+@login_required
+def ruleta():
+    castigos = [c.to_dict() for c in Castigo.query.filter_by(idUser=current_user.idUser).all()]
+    habits = [h.to_dict() for h in Habit.query.filter_by(idUser=current_user.idUser).all()]
+    return render_template('castigos/ruleta.html', habits=habits, castigos=castigos)
