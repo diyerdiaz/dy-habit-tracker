@@ -6,7 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var aviso = document.getElementById('planMesModal');
     if (aviso && window.bootstrap) {
         var abrir = function () { new bootstrap.Modal(aviso).show(); };
-        if (document.getElementById('bienvenida')) {
+        if (document.getElementById('resumenMesModal')) {
+            // Primero el resumen del mes que terminó (él ya espera al saludo)
+            document.addEventListener('resumen:cerrado', abrir, { once: true });
+        } else if (document.getElementById('bienvenida')) {
             document.addEventListener('bienvenida:terminada', abrir, { once: true });
         } else {
             abrir();

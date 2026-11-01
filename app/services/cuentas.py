@@ -11,6 +11,7 @@ from app.models.metodo_estudio import MetodoEstudio
 from app.models.plan_mensual import PlanMensual
 from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.recuperacion import Recuperacion, SesionRecuperacion
+from app.models.resumen_mensual import ResumenVisto
 from app.models.ruleta_castigo import Castigo
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.tareas import Tarea
@@ -37,7 +38,7 @@ def borrar_cuenta(user):
     # Primero lo que apunta a otras tablas del mismo usuario (sesiones -> temas, historial -> hábitos)
     for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, Habit,
                    Castigo, Tarea, UserProgress, VocabularioRegistro, Vocabulario, ShadowingSesion,
-                   Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, MetaVision):
+                   Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, ResumenVisto, MetaVision):
         modelo.query.filter_by(idUser=id_user).delete(synchronize_session=False)
     db.session.delete(user)
 

@@ -9,6 +9,7 @@ from app.models.recuperacion import (
 )
 from app import db
 from app.services.gamificacion import registrar_toggle_habito, registrar_recuperacion
+from app.services.resumen_mes import resumen_pendiente
 from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
 
@@ -128,6 +129,7 @@ def habits_check():
         pct_hoy=pct_hoy,
         necesita_plan=PlanMensual.del_mes(current_user.idUser) is None,
         mes=nombre_mes(hoy),
+        resumen_mes=resumen_pendiente(current_user.idUser, hoy),
     )
 
 @bp.route('/habit/<int:habit_id>/json')

@@ -6,6 +6,7 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.plan_mensual import PlanMensual, nombre_mes
 from app.services.personajes_login import PERSONAJES, elegir_personaje
+from app.services.resumen_mes import resumen_pendiente
 from app import db
 from datetime import date, timedelta
 from collections import defaultdict
@@ -231,6 +232,7 @@ def dashboard():
     return render_template(
         "dashboard/index.html", data=data, recien_logueado=session.pop('bienvenida', False),
         necesita_plan=PlanMensual.del_mes(current_user.idUser) is None, mes=nombre_mes(hoy),
+        resumen_mes=resumen_pendiente(current_user.idUser, hoy),
     )
 
 
