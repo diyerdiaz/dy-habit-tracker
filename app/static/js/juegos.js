@@ -3,6 +3,8 @@
 //  - Unir parejas: se toca una palabra en inglés y luego su significado (o al revés).
 //  - Sopa de letras: los significados son las pistas; se toca la primera y la
 //    última letra de la palabra en inglés dentro de la cuadrícula.
+//  - Ahorcado: se adivina la palabra letra por letra; la pista es un ejemplo en
+//    inglés con la palabra tapada y el significado solo se ve al terminarla.
 
 const $ = (id) => document.getElementById(id);
 const normalizar = (texto) => texto.trim().toLowerCase();
@@ -605,16 +607,183 @@ function iniciarSopa(juego) {
     nuevaRonda();
 }
 
+// ═══════════════════════════ Ahorcado ═══════════════════════════
+
+const VIDAS_AHORCADO = 6;  // una por cada parte del dibujo
+
+// Cómo va una palabra según las letras ya usadas (`usadas` es un Set en mayúsculas)
+function estadoAhorcado(letras, usadas) {
+    const errores = [...usadas].filter((l) => !letras.includes(l)).length;
+    return {
+        casillas: [...letras].map((l) => (usadas.has(l) ? l : '')),
+        errores,
+        ganada: [...letras].every((l) => usadas.has(l)),
+        perdida: errores >= VIDAS_AHORCADO,
+    };
+}
+
+function iniciarAhorcado(juego) {
+    const palabras = JSON.parse($('ahorcadoPalabras').textContent);
+    const porRonda = Number(juego.dataset.porRonda);
+    const zona = $('ahorcadoZona');
+    const teclado = $('ahorcadoTeclado');
+    const veredicto = $('ahorcadoVeredicto');
+    const final = $('ahorcadoFinal');
+    const botonPista = $('ahorcadoPista');
+    const partes = [...$('ahorcadoDibujo').querySelectorAll('.ahorcado-parte')];
+    const pronunciar = crearSonido($('ahorcadoSonido'));
+    const bolsa = crearBolsa('juegosAhorcadoPendientes', palabras);
+    const reloj = crearReloj($('ahorcadoTiempo'));
+
+    let ronda = [];
+    let indice = 0;            // palabra de la ronda que se está jugando
+    let usadas = new Set();
+    let terminada = false;     // la palabra actual ya se ganó o se perdió
+    let pistaUsada = false;
+    let aciertos = 0;
+    let errores = 0;
+    let pistas = 0;
+
+    const teclas = new Map([...ABECEDARIO].map((letra) => {
+        const tecla = document.createElement('button');
+        tecla.type = 'button';
+        tecla.className = 'ahorcado-tecla';
+        tecla.textContent = letra;
+        tecla.dataset.letra = letra;
+        return [letra, tecla];
+    }));
+    teclado.replaceChildren(...teclas.values());
+
+    function nuevaRonda() {
+        ronda = bolsa.sacar(Math.min(porRonda, palabras.length), (p) => ['letras:' + p.letras]);
+        indice = 0;
+        aciertos = 0;
+        errores = 0;
+        pistas = 0;
+        $('ahorcadoTotal').textContent = ronda.length;
+        $('ahorcadoPistas').textContent = 0;
+        final.hidden = true;
+        zona.hidden = false;
+        reloj.empezar();
+        mostrarPalabra();
+    }
+
+    function mostrarPalabra() {
+        const palabra = ronda[indice];
+        usadas = new Set();
+        terminada = false;
+        pistaUsada = false;
+        $('ahorcadoNumero').textContent = indice + 1;
+        $('ahorcadoEjemplo').textContent = palabra.pistas[azar(palabra.pistas.length)];
+        teclas.forEach((tecla) => { tecla.disabled = false; tecla.className = 'ahorcado-tecla'; });
+        veredicto.hidden = true;
+        teclado.hidden = false;
+        botonPista.disabled = false;
+        dibujar();
+    }
+
+    function dibujar() {
+        const estado = estadoAhorcado(ronda[indice].letras, usadas);
+        $('ahorcadoCasillas').replaceChildren(...estado.casillas.map((letra) => {
+            const casilla = document.createElement('span');
+            casilla.className = 'ahorcado-casilla';
+            casilla.textContent = letra;
+            return casilla;
+        }));
+        $('ahorcadoVidas').textContent = VIDAS_AHORCADO - estado.errores;
+        partes.forEach((parte, i) => parte.classList.toggle('visible', i < estado.errores));
+        return estado;
+    }
+
+    function probar(letra) {
+        if (terminada || usadas.has(letra)) return;
+        const acierto = ronda[indice].letras.includes(letra);
+        usadas.add(letra);
+        const tecla = teclas.get(letra);
+        tecla.disabled = true;
+        tecla.classList.add(acierto ? 'acertada' : 'fallida');
+        if (!acierto) errores++;
+        const estado = dibujar();
+        if (estado.ganada || estado.perdida) cerrarPalabra(estado.ganada);
+    }
+
+    function cerrarPalabra(ganada) {
+        const palabra = ronda[indice];
+        terminada = true;
+        if (ganada) aciertos++;
+        botonPista.disabled = true;
+        $('ahorcadoVeredictoTitulo').textContent = ganada ? '¡Correcto!' : 'Se acabaron las vidas';
+        $('ahorcadoRespuesta').textContent = palabra.en;
+        $('ahorcadoSignificado').textContent = palabra.es;
+        $('ahorcadoSiguiente').textContent = indice + 1 < ronda.length ? 'Siguiente palabra' : 'Ver resultado';
+        teclado.hidden = true;
+        veredicto.hidden = false;
+        $('ahorcadoSiguiente').focus();
+        pronunciar(palabra.en);
+    }
+
+    function terminar() {
+        const tiempo = reloj.parar();
+        const perfecta = errores === 0 && pistas === 0;
+        const todas = aciertos === ronda.length;
+        $('ahorcadoFinalIcono').textContent = perfecta ? '🏆' : todas ? '🎉' : '💪';
+        $('ahorcadoFinalTitulo').textContent = perfecta ? '¡Ronda perfecta!' : todas ? '¡Las adivinaste todas!' : '¡Ronda completa, sigue practicando!';
+        $('ahorcadoFinalAciertos').textContent = `${aciertos}/${ronda.length}`;
+        $('ahorcadoFinalErrores').textContent = errores;
+        $('ahorcadoFinalPistas').textContent = pistas;
+        $('ahorcadoFinalTiempo').textContent = formatoTiempo(tiempo);
+
+        zona.hidden = true;
+        final.hidden = false;
+        $('ahorcadoOtra').focus();
+        guardarResultado(juego.dataset.resultadoUrl,
+            { ids: ronda.map((p) => p.id), errores, segundos: tiempo, pistas }, $('ahorcadoFinalNota'));
+    }
+
+    teclado.addEventListener('click', (e) => {
+        const tecla = e.target.closest('.ahorcado-tecla');
+        if (tecla) probar(tecla.dataset.letra);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        // La tarjeta de la frase del día puede estar abierta encima del juego
+        if (zona.hidden || e.ctrlKey || e.metaKey || e.altKey || document.querySelector('.frase-dia-fondo:not([hidden])')) return;
+        const letra = e.key.toUpperCase();
+        if (e.key.length === 1 && teclas.has(letra)) probar(letra);
+    });
+
+    // Pista: revela una letra que falte, una vez por palabra
+    botonPista.addEventListener('click', () => {
+        if (terminada || pistaUsada) return;
+        const faltan = [...new Set(ronda[indice].letras)].filter((l) => !usadas.has(l));
+        pistaUsada = true;
+        pistas++;
+        botonPista.disabled = true;
+        $('ahorcadoPistas').textContent = pistas;
+        probar(faltan[azar(faltan.length)]);
+    });
+
+    $('ahorcadoSiguiente').addEventListener('click', () => {
+        indice++;
+        if (indice < ronda.length) mostrarPalabra();
+        else terminar();
+    });
+    $('ahorcadoOtra').addEventListener('click', nuevaRonda);
+    nuevaRonda();
+}
+
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         const unir = $('juegoUnir');
         if (unir) iniciarUnir(unir);
         const sopa = $('juegoSopa');
         if (sopa) iniciarSopa(sopa);
+        const ahorcado = $('juegoAhorcado');
+        if (ahorcado) iniciarAhorcado(ahorcado);
     });
 }
 
-// Los tests (app/test/test_juegos.py) cargan el armado de la sopa con Node
+// Los tests (app/test/test_juegos.py) cargan el armado de la sopa y el ahorcado con Node
 if (typeof module !== 'undefined') {
-    module.exports = { generarSopa, buscarEnTablero, DIRECCIONES };
+    module.exports = { generarSopa, buscarEnTablero, DIRECCIONES, estadoAhorcado, VIDAS_AHORCADO };
 }

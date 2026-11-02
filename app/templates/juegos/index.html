@@ -60,6 +60,21 @@
             </ul>
             {% endif %}
         </a>
+        {% set ahorcado = resumen.get('ahorcado') %}
+        <a href="{{ url_for('juegos.ahorcado') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+            <i class="bi bi-person-exclamation"></i>
+            <h3>Ahorcado</h3>
+            <p class="juego-desc">Adivina la palabra letra por letra. La pista es tu ejemplo en inglés.</p>
+            {% if total_ahorcado < minimo %}
+            <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
+            {% elif ahorcado %}
+            <ul class="juego-stats">
+                <li><span>{{ ahorcado.jugadas }}</span> {{ 'ronda' if ahorcado.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ ahorcado.precision }}%</span> precisión</li>
+                {% if ahorcado.mejor_tiempo is not none %}<li><span>{{ ahorcado.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
     </div>
 </div>
 {% endblock %}

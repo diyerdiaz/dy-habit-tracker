@@ -299,3 +299,139 @@ def test_armado_de_la_sopa_nunca_corta_ni_repite_palabras(tmp_path):
     resultado = json.loads(salida.stdout)
     assert resultado['tableros'] >= 350          # casi siempre logra armar el tablero
     assert resultado['problemas'] == []
+
+
+# ═══════════════ Ahorcado ═══════════════
+from app.routes.juegos_route import ejemplos_con_hueco, solo_letras, LETRAS_AHORCADO
+
+AHORCADO = [('give', 'dar', 'Please give me the book.'),
+            ('tell', 'decir', 'Can you tell me the truth?\r\nTell her now.'),
+            ('surprise', 'sorpresa', 'That party was a total surprise.'),
+            ('think', 'pensar', 'I think it is a great idea.'),
+            ('understanding', 'comprensión', 'Thanks for your understanding.'),
+            ('go', 'ir', 'We want to go.'),                     # muy corta
+            ('give up', 'rendirse', 'Never give up.'),          # dos piezas
+            ('know', 'saber', None),                            # sin ejemplo
+            ('run', 'correr', 'She is very fast.')]             # el ejemplo no la usa
+
+
+def _vocabulario_ahorcado(user, datos=AHORCADO):
+    for en, es, ejemplos in datos:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es, ejemplos=ejemplos))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_ahorcado(html):
+    bloque = re.search(r'<script type="application/json" id="ahorcadoPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_ahorcado(client, ids, **extra):
+    datos = {'ids': ids, 'errores': 3, 'segundos': 70, 'pistas': 1, **extra}
+    return client.post('/menu/ingles/juegos/ahorcado/resultado', json=datos)
+
+
+def test_que_palabras_sirven_para_el_ahorcado():
+    assert solo_letras('understanding', LETRAS_AHORCADO) == 'UNDERSTANDING'
+    for mala in ('go', 'give up', "don't", 'R2D2', ''):
+        assert solo_letras(mala, LETRAS_AHORCADO) is None, mala
+
+
+def test_la_pista_tapa_la_palabra_sin_importar_mayusculas():
+    assert ejemplos_con_hueco('tell', 'Can you tell me?\r\nTell her.') == ['Can you ____ me?', '____ her.']
+    assert ejemplos_con_hueco('give', 'She gives it and I give it.') == ['She ____ it and I ____ it.']
+
+
+def test_la_pista_descarta_lineas_sin_la_palabra():
+    assert ejemplos_con_hueco('run', 'She is fast.\nI run.') == ['I ____.']
+    assert ejemplos_con_hueco('run', 'She is fast.') == []
+    assert ejemplos_con_hueco('run', None) == []
+
+
+def test_ahorcado_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/ahorcado').status_code == 302
+
+
+def test_ahorcado_solo_manda_palabras_con_pista_en_ingles(logged_client, user):
+    _vocabulario_ahorcado(user)
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'id="juegoAhorcado"' in html and 'js/juegos.js' in html
+    datos = _palabras_ahorcado(html)
+    assert {p['letras'] for p in datos} == {'GIVE', 'TELL', 'SURPRISE', 'THINK', 'UNDERSTANDING'}
+    for palabra in datos:
+        assert set(palabra) == {'id', 'en', 'es', 'letras', 'pistas'}
+        # La pista nunca deja ver la palabra
+        assert all(palabra['en'].lower() not in pista.lower() and '____' in pista for pista in palabra['pistas'])
+
+
+def test_ahorcado_no_repite_palabras_iguales(logged_client, user):
+    _vocabulario_ahorcado(user, AHORCADO[:5] + [('Give', 'regalar', 'I give it.')])
+    datos = _palabras_ahorcado(logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True))
+    assert len(datos) == 5
+
+
+def test_ahorcado_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_ahorcado(user, AHORCADO[:3] + AHORCADO[5:])
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoAhorcado"' not in html
+    assert 'Tienes 3 de 7' in html
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'Necesitas 4 palabras de una sola pieza con ejemplo (tienes 3)' in menu
+
+
+def test_ahorcado_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_ahorcado(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='x', ejemplos='a secret here'))
+    db.session.commit()
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'SECRET' not in {p['letras'] for p in _palabras_ahorcado(html)}
+
+
+def test_guardar_ronda_de_ahorcado(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    respuesta = _enviar_ahorcado(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('ahorcado', 5, 3, 1, None, 70)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_ahorcado_invalido(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    for extra in ({'pistas': -1}, {'pistas': 6}, {'pistas': '1'}, {'pistas': True}):
+        assert _enviar_ahorcado(logged_client, ids, **extra).status_code == 400, extra
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_el_ahorcado(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    _enviar_ahorcado(logged_client, ids, errores=0, pistas=0, segundos=45)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/ahorcado' in html
+    assert '45s</span> mejor ronda perfecta' in html
+
+
+SCRIPT_AHORCADO = r"""
+const { estadoAhorcado, VIDAS_AHORCADO } = require(process.argv[1]);
+const inicial = estadoAhorcado('TELL', new Set());
+const parcial = estadoAhorcado('TELL', new Set(['L', 'X']));
+const ganada = estadoAhorcado('TELL', new Set(['T', 'E', 'L']));
+const perdida = estadoAhorcado('TELL', new Set(['A', 'B', 'C', 'D', 'F', 'G']));
+console.log(JSON.stringify({ vidas: VIDAS_AHORCADO, inicial, parcial, ganada, perdida }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_reglas_del_ahorcado():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_AHORCADO, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['vidas'] == 6
+    assert r['inicial'] == {'casillas': ['', '', '', ''], 'errores': 0, 'ganada': False, 'perdida': False}
+    # Una letra repetida se revela en todas sus casillas
+    assert r['parcial'] == {'casillas': ['', '', 'L', 'L'], 'errores': 1, 'ganada': False, 'perdida': False}
+    assert r['ganada']['ganada'] and not r['ganada']['perdida']
+    assert r['perdida']['perdida'] and not r['perdida']['ganada']

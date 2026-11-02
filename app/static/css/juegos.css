@@ -350,3 +350,121 @@
 @media (prefers-reduced-motion: reduce) {
     .sopa-celda.fallida, .sopa-celda.pista { animation: none; }
 }
+
+/* ── Ahorcado ── */
+#ahorcadoPista { width: auto; padding: 0 10px; color: #ffd54f; border-color: rgba(255, 213, 79, .4); }
+#ahorcadoPista:disabled { opacity: .4; }
+
+.ahorcado-zona {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) minmax(0, 560px);
+    gap: 28px;
+    justify-content: center;
+    align-items: center;
+}
+.ahorcado-zona[hidden], .ahorcado-teclado[hidden], .ahorcado-veredicto[hidden] { display: none; }
+
+.ahorcado-dibujo {
+    width: 100%;
+    padding: 10px;
+    border-radius: 16px;
+    background: #031024;
+    border: 1px solid rgba(77, 171, 255, .25);
+}
+.ahorcado-poste, .ahorcado-parte {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.ahorcado-poste { stroke: rgba(255, 255, 255, .4); }
+.ahorcado-parte {
+    stroke: #ff5c7a;
+    opacity: 0;
+    transition: opacity .25s;
+}
+.ahorcado-parte.visible { opacity: 1; }
+
+.ahorcado-pista {
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border-left: 4px solid #4dabff;
+    background: #04162e;
+}
+.ahorcado-pista-titulo {
+    color: rgba(255, 255, 255, .5);
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+.ahorcado-pista p {
+    margin: 4px 0 0;
+    color: #fff;
+    font-size: 1.1rem;
+    font-style: italic;
+    overflow-wrap: anywhere;
+}
+
+.ahorcado-casillas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+.ahorcado-casilla {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(26px, 7vw, 40px);
+    height: clamp(36px, 9vw, 48px);
+    border-bottom: 3px solid #4dabff;
+    color: #fff;
+    font-size: clamp(1.2rem, 4.5vw, 1.7rem);
+    font-weight: 700;
+}
+
+.ahorcado-teclado {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 6px;
+    touch-action: manipulation;
+}
+.ahorcado-tecla {
+    min-height: 42px;
+    padding: 0;
+    border: 1px solid rgba(77, 171, 255, .3);
+    border-radius: 10px;
+    background: #04162e;
+    color: #e6f1ff;
+    font-weight: 700;
+    transition: background .15s;
+}
+.ahorcado-tecla:hover:not(:disabled) { background: #082448; }
+.ahorcado-tecla:focus-visible { outline: 2px solid #4dabff; outline-offset: 1px; }
+.ahorcado-tecla.acertada { border-color: #00e676; background: #03301f; color: #00e676; }
+.ahorcado-tecla.fallida { border-color: #ff5c7a; background: #3a0f1c; color: #ff5c7a; }
+
+.ahorcado-veredicto { text-align: center; animation: unir-aparecer .35s ease; }
+.ahorcado-veredicto h2 { margin: 0 0 6px; color: #fff; font-size: 1.3rem; }
+.ahorcado-respuesta { margin: 0; color: #4dabff; font-size: 1.6rem; font-weight: 700; overflow-wrap: anywhere; }
+.ahorcado-significado { margin: 0 0 14px; color: rgba(255, 255, 255, .7); overflow-wrap: anywhere; }
+
+@media (max-width: 767px) {
+    .ahorcado-zona { grid-template-columns: minmax(0, 480px); gap: 14px; }
+    .ahorcado-dibujo { max-width: 110px; margin: 0 auto; }
+    .ahorcado-teclado { grid-template-columns: repeat(7, 1fr); }
+    .ahorcado-pista { margin-bottom: 12px; padding: 8px 12px; }
+    .ahorcado-casillas { margin-bottom: 12px; }
+    /* En el celular se compacta lo de arriba para que el teclado quepa en pantalla */
+    .juegos-wrapper:has(#juegoAhorcado) { padding-top: 70px; }
+    .juegos-wrapper:has(#juegoAhorcado) .juegos-volver { margin-bottom: 4px; }
+    .juegos-wrapper:has(#juegoAhorcado) .ingles-desc { display: none; }
+    .juegos-wrapper:has(#juegoAhorcado) .unir-titulo { font-size: 1.8rem; margin-bottom: 0; }
+    #juegoAhorcado .juego-barra { gap: 6px 12px; padding: 8px 10px; margin-bottom: 12px; font-size: .85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ahorcado-veredicto { animation: none; }
+}
