@@ -6,6 +6,7 @@ en inglés dentro de la cuadrícula.
 Ahorcado: hay que adivinar la palabra en inglés letra por letra; la pista es tu
 propio ejemplo en inglés con la palabra tapada, sin nada de español mientras se juega.
 Caza de patos: sale un significado y hay que dispararle al pato con su palabra en inglés.
+Crucigrama: los significados son las pistas y las palabras en inglés se cruzan en la cuadrícula.
 El navegador recibe todas las palabras al abrir la página y arma las rondas solo,
 así se puede jugar aunque el internet esté lento; al terminar cada ronda envía
 el resultado para guardarlo en tus estadísticas.
@@ -31,6 +32,10 @@ LETRAS_SOPA = (3, 10)
 PALABRAS_POR_RONDA_AHORCADO = 5
 LETRAS_AHORCADO = (3, 20)
 HUECO = '____'
+# Crucigrama: de 4 a 8 palabras por tablero; hacen falta más candidatas para que crucen
+MINIMO_PALABRAS_CRUCIGRAMA = 6
+MAXIMO_PALABRAS_CRUCIGRAMA = 8
+LETRAS_CRUCIGRAMA = (3, 12)
 
 
 def _palabras_para_jugar(idUser):
@@ -90,6 +95,17 @@ def _palabras_para_ahorcado(idUser):
     return salida
 
 
+def _palabras_para_crucigrama(idUser):
+    """Palabras de una pieza, cada una una sola vez."""
+    salida, vistas = [], set()
+    for p in _palabras_para_jugar(idUser):
+        letras = solo_letras(p['en'], LETRAS_CRUCIGRAMA)
+        if letras and letras not in vistas:
+            vistas.add(letras)
+            salida.append({**p, 'letras': letras})
+    return salida
+
+
 def _resumen(idUser):
     partidas = JuegoPartida.query.filter_by(idUser=idUser).all()
     por_juego = defaultdict(list)
@@ -116,6 +132,8 @@ def index():
         total_sopa=len(_palabras_para_sopa(current_user.idUser)),
         minimo_sopa=MINIMO_PALABRAS_SOPA,
         total_ahorcado=len(_palabras_para_ahorcado(current_user.idUser)),
+        total_crucigrama=len(_palabras_para_crucigrama(current_user.idUser)),
+        minimo_crucigrama=MINIMO_PALABRAS_CRUCIGRAMA,
         resumen=_resumen(current_user.idUser),
         letras_flotantes=get_letras_flotantes(current_user.idUser),
     )
@@ -169,25 +187,38 @@ def patos():
     )
 
 
+@bp.route('/crucigrama')
+@login_required
+def crucigrama():
+    return render_template(
+        'juegos/crucigrama.html',
+        palabras=_palabras_para_crucigrama(current_user.idUser),
+        total_palabras=len(_palabras_para_jugar(current_user.idUser)),
+        minimo=MINIMO_PALABRAS_CRUCIGRAMA,
+        por_ronda=MAXIMO_PALABRAS_CRUCIGRAMA,
+    )
+
+
 @bp.route('/<juego>/resultado', methods=['POST'])
 @login_required
 def resultado(juego):
     """Guarda una ronda terminada. Recibe JSON: {"ids": [...], "errores": 2, "segundos": 41},
-    en la sopa de letras también "pistas" y "nivel", y en el ahorcado "pistas"."""
+    en la sopa de letras también "pistas" y "nivel", y en ahorcado y crucigrama "pistas"."""
     if juego not in JUEGOS:
         return jsonify({'success': False, 'error': 'Juego no válido.'}), 404
     data = request.get_json(silent=True) or {}
     ids = data.get('ids')
     errores, segundos = data.get('errores'), data.get('segundos')
+    maximo_palabras = MAXIMO_PALABRAS_CRUCIGRAMA if juego == 'crucigrama' else PAREJAS_POR_RONDA
 
     if (not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids)
-            or len(set(ids)) != len(ids) or not MINIMO_PALABRAS <= len(ids) <= PAREJAS_POR_RONDA
+            or len(set(ids)) != len(ids) or not MINIMO_PALABRAS <= len(ids) <= maximo_palabras
             or not isinstance(errores, int) or not 0 <= errores <= 500
             or not isinstance(segundos, int) or not 0 <= segundos <= 3600):
         return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400
 
     pistas, nivel = 0, None
-    if juego in ('sopa', 'ahorcado'):
+    if juego in ('sopa', 'ahorcado', 'crucigrama'):
         pistas = data.get('pistas', 0)
         if not isinstance(pistas, int) or isinstance(pistas, bool) or not 0 <= pistas <= len(ids):
             return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400

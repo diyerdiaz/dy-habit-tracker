@@ -95,6 +95,21 @@
             </ul>
             {% endif %}
         </a>
+        {% set crucigrama = resumen.get('crucigrama') %}
+        <a href="{{ url_for('juegos.crucigrama') }}" class="ingles-card juego-card{% if total_crucigrama < minimo_crucigrama %} bloqueado{% endif %}">
+            <i class="bi bi-puzzle"></i>
+            <h3>Crucigrama</h3>
+            <p class="juego-desc">Escribe en inglés la palabra de cada significado y crúzalas.</p>
+            {% if total_crucigrama < minimo_crucigrama %}
+            <p class="juego-desc">Necesitas {{ minimo_crucigrama }} palabras de una sola pieza (tienes {{ total_crucigrama }}).</p>
+            {% elif crucigrama %}
+            <ul class="juego-stats">
+                <li><span>{{ crucigrama.jugadas }}</span> {{ 'ronda' if crucigrama.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ crucigrama.precision }}%</span> precisión</li>
+                {% if crucigrama.mejor_tiempo is not none %}<li><span>{{ crucigrama.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
     </div>
 </div>
 {% endblock %}

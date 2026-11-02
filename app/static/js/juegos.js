@@ -7,6 +7,8 @@
 //    inglés con la palabra tapada y el significado solo se ve al terminarla.
 //  - Caza de patos: sale un significado y hay que dispararle al pato que lleva
 //    su palabra en inglés antes de que cruce la pantalla.
+//  - Crucigrama: los significados son las pistas y las palabras en inglés se
+//    cruzan en una cuadrícula que se arma aquí con las palabras de la ronda.
 
 const $ = (id) => document.getElementById(id);
 const normalizar = (texto) => texto.trim().toLowerCase();
@@ -1007,6 +1009,453 @@ function iniciarPatos(juego) {
     nuevaRonda();
 }
 
+// ═══════════════════════════ Crucigrama ═══════════════════════════
+
+const LADO_CRUCIGRAMA = 13;      // filas y columnas máximas: más no cabe en el celular
+const MINIMO_EN_CRUCIGRAMA = 4;  // el servidor no acepta rondas más chicas
+const INTENTOS_CRUCIGRAMA = 40;
+const DIRECCIONES_CRUCIGRAMA = { h: [0, 1], v: [1, 0] };
+
+const claveCelda = (f, c) => `${f},${c}`;
+
+// Cuántas letras comparte la palabra con el tablero en esa posición, o -1 si no cabe:
+// fuera de las palabras que cruza no puede tocar ninguna letra, porque formaría otra palabra
+function crucesAlColocar(celdas, letras, f0, c0, dir) {
+    const [df, dc] = DIRECCIONES_CRUCIGRAMA[dir];
+    if (celdas.has(claveCelda(f0 - df, c0 - dc))) return -1;
+    if (celdas.has(claveCelda(f0 + df * letras.length, c0 + dc * letras.length))) return -1;
+    let cruces = 0;
+    for (let i = 0; i < letras.length; i++) {
+        const f = f0 + df * i;
+        const c = c0 + dc * i;
+        const celda = celdas.get(claveCelda(f, c));
+        if (celda) {
+            if (celda.letra !== letras[i] || celda.dirs.includes(dir)) return -1;
+            cruces++;
+        } else if (celdas.has(claveCelda(f + dc, c + df)) || celdas.has(claveCelda(f - dc, c - df))) {
+            return -1;
+        }
+    }
+    return cruces;
+}
+
+function intentarCrucigrama(palabras, maximo) {
+    const celdas = new Map();
+    const colocadas = [];
+    let caja = null;
+    let cruces = 0;
+
+    const cajaCon = (largo, f, c, dir) => {
+        const [df, dc] = DIRECCIONES_CRUCIGRAMA[dir];
+        const fFin = f + df * (largo - 1);
+        const cFin = c + dc * (largo - 1);
+        return caja
+            ? { f0: Math.min(caja.f0, f), c0: Math.min(caja.c0, c), f1: Math.max(caja.f1, fFin), c1: Math.max(caja.c1, cFin) }
+            : { f0: f, c0: c, f1: fFin, c1: cFin };
+    };
+    const cabe = (k) => k.f1 - k.f0 < LADO_CRUCIGRAMA && k.c1 - k.c0 < LADO_CRUCIGRAMA;
+
+    function colocar(palabra, f, c, dir) {
+        const [df, dc] = DIRECCIONES_CRUCIGRAMA[dir];
+        caja = cajaCon(palabra.letras.length, f, c, dir);
+        [...palabra.letras].forEach((letra, i) => {
+            const clave = claveCelda(f + df * i, c + dc * i);
+            const celda = celdas.get(clave);
+            if (celda) celda.dirs.push(dir);
+            else celdas.set(clave, { letra, dirs: [dir] });
+        });
+        colocadas.push({ palabra, fila: f, columna: c, dir });
+    }
+
+    // Busca dónde cruza mejor: muchos cruces y un tablero compacto
+    function mejorLugar(palabra) {
+        let mejor = null;
+        for (const [clave, celda] of celdas) {
+            if (celda.dirs.length > 1) continue;
+            const [f, c] = clave.split(',').map(Number);
+            const dir = celda.dirs[0] === 'h' ? 'v' : 'h';
+            const [df, dc] = DIRECCIONES_CRUCIGRAMA[dir];
+            [...palabra.letras].forEach((letra, i) => {
+                if (letra !== celda.letra) return;
+                const f0 = f - df * i;
+                const c0 = c - dc * i;
+                const cruza = crucesAlColocar(celdas, palabra.letras, f0, c0, dir);
+                if (cruza < 1) return;
+                const k = cajaCon(palabra.letras.length, f0, c0, dir);
+                if (!cabe(k)) return;
+                const puntos = cruza * 10 - (k.f1 - k.f0 + k.c1 - k.c0) + Math.random() * 3;
+                if (!mejor || puntos > mejor.puntos) mejor = { f0, c0, dir, cruza, puntos };
+            });
+        }
+        return mejor;
+    }
+
+    const orden = mezclar(palabras).sort((a, b) => b.letras.length - a.letras.length);
+    colocar(orden[0], 0, 0, azar(2) ? 'h' : 'v');
+    for (const palabra of orden.slice(1)) {
+        if (colocadas.length === maximo) break;
+        const lugar = mejorLugar(palabra);
+        if (lugar) {
+            colocar(palabra, lugar.f0, lugar.c0, lugar.dir);
+            cruces += lugar.cruza;
+        }
+    }
+    return { colocadas, caja, cruces };
+}
+
+// Numera las palabras de arriba abajo y de izquierda a derecha, y deja el tablero
+// empezando en la fila 0 y la columna 0. Dos palabras pueden compartir número.
+function terminarCrucigrama({ colocadas, caja }) {
+    const items = colocadas.map((c) => ({ ...c, fila: c.fila - caja.f0, columna: c.columna - caja.c0 }));
+    const inicios = [...new Set(items.map((i) => claveCelda(i.fila, i.columna)))]
+        .map((k) => k.split(',').map(Number))
+        .sort((a, b) => a[0] - b[0] || a[1] - b[1])
+        .map(([f, c]) => claveCelda(f, c));
+    items.forEach((i) => { i.numero = inicios.indexOf(claveCelda(i.fila, i.columna)) + 1; });
+    return { filas: caja.f1 - caja.f0 + 1, columnas: caja.c1 - caja.c0 + 1, colocadas: items };
+}
+
+// Prueba varios órdenes y se queda con el de más palabras, más cruces y menos tamaño.
+// Devuelve null si no logra cruzar al menos MINIMO_EN_CRUCIGRAMA.
+function generarCrucigrama(palabras, maximo) {
+    if (!palabras.length) return null;
+    let mejor = null;
+    const lado = (t) => t.caja.f1 - t.caja.f0 + t.caja.c1 - t.caja.c0;
+    for (let intento = 0; intento < INTENTOS_CRUCIGRAMA; intento++) {
+        const prueba = intentarCrucigrama(palabras, maximo);
+        if (!mejor
+            || prueba.colocadas.length > mejor.colocadas.length
+            || (prueba.colocadas.length === mejor.colocadas.length
+                && (prueba.cruces > mejor.cruces || (prueba.cruces === mejor.cruces && lado(prueba) < lado(mejor))))) {
+            mejor = prueba;
+        }
+    }
+    return mejor.colocadas.length >= MINIMO_EN_CRUCIGRAMA ? terminarCrucigrama(mejor) : null;
+}
+
+function iniciarCrucigrama(juego) {
+    const palabras = JSON.parse($('cruciPalabras').textContent);
+    const porRonda = Number(juego.dataset.porRonda);
+    const zona = $('cruciZona');
+    const rejilla = $('cruciRejilla');
+    const final = $('cruciFinal');
+    const mensaje = $('cruciMensaje');
+    const pronunciar = crearSonido($('cruciSonido'));
+    const bolsa = crearBolsa('juegosCrucigramaPendientes', palabras);
+    const reloj = crearReloj($('cruciTiempo'));
+    const clavesCruci = (p) => ['letras:' + p.letras, 'es:' + normalizar(p.es)];
+
+    let ronda = [];            // [{palabra, numero, dir, celdas: [claves], resuelta}]
+    let casillas = new Map();  // clave -> {input, letra, fila, columna}
+    let activa = null;         // palabra en la que se está escribiendo
+    let ultimaClave = null;    // casilla tocada, para cambiar de dirección al tocarla otra vez
+    let terminado = false;
+    let errores = 0;
+    let pistas = 0;
+
+    function nuevaRonda() {
+        let tablero = null;
+        for (let intento = 0; intento < 5 && !tablero; intento++) {
+            // Se sacan más de las que caben: no todas logran cruzarse
+            const candidatas = bolsa.sacar(Math.min(porRonda + 4, palabras.length), clavesCruci);
+            tablero = generarCrucigrama(candidatas, porRonda);
+            const usadas = tablero ? tablero.colocadas.map((c) => c.palabra.id) : [];
+            bolsa.devolver(candidatas.map((p) => p.id).filter((id) => !usadas.includes(id)));
+        }
+        if (!tablero) {
+            zona.innerHTML = '<p class="juegos-vacio">No se pudo armar el crucigrama con tus palabras. Agrega algunas más e inténtalo de nuevo.</p>';
+            return;
+        }
+
+        ronda = tablero.colocadas.map((c) => {
+            const [df, dc] = DIRECCIONES_CRUCIGRAMA[c.dir];
+            return {
+                palabra: c.palabra,
+                numero: c.numero,
+                dir: c.dir,
+                celdas: [...c.palabra.letras].map((_, i) => claveCelda(c.fila + df * i, c.columna + dc * i)),
+                resuelta: false,
+            };
+        });
+        errores = 0;
+        pistas = 0;
+        activa = null;
+        ultimaClave = null;
+        terminado = false;
+        dibujarRejilla(tablero);
+        dibujarPistas();
+        $('cruciTotal').textContent = ronda.length;
+        $('cruciPistas').textContent = 0;
+        actualizarBarra();
+        mensaje.textContent = '';
+        $('cruciBotones').hidden = false;
+        $('cruciPista').disabled = false;
+        final.hidden = true;
+        zona.hidden = false;
+        reloj.empezar();
+        activar(ronda[0], ronda[0].celdas[0]);
+    }
+
+    function dibujarRejilla(tablero) {
+        const letras = new Map();
+        tablero.colocadas.forEach((c) => {
+            const [df, dc] = DIRECCIONES_CRUCIGRAMA[c.dir];
+            [...c.palabra.letras].forEach((l, i) => letras.set(claveCelda(c.fila + df * i, c.columna + dc * i), l));
+        });
+        const numeros = new Map(tablero.colocadas.map((c) => [claveCelda(c.fila, c.columna), c.numero]));
+
+        casillas = new Map();
+        rejilla.style.setProperty('--columnas', tablero.columnas);
+        const hijos = [];
+        for (let f = 0; f < tablero.filas; f++) {
+            for (let c = 0; c < tablero.columnas; c++) {
+                const clave = claveCelda(f, c);
+                const celda = document.createElement('div');
+                if (!letras.has(clave)) {
+                    celda.className = 'cruci-vacia';
+                    hijos.push(celda);
+                    continue;
+                }
+                celda.className = 'cruci-celda';
+                if (numeros.has(clave)) {
+                    const numero = document.createElement('span');
+                    numero.className = 'cruci-numero';
+                    numero.textContent = numeros.get(clave);
+                    celda.append(numero);
+                }
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'cruci-letra';
+                input.autocomplete = 'off';
+                input.autocapitalize = 'characters';
+                input.spellcheck = false;
+                input.dataset.clave = clave;
+                input.setAttribute('aria-label', `Fila ${f + 1}, columna ${c + 1}`);
+                celda.append(input);
+                casillas.set(clave, { input, letra: letras.get(clave), fila: f, columna: c });
+                hijos.push(celda);
+            }
+        }
+        rejilla.replaceChildren(...hijos);
+    }
+
+    function dibujarPistas() {
+        const lista = (dir) => ronda.filter((r) => r.dir === dir).sort((a, b) => a.numero - b.numero).map((r) => {
+            const item = document.createElement('li');
+            item.dataset.i = ronda.indexOf(r);
+            const numero = document.createElement('strong');
+            numero.textContent = `${r.numero}.`;
+            const texto = document.createElement('span');
+            texto.textContent = ` ${r.palabra.es} (${r.palabra.letras.length})`;
+            item.append(numero, texto);
+            return item;
+        });
+        $('cruciHorizontales').replaceChildren(...lista('h'));
+        $('cruciVerticales').replaceChildren(...lista('v'));
+    }
+
+    function actualizarBarra() {
+        $('cruciResueltas').textContent = ronda.filter((r) => r.resuelta).length;
+        $('cruciErrores').textContent = errores;
+    }
+
+    const palabrasDe = (clave) => ronda.filter((r) => r.celdas.includes(clave));
+
+    function activar(palabra, clave) {
+        activa = palabra;
+        ultimaClave = clave;
+        casillas.forEach((c, k) => c.input.classList.toggle('en-palabra', palabra.celdas.includes(k)));
+        document.querySelectorAll('.cruci-lista li').forEach((li) => {
+            li.classList.toggle('activa', ronda[li.dataset.i] === palabra);
+        });
+        const flecha = palabra.dir === 'h' ? '→' : '↓';
+        $('cruciActiva').textContent = `${palabra.numero} ${flecha} ${palabra.palabra.es} (${palabra.palabra.letras.length})`;
+        casillas.get(clave).input.focus();
+        casillas.get(clave).input.select();   // escribir encima reemplaza la letra
+    }
+
+    const bloqueada = (clave) => casillas.get(clave).input.readOnly;
+
+    // Avanza dentro de la palabra saltando las casillas ya resueltas
+    function mover(clave, paso) {
+        const celdas = activa.celdas;
+        for (let i = celdas.indexOf(clave) + paso; i >= 0 && i < celdas.length; i += paso) {
+            if (!bloqueada(celdas[i])) {
+                activar(activa, celdas[i]);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function escribir(clave, letra) {
+        const casilla = casillas.get(clave);
+        casilla.escrita = letra;
+        casilla.input.value = letra;
+        casilla.input.classList.remove('incorrecta');
+    }
+
+    rejilla.addEventListener('click', (e) => {
+        const input = e.target.closest('.cruci-letra');
+        if (!input || terminado) return;
+        const clave = input.dataset.clave;
+        const opciones = palabrasDe(clave);
+        // Tocar otra vez una casilla donde se cruzan dos palabras cambia de dirección
+        let palabra = opciones.includes(activa) ? activa : opciones[0];
+        if (clave === ultimaClave && opciones.length > 1) palabra = opciones.find((o) => o !== activa);
+        activar(palabra, clave);
+    });
+
+    rejilla.addEventListener('input', (e) => {
+        const input = e.target;
+        const clave = input.dataset.clave;
+        // En el celular no siempre llega la tecla: se lee lo que quedó escrito
+        const letras = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+        // Si la casilla no quedó seleccionada, ignora la letra que ya estaba
+        const anterior = casillas.get(clave).escrita;
+        const nuevas = letras.length === 2 && letras[0] === anterior ? letras.slice(1) : letras;
+        if (!nuevas) escribir(clave, '');
+        // Varias letras a la vez (pegar, autocompletar) se reparten por las casillas
+        let actual = clave;
+        for (const letra of nuevas) {
+            escribir(actual, letra);
+            if (!mover(actual, 1)) break;
+            actual = ultimaClave;
+        }
+    });
+
+    rejilla.addEventListener('keydown', (e) => {
+        const input = e.target.closest('.cruci-letra');
+        if (!input || terminado) return;
+        const clave = input.dataset.clave;
+        const { fila, columna } = casillas.get(clave);
+        const flechas = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+
+        if (e.key === 'Backspace') {
+            if (bloqueada(clave)) {
+                e.preventDefault();
+                mover(clave, -1);
+            } else if (!input.value) {
+                e.preventDefault();
+                if (mover(clave, -1)) escribir(ultimaClave, '');
+            }
+        } else if (flechas[e.key]) {
+            e.preventDefault();
+            const [df, dc] = flechas[e.key];
+            const destino = claveCelda(fila + df, columna + dc);
+            if (!casillas.has(destino)) return;
+            const opciones = palabrasDe(destino);
+            const dir = df ? 'v' : 'h';
+            activar(opciones.find((o) => o.dir === dir) || opciones[0], destino);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            comprobar();
+        } else if (e.key.length === 1 && /[a-z]/i.test(e.key) && bloqueada(clave)) {
+            mover(clave, 1);
+        }
+    });
+
+    document.querySelectorAll('.cruci-lista').forEach((lista) => lista.addEventListener('click', (e) => {
+        const item = e.target.closest('li');
+        if (!item || terminado) return;
+        const palabra = ronda[item.dataset.i];
+        activar(palabra, palabra.celdas.find((c) => !bloqueada(c)) || palabra.celdas[0]);
+    }));
+
+    function resolver(r) {
+        r.resuelta = true;
+        r.celdas.forEach((clave) => {
+            const { input } = casillas.get(clave);
+            input.readOnly = true;
+            input.classList.remove('incorrecta');
+            input.classList.add('correcta');
+        });
+        const item = document.querySelector(`.cruci-lista li[data-i="${ronda.indexOf(r)}"]`);
+        item.classList.add('hecha');
+        item.querySelector('span').textContent += ` — ${r.palabra.en}`;
+    }
+
+    const textoDe = (r) => r.celdas.map((clave) => casillas.get(clave).input.value).join('');
+
+    // Solo se revisan las palabras completas: cada una mal escrita cuenta como un error
+    function comprobar() {
+        if (terminado) return;
+        const llenas = ronda.filter((r) => !r.resuelta && textoDe(r).length === r.celdas.length);
+        if (!llenas.length) {
+            mensaje.textContent = 'Completa una palabra para comprobarla.';
+            return;
+        }
+        const buenas = llenas.filter((r) => textoDe(r) === r.palabra.letras);
+        const malas = llenas.filter((r) => !buenas.includes(r));
+        errores += malas.length;
+        malas.forEach((r) => r.celdas.forEach((clave) => {
+            const { input, letra } = casillas.get(clave);
+            input.classList.toggle('incorrecta', input.value !== letra);
+        }));
+        buenas.forEach(resolver);
+        if (buenas.length) pronunciar(buenas[buenas.length - 1].palabra.en);
+        actualizarBarra();
+        mensaje.textContent = malas.length ? 'Hay letras por corregir.' : '¡Bien!';
+        if (ronda.every((r) => r.resuelta)) setTimeout(() => terminar(false), 500);
+    }
+
+    // Pista: pone una letra correcta en la palabra elegida
+    $('cruciPista').addEventListener('click', () => {
+        if (terminado || !activa) return;
+        const faltan = activa.celdas.filter((c) => !bloqueada(c) && casillas.get(c).input.value !== casillas.get(c).letra);
+        if (!faltan.length) {
+            mensaje.textContent = 'A esa palabra no le falta ninguna letra: compruébala.';
+            return;
+        }
+        const clave = faltan[azar(faltan.length)];
+        const { input, letra } = casillas.get(clave);
+        escribir(clave, letra);
+        input.readOnly = true;
+        input.classList.add('revelada');
+        pistas++;
+        $('cruciPistas').textContent = pistas;
+        if (pistas === ronda.length) $('cruciPista').disabled = true;   // el servidor no acepta más
+    });
+
+    // Ver solución: las palabras que faltaban cuentan como errores
+    $('cruciSolucion').addEventListener('click', () => {
+        if (terminado) return;
+        const faltan = ronda.filter((r) => !r.resuelta);
+        errores += faltan.length;
+        faltan.forEach((r) => {
+            r.celdas.forEach((clave) => { casillas.get(clave).input.value = casillas.get(clave).letra; });
+            resolver(r);
+        });
+        terminar(true);
+    });
+
+    function terminar(conSolucion) {
+        terminado = true;
+        const tiempo = reloj.parar();
+        const perfecta = errores === 0 && pistas === 0;
+        $('cruciFinalIcono').textContent = perfecta ? '🏆' : conSolucion ? '💪' : '🎉';
+        $('cruciFinalTitulo').textContent = perfecta ? '¡Crucigrama perfecto!' : conSolucion ? 'Repasa estas palabras' : '¡Crucigrama completo!';
+        $('cruciFinalAciertos').textContent = ronda.length;
+        $('cruciFinalErrores').textContent = errores;
+        $('cruciFinalPistas').textContent = pistas;
+        $('cruciFinalTiempo').textContent = formatoTiempo(tiempo);
+
+        actualizarBarra();
+        mensaje.textContent = '';
+        $('cruciBotones').hidden = true;
+        $('cruciPista').disabled = true;
+        // El tablero queda a la vista para repasar las respuestas
+        final.hidden = false;
+        $('cruciOtra').focus();
+        guardarResultado(juego.dataset.resultadoUrl,
+            { ids: ronda.map((r) => r.palabra.id), errores, segundos: tiempo, pistas }, $('cruciFinalNota'));
+    }
+
+    $('cruciComprobar').addEventListener('click', comprobar);
+    $('cruciOtra').addEventListener('click', nuevaRonda);
+    nuevaRonda();
+}
+
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         const unir = $('juegoUnir');
@@ -1017,6 +1466,8 @@ if (typeof document !== 'undefined') {
         if (ahorcado) iniciarAhorcado(ahorcado);
         const patos = $('juegoPatos');
         if (patos) iniciarPatos(patos);
+        const crucigrama = $('juegoCrucigrama');
+        if (crucigrama) iniciarCrucigrama(crucigrama);
     });
 }
 
@@ -1025,5 +1476,6 @@ if (typeof module !== 'undefined') {
     module.exports = {
         generarSopa, buscarEnTablero, DIRECCIONES, estadoAhorcado, VIDAS_AHORCADO,
         opcionesPatos, duracionPato, anguloEscopeta, VIDAS_PATOS, PATOS_EN_PANTALLA,
+        generarCrucigrama, DIRECCIONES_CRUCIGRAMA, LADO_CRUCIGRAMA,
     };
 }

@@ -497,6 +497,184 @@ def test_patos_no_usa_material_de_duck_hunt(logged_client, user):
     assert 'id="patoDibujo"' in html  # dibujo propio, sin imágenes externas
 
 
+# ═══════════════ Crucigrama ═══════════════
+from app.routes.juegos_route import LETRAS_CRUCIGRAMA
+
+CRUCI = [('borrow', 'pedir prestado'), ('enough', 'suficiente'), ('although', 'aunque'),
+         ('wear', 'llevar puesto'), ('learn', 'aprender'), ('break', 'romper'),
+         ('remember', 'recordar'), ('because', 'porque'), ('think', 'pensar'),
+         ('give up', 'rendirse'), ('go', 'ir'), ('understandings', 'comprensiones')]
+
+
+def _vocabulario_cruci(user, pares=CRUCI):
+    for en, es in pares:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_cruci(html):
+    bloque = re.search(r'<script type="application/json" id="cruciPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_cruci(client, ids, **extra):
+    datos = {'ids': ids, 'errores': 1, 'segundos': 120, 'pistas': 2, **extra}
+    return client.post('/menu/ingles/juegos/crucigrama/resultado', json=datos)
+
+
+def test_crucigrama_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/crucigrama').status_code == 302
+
+
+def test_crucigrama_solo_manda_palabras_que_caben(logged_client, user):
+    _vocabulario_cruci(user)
+    html = logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True)
+    assert 'id="juegoCrucigrama"' in html and 'js/juegos.js' in html
+    datos = _palabras_cruci(html)
+    assert all(LETRAS_CRUCIGRAMA[0] <= len(p['letras']) <= LETRAS_CRUCIGRAMA[1] for p in datos)
+    assert {p['en'] for p in datos} == {en for en, _ in CRUCI[:9]}  # sin frases, cortas ni muy largas
+    assert all(set(p) == {'id', 'en', 'es', 'letras'} for p in datos)
+
+
+def test_crucigrama_no_repite_palabras_iguales(logged_client, user):
+    _vocabulario_cruci(user, CRUCI[:6] + [('Borrow', 'tomar prestado')])
+    datos = _palabras_cruci(logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True))
+    assert len(datos) == 6
+
+
+def test_crucigrama_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_cruci(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='secreto'))
+    db.session.commit()
+    datos = _palabras_cruci(logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True))
+    assert 'SECRET' not in {p['letras'] for p in datos}
+
+
+def test_crucigrama_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_cruci(user, CRUCI[:5] + CRUCI[9:])
+    html = logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoCrucigrama"' not in html
+    assert 'Tienes 5 de 8' in html
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'Necesitas 6 palabras de una sola pieza (tienes 5)' in menu
+
+
+def test_guardar_crucigrama_de_ocho_palabras(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:8]
+    respuesta = _enviar_cruci(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('crucigrama', 8, 1, 2, None, 120)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_crucigrama_invalido(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())
+    assert _enviar_cruci(logged_client, ids[:9]).status_code == 400   # más de 8 palabras
+    assert _enviar_cruci(logged_client, ids[:3]).status_code == 400   # menos de 4
+    for extra in ({'pistas': -1}, {'pistas': 9}, {'pistas': '1'}, {'pistas': True}):
+        assert _enviar_cruci(logged_client, ids[:8], **extra).status_code == 400, extra
+    assert JuegoPartida.query.count() == 0
+
+
+def test_los_demas_juegos_siguen_con_seis_palabras_como_maximo(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:7]
+    assert _enviar(logged_client, ids).status_code == 400
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_el_crucigrama(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:6]
+    _enviar_cruci(logged_client, ids, errores=0, pistas=0, segundos=90)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/crucigrama' in html and 'bi-puzzle' in html
+    assert '90s</span> mejor ronda perfecta' in html
+
+
+SCRIPT_CRUCIGRAMA = r"""
+const { generarCrucigrama, DIRECCIONES_CRUCIGRAMA: DIRS, LADO_CRUCIGRAMA } = require(process.argv[1]);
+const conjuntos = [
+  ['BORROW', 'ENOUGH', 'ALTHOUGH', 'WEAR', 'LEARN', 'BREAK', 'REMEMBER', 'BECAUSE', 'THINK', 'TELL', 'KNOW', 'WHAT'],
+  ['NOW', 'MAKE', 'GIVE', 'GOING', 'FINE', 'SURPRISE', 'TELL', 'THINK', 'ANYTHING', 'WHAT', 'ARE', 'KNOW'],
+  ['ABCDEFGHIJKL', 'MNOPQRSTUVWX', 'LIE', 'WELL', 'JUST', 'REALLY', 'WAY', 'CHOOSE'],
+];
+const problemas = [];
+let tableros = 0, palabrasTotal = 0;
+const contar = (l) => { palabrasTotal += l; };
+for (const letras of conjuntos) {
+  const palabras = letras.map((l, id) => ({ id, letras: l }));
+  for (let vez = 0; vez < 150; vez++) {
+    const t = generarCrucigrama(palabras.slice().sort(() => Math.random() - 0.5), 8);
+    if (!t) { problemas.push(`sin tablero ${letras[0]}`); continue; }
+    tableros++;
+    contar(t.colocadas.length);
+    if (t.filas > LADO_CRUCIGRAMA || t.columnas > LADO_CRUCIGRAMA) problemas.push('demasiado grande');
+    if (t.colocadas.length < 4 || t.colocadas.length > 8) problemas.push(`salen ${t.colocadas.length}`);
+    const grilla = Array.from({ length: t.filas }, () => Array(t.columnas).fill(null));
+    const celdasDe = (c) => [...c.palabra.letras].map((_, i) => [c.fila + DIRS[c.dir][0] * i, c.columna + DIRS[c.dir][1] * i]);
+    for (const c of t.colocadas) {
+      celdasDe(c).forEach(([f, col], i) => {
+        if (f < 0 || col < 0 || f >= t.filas || col >= t.columnas) { problemas.push('fuera del tablero'); return; }
+        if (grilla[f][col] && grilla[f][col] !== c.palabra.letras[i]) problemas.push('cruce con letras distintas');
+        grilla[f][col] = c.palabra.letras[i];
+      });
+    }
+    // Toda línea de 2 letras o más debe ser una palabra del crucigrama: ni más ni menos
+    const esperadas = new Set(t.colocadas.map((c) => `${c.dir}:${c.fila},${c.columna}:${c.palabra.letras}`));
+    const halladas = new Set();
+    const recorrer = (dir, n1, n2, celda) => {
+      for (let a = 0; a < n1; a++) {
+        let inicio = null, texto = '';
+        for (let b = 0; b <= n2; b++) {
+          const l = b < n2 ? celda(a, b) : null;
+          if (l) { if (!texto) inicio = b; texto += l; }
+          else {
+            if (texto.length > 1) halladas.add(dir === 'h' ? `h:${a},${inicio}:${texto}` : `v:${inicio},${a}:${texto}`);
+            texto = '';
+          }
+        }
+      }
+    };
+    recorrer('h', t.filas, t.columnas, (f, c) => grilla[f][c]);
+    recorrer('v', t.columnas, t.filas, (c, f) => grilla[f][c]);
+    if ([...halladas].sort().join() !== [...esperadas].sort().join()) problemas.push('se formaron palabras de más');
+    // Todas conectadas entre sí
+    const vistos = new Set();
+    const pendientes = [t.colocadas[0]];
+    while (pendientes.length) {
+      const c = pendientes.pop();
+      if (vistos.has(c)) continue;
+      vistos.add(c);
+      const propias = new Set(celdasDe(c).map(String));
+      t.colocadas.filter((o) => !vistos.has(o) && celdasDe(o).some((x) => propias.has(String(x)))).forEach((o) => pendientes.push(o));
+    }
+    if (vistos.size !== t.colocadas.length) problemas.push('palabras sueltas');
+    // Números en orden de lectura; el mismo número solo para la misma casilla
+    const inicios = t.colocadas.slice().sort((a, b) => a.fila - b.fila || a.columna - b.columna);
+    if (new Set(inicios.map((c) => `${c.fila},${c.columna}`)).size !== Math.max(...inicios.map((c) => c.numero))) problemas.push('numeración');
+    inicios.reduce((prev, c) => { if (c.numero < prev) problemas.push('números desordenados'); return c.numero; }, 0);
+  }
+}
+const sinCruce = generarCrucigrama(['AAA', 'BBB', 'CCC', 'DDD'].map((letras, id) => ({ id, letras })), 8);
+console.log(JSON.stringify({ tableros, media: palabrasTotal / tableros, problemas: [...new Set(problemas)], sinCruce, vacio: generarCrucigrama([], 8) }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_armado_del_crucigrama_siempre_es_valido():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_CRUCIGRAMA, str(juegos_js)], capture_output=True, text=True, timeout=120)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['problemas'] == []
+    assert r['tableros'] == 450
+    assert r['media'] >= 6            # normalmente se logran tableros bien cruzados
+    assert r['sinCruce'] is None      # sin letras en común no hay crucigrama
+    assert r['vacio'] is None
+
+
 def test_tarjeta_de_patos_lleva_su_dibujo(logged_client, user):
     _vocabulario(user)
     menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
