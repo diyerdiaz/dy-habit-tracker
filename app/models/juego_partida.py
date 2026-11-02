@@ -6,6 +6,7 @@ JUEGOS = {
     'unir': 'Unir parejas',
     'sopa': 'Sopa de letras',
     'ahorcado': 'Ahorcado',
+    'patos': 'Caza de patos',
 }
 NIVELES_SOPA = ('facil', 'normal', 'dificil')
 

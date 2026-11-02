@@ -55,6 +55,18 @@
     font-size: .8rem;
 }
 .juego-stats span { color: #fff; font-weight: 700; }
+/* Bootstrap Icons no trae pato: mismo tamaño, color y brillo que los demás iconos */
+.pato-icono {
+    width: 3.2rem;
+    height: 2.2rem;
+    margin: .3rem 0;
+    fill: #4dabff;
+    filter: drop-shadow(0 0 7px rgba(77, 171, 255, .6));
+    transition: transform .3s;
+}
+.ingles-card:hover .pato-icono { transform: scale(1.15); }
+.pato-icono-ala { fill: #04162e; stroke: #4dabff; stroke-width: 2; stroke-linejoin: round; }
+.pato-icono-ojo { fill: #04162e; }
 .juego-card.bloqueado,
 .juego-card.proximamente {
     opacity: .45;
@@ -467,4 +479,185 @@
 
 @media (prefers-reduced-motion: reduce) {
     .ahorcado-veredicto { animation: none; }
+}
+
+/* ── Caza de patos ── */
+.patos-zona { max-width: 820px; margin: 0 auto; }
+.patos-zona[hidden] { display: none; }
+
+.patos-significado {
+    margin: 0 0 12px;
+    padding: 10px 16px;
+    text-align: center;
+    border-radius: 14px;
+    background: #04162e;
+    border: 1px solid rgba(77, 171, 255, .3);
+    color: #fff;
+    font-size: clamp(1.05rem, 3.5vw, 1.4rem);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.patos-campo { position: relative; }
+
+.patos-cielo {
+    position: relative;
+    height: clamp(340px, 52vh, 460px);
+    overflow: hidden;
+    border-radius: 18px;
+    border: 1px solid rgba(77, 171, 255, .3);
+    background: linear-gradient(#0a2a55, #1b5c94 75%, #1f6b4f 75%, #123f2f);
+    cursor: crosshair;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.pato {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    width: 140px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: crosshair;
+    animation: pato-cruza var(--segundos) linear forwards;
+}
+@keyframes pato-cruza {
+    from { transform: translateX(var(--salida)); }
+    to   { transform: translateX(var(--llegada)); }
+}
+.pato:focus-visible { outline: 2px solid #ffd54f; outline-offset: -2px; }
+
+.pato-cuerpo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    animation: pato-aleteo .5s ease-in-out infinite alternate;
+}
+@keyframes pato-aleteo {
+    from { translate: 0 -3px; }
+    to   { translate: 0 3px; }
+}
+.pato-dibujo { width: 58px; height: 40px; }
+.pato.al-reves .pato-dibujo { transform: scaleX(-1); }
+.pato-palabra {
+    max-width: 100%;
+    padding: 1px 8px;
+    border-radius: 8px;
+    background: rgba(3, 16, 36, .85);
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+/* El pato cazado se detiene donde estaba y cae */
+.pato.cazado { animation-play-state: paused; }
+.pato.cazado .pato-cuerpo { animation: pato-cae .8s ease-in forwards; }
+.pato.cazado .pato-palabra { background: #03301f; color: #00e676; }
+@keyframes pato-cae {
+    0%   { filter: brightness(3); }
+    30%  { translate: 0 -8px; rotate: 20deg; opacity: 1; filter: none; }
+    100% { translate: 0 420px; rotate: 170deg; opacity: 0; }
+}
+
+/* Lo que va encima del cielo no recibe los clics: esos son para los patos */
+.patos-efectos {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 18px;
+    pointer-events: none;
+}
+.pato-impacto { position: absolute; width: 0; height: 0; }
+.pato-destello {
+    position: absolute;
+    left: -60px;
+    top: -60px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #fff 0 18%, #ffd54f 32%, rgba(255, 120, 40, .75) 52%, transparent 72%);
+    clip-path: polygon(50% 0, 60% 34%, 92% 14%, 70% 44%, 100% 56%, 66% 62%, 80% 96%, 52% 72%, 26% 98%, 36% 64%, 0 62%, 30% 46%, 8% 14%, 42% 34%);
+    animation: pato-destello .4s ease-out forwards;
+}
+@keyframes pato-destello {
+    from { transform: scale(.3) rotate(0deg); opacity: 1; }
+    to   { transform: scale(1.5) rotate(25deg); opacity: 0; }
+}
+.pato-pluma {
+    position: absolute;
+    left: -7px;
+    top: -3px;
+    width: 14px;
+    height: 6px;
+    border-radius: 80% 10% 80% 10%;
+    background: #a9825c;
+    animation: pato-pluma .9s ease-out forwards;
+}
+.pato-pluma.clara { background: #f3e9d8; }
+@keyframes pato-pluma {
+    from { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    70%  { opacity: 1; }
+    to   { transform: translate(var(--x), calc(var(--y) + 45px)) rotate(var(--giro)); opacity: 0; }
+}
+
+.escopeta {
+    --angulo: 0deg;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 44px;
+    height: 118px;
+    margin-left: -22px;
+    transform: rotate(var(--angulo));
+    transform-origin: 50% 100%;
+    transition: transform .08s linear;
+    pointer-events: none;
+}
+.escopeta-dibujo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .5));
+}
+.escopeta.disparando .escopeta-dibujo { animation: escopeta-retroceso .22s ease-out; }
+@keyframes escopeta-retroceso {
+    20% { translate: 0 16px; }
+}
+.escopeta-fogonazo { fill: #ffd54f; opacity: 0; }
+.escopeta.disparando .escopeta-fogonazo { animation: escopeta-fogonazo .14s ease-out; }
+@keyframes escopeta-fogonazo {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+.pato.fallado { cursor: default; }
+.pato.fallado .pato-cuerpo { opacity: .45; }
+.pato.fallado .pato-palabra { background: #3a0f1c; color: #ff5c7a; }
+
+.patos-mensaje {
+    min-height: 1.6em;
+    margin: 10px 0 0;
+    text-align: center;
+    color: rgba(255, 255, 255, .8);
+    font-weight: 600;
+}
+
+@media (max-width: 575px) {
+    .juegos-wrapper:has(#juegoPatos) { padding-top: 70px; }
+    .juegos-wrapper:has(#juegoPatos) .juegos-volver { margin-bottom: 4px; }
+    .juegos-wrapper:has(#juegoPatos) .ingles-desc { display: none; }
+    .juegos-wrapper:has(#juegoPatos) .unir-titulo { font-size: 1.8rem; margin-bottom: 0; }
+    #juegoPatos .juego-barra { gap: 6px 12px; padding: 8px 10px; margin-bottom: 12px; font-size: .85rem; }
+    .pato { width: 120px; }
+    .pato-palabra { font-size: .85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pato-impacto { display: none; }
+    .escopeta.disparando .escopeta-dibujo, .escopeta.disparando .escopeta-fogonazo { animation: none; }
 }

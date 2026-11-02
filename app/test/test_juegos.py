@@ -435,3 +435,132 @@ def test_reglas_del_ahorcado():
     assert r['parcial'] == {'casillas': ['', '', 'L', 'L'], 'errores': 1, 'ganada': False, 'perdida': False}
     assert r['ganada']['ganada'] and not r['ganada']['perdida']
     assert r['perdida']['perdida'] and not r['perdida']['ganada']
+
+
+# ═══════════════ Caza de patos ═══════════════
+
+def _palabras_patos(html):
+    bloque = re.search(r'<script type="application/json" id="patosPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def test_patos_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/patos').status_code == 302
+
+
+def test_patos_trae_las_palabras_del_usuario(logged_client, user, other_user):
+    _vocabulario(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='secreto'))
+    db.session.commit()
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'id="juegoPatos"' in html and 'js/juegos.js' in html and 'css/juegos.css' in html
+    assert {p['en'] for p in _palabras_patos(html)} == {en for en, _ in PALABRAS}
+
+
+def test_patos_admite_frases_de_varias_palabras(logged_client, user):
+    _vocabulario(user)
+    db.session.add(Vocabulario(idUser=user.idUser, nombre='give up', significado='rendirse'))
+    db.session.commit()
+    datos = _palabras_patos(logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True))
+    assert 'give up' in {p['en'] for p in datos}
+
+
+def test_patos_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario(user, cuantas=3)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoPatos"' not in html
+
+
+def test_guardar_ronda_de_patos(logged_client, user):
+    ids = [p.idVocab for p in _vocabulario(user)][:6]
+    respuesta = logged_client.post('/menu/ingles/juegos/patos/resultado',
+                                   json={'ids': ids, 'errores': 2, 'segundos': 33})
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('patos', 6, 2, 0, None, 33)
+    assert _xp(user) == 0
+
+
+def test_menu_muestra_caza_de_patos(logged_client, user):
+    ids = [p.idVocab for p in _vocabulario(user)][:4]
+    logged_client.post('/menu/ingles/juegos/patos/resultado', json={'ids': ids, 'errores': 0, 'segundos': 25})
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/patos' in html and 'Caza de patos' in html
+    assert '25s</span> mejor ronda perfecta' in html
+
+
+def test_patos_no_usa_material_de_duck_hunt(logged_client, user):
+    _vocabulario(user)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'Duck Hunt' not in html and 'Nintendo' not in html
+    assert 'id="patoDibujo"' in html  # dibujo propio, sin imágenes externas
+
+
+def test_tarjeta_de_patos_lleva_su_dibujo(logged_client, user):
+    _vocabulario(user)
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'class="pato-icono"' in menu
+    juego = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'bi-crosshair' not in menu + juego  # no existe en Bootstrap Icons 1.10.5
+
+
+def test_patos_trae_escopeta_y_capa_de_efectos(logged_client, user):
+    _vocabulario(user)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'id="patosEscopeta"' in html and 'id="patosEfectos"' in html
+    # Fuera del cielo: al cambiar de pato se vacía y se llevaría la escopeta con él
+    assert re.search(r'id="patosCielo"></div>\s*<div class="patos-efectos"', html)
+    css = logged_client.get('/static/css/juegos.css').get_data(as_text=True)
+    assert css.count('pointer-events: none') >= 2  # nunca le roban el clic a los patos
+
+
+SCRIPT_PATOS = r"""
+const { opcionesPatos, duracionPato, anguloEscopeta, VIDAS_PATOS, PATOS_EN_PANTALLA } = require(process.argv[1]);
+const palabras = [
+  { id: 1, en: 'give', es: 'dar' }, { id: 2, en: 'offer', es: 'Dar ' }, { id: 3, en: 'take', es: 'tomar' },
+  { id: 4, en: 'run', es: 'correr' }, { id: 5, en: 'eat', es: 'comer' }, { id: 6, en: 'GIVE', es: 'regalar' },
+  { id: 7, en: 'read', es: 'leer' },
+];
+const problemas = [];
+for (let vez = 0; vez < 500; vez++) {
+  for (const objetivo of palabras) {
+    const op = opcionesPatos(objetivo, palabras, PATOS_EN_PANTALLA);
+    if (!op.includes(objetivo)) problemas.push('falta el correcto');
+    if (op.length !== PATOS_EN_PANTALLA) problemas.push(`salen ${op.length}`);
+    const en = op.map((p) => p.en.trim().toLowerCase());
+    const es = op.map((p) => p.es.trim().toLowerCase());
+    if (new Set(en).size !== en.length) problemas.push('palabra repetida');
+    if (new Set(es).size !== es.length) problemas.push('significado repetido');
+  }
+}
+const pocas = opcionesPatos(palabras[0], palabras.slice(0, 3), PATOS_EN_PANTALLA).length;
+const tiempos = [0, 1, 2, 3, 4, 5, 20].map(duracionPato);
+const o = { x: 100, y: 100 };
+const angulos = {
+  arriba: anguloEscopeta(o, { x: 100, y: 0 }),
+  derecha45: anguloEscopeta(o, { x: 200, y: 0 }),
+  izquierda45: anguloEscopeta(o, { x: 0, y: 0 }),
+  topeDerecha: anguloEscopeta(o, { x: 900, y: 100 }),
+  topeIzquierda: anguloEscopeta(o, { x: -900, y: 100 }),
+  debajo: anguloEscopeta(o, { x: 100, y: 300 }),
+};
+console.log(JSON.stringify({ problemas: [...new Set(problemas)], pocas, tiempos, vidas: VIDAS_PATOS, angulos }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_opciones_y_velocidad_de_los_patos():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_PATOS, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['problemas'] == []
+    assert r['pocas'] == 2           # 'offer' significa lo mismo que 'give': no puede salir
+    assert r['vidas'] == 3
+    assert r['tiempos'] == sorted(r['tiempos'], reverse=True) and r['tiempos'][-1] == 4.5  # con tope
+    a = r['angulos']
+    assert a['arriba'] == 0
+    assert a['derecha45'] == pytest.approx(45) and a['izquierda45'] == pytest.approx(-45)
+    # Nunca gira de más, ni apuntando abajo de la escopeta
+    assert a['topeDerecha'] == 70 and a['topeIzquierda'] == -70 and a['debajo'] == 70

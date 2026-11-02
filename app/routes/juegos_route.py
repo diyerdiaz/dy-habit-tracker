@@ -5,6 +5,7 @@ Sopa de letras: los significados son las pistas y hay que encontrar la palabra
 en inglés dentro de la cuadrícula.
 Ahorcado: hay que adivinar la palabra en inglés letra por letra; la pista es tu
 propio ejemplo en inglés con la palabra tapada, sin nada de español mientras se juega.
+Caza de patos: sale un significado y hay que dispararle al pato con su palabra en inglés.
 El navegador recibe todas las palabras al abrir la página y arma las rondas solo,
 así se puede jugar aunque el internet esté lento; al terminar cada ronda envía
 el resultado para guardarlo en tus estadísticas.
@@ -154,6 +155,17 @@ def ahorcado():
         total_palabras=len(_palabras_para_jugar(current_user.idUser)),
         minimo=MINIMO_PALABRAS,
         por_ronda=PALABRAS_POR_RONDA_AHORCADO,
+    )
+
+
+@bp.route('/patos')
+@login_required
+def patos():
+    return render_template(
+        'juegos/patos.html',
+        palabras=_palabras_para_jugar(current_user.idUser),
+        minimo=MINIMO_PALABRAS,
+        por_ronda=PAREJAS_POR_RONDA,
     )
 
 

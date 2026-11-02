@@ -5,6 +5,8 @@
 //    última letra de la palabra en inglés dentro de la cuadrícula.
 //  - Ahorcado: se adivina la palabra letra por letra; la pista es un ejemplo en
 //    inglés con la palabra tapada y el significado solo se ve al terminarla.
+//  - Caza de patos: sale un significado y hay que dispararle al pato que lleva
+//    su palabra en inglés antes de que cruce la pantalla.
 
 const $ = (id) => document.getElementById(id);
 const normalizar = (texto) => texto.trim().toLowerCase();
@@ -772,6 +774,239 @@ function iniciarAhorcado(juego) {
     nuevaRonda();
 }
 
+// ═══════════════════════════ Caza de patos ═══════════════════════════
+
+const VIDAS_PATOS = 3;
+const PATOS_EN_PANTALLA = 4;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const VUELO_PATOS = 78;       // % de alto del cielo por donde vuelan; abajo está la escopeta
+const ANGULO_ESCOPETA = 70;   // lo máximo que gira hacia cada lado
+const PLUMAS = 14;
+
+// El pato correcto y otros con palabra y significado distintos, en orden al azar:
+// si dos patos compartieran significado, ambos serían respuestas válidas
+function opcionesPatos(objetivo, palabras, cantidad) {
+    const ingles = new Set([normalizar(objetivo.en)]);
+    const espanol = new Set([normalizar(objetivo.es)]);
+    const otros = [];
+    for (const p of mezclar(palabras)) {
+        if (otros.length === cantidad - 1) break;
+        if (ingles.has(normalizar(p.en)) || espanol.has(normalizar(p.es))) continue;
+        ingles.add(normalizar(p.en));
+        espanol.add(normalizar(p.es));
+        otros.push(p);
+    }
+    return mezclar([objetivo, ...otros]);
+}
+
+// Segundos que tarda el pato en cruzar: cada objetivo de la ronda va más rápido
+const duracionPato = (indice) => Math.max(4.5, 9 - indice * 0.9);
+
+// Grados que gira la escopeta para apuntar de `origen` a `punto` (0 = recto hacia arriba)
+function anguloEscopeta(origen, punto) {
+    const grados = Math.atan2(punto.x - origen.x, origen.y - punto.y) * (180 / Math.PI);
+    return Math.max(-ANGULO_ESCOPETA, Math.min(ANGULO_ESCOPETA, grados));
+}
+
+function iniciarPatos(juego) {
+    const palabras = JSON.parse($('patosPalabras').textContent);
+    const porRonda = Number(juego.dataset.porRonda);
+    const zona = $('patosZona');
+    const cielo = $('patosCielo');
+    const final = $('patosFinal');
+    const mensaje = $('patosMensaje');
+    const efectos = $('patosEfectos');
+    const escopeta = $('patosEscopeta');
+    const pronunciar = crearSonido($('patosSonido'));
+    const bolsa = crearBolsa('juegosPatosPendientes', palabras);
+    const reloj = crearReloj($('patosTiempo'));
+    const clavesPatos = (p) => ['en:' + normalizar(p.en), 'es:' + normalizar(p.es)];
+
+    let ronda = [];
+    let indice = 0;
+    let objetivo = null;
+    let resuelto = false;      // este objetivo ya se cazó, se escapó o se acabó la ronda
+    let vidas = VIDAS_PATOS;
+    let aciertos = 0;
+    let errores = 0;
+    let escape = null;         // temporizador del pato correcto
+
+    function crearPato(palabra, fila, filas, segundos) {
+        const pato = document.createElement('button');
+        const deIzquierda = azar(2) === 0;
+        const salida = `${deIzquierda ? -150 : cielo.clientWidth + 10}px`;
+        const llegada = `${deIzquierda ? cielo.clientWidth + 10 : -150}px`;
+        pato.type = 'button';
+        pato.className = deIzquierda ? 'pato' : 'pato al-reves';
+        pato.dataset.id = palabra.id;
+        pato.style.top = `${(fila * VUELO_PATOS) / filas}%`;
+        pato.style.height = `${VUELO_PATOS / filas}%`;
+        pato.style.setProperty('--salida', salida);
+        pato.style.setProperty('--llegada', llegada);
+        pato.style.setProperty('--segundos', `${segundos}s`);
+
+        const cuerpo = document.createElement('span');
+        cuerpo.className = 'pato-cuerpo';
+        const dibujo = document.createElementNS(SVG_NS, 'svg');
+        dibujo.setAttribute('class', 'pato-dibujo');
+        const uso = document.createElementNS(SVG_NS, 'use');
+        uso.setAttribute('href', '#patoDibujo');
+        dibujo.append(uso);
+        const texto = document.createElement('span');
+        texto.className = 'pato-palabra';
+        texto.lang = 'en';
+        texto.textContent = palabra.en;
+        cuerpo.append(dibujo, texto);
+        pato.append(cuerpo);
+        return pato;
+    }
+
+    function nuevaRonda() {
+        ronda = bolsa.sacar(Math.min(porRonda, palabras.length), clavesPatos);
+        indice = 0;
+        vidas = VIDAS_PATOS;
+        aciertos = 0;
+        errores = 0;
+        $('patosTotal').textContent = ronda.length;
+        $('patosVidas').textContent = vidas;
+        final.hidden = true;
+        zona.hidden = false;
+        reloj.empezar();
+        mostrarObjetivo();
+    }
+
+    function mostrarObjetivo() {
+        objetivo = ronda[indice];
+        resuelto = false;
+        mensaje.textContent = '';
+        $('patosNumero').textContent = indice + 1;
+        $('patosSignificado').textContent = objetivo.es;
+
+        const opciones = opcionesPatos(objetivo, palabras, PATOS_EN_PANTALLA);
+        const segundos = duracionPato(indice);
+        cielo.replaceChildren(...opciones.map((p, fila) => crearPato(
+            p, fila, opciones.length, p === objetivo ? segundos : segundos * (0.9 + Math.random() * 0.3))));
+        escape = setTimeout(seEscapo, segundos * 1000);
+    }
+
+    function perderVida() {
+        errores++;
+        vidas--;
+        $('patosVidas').textContent = vidas;
+    }
+
+    function apuntar(e) {
+        const caja = escopeta.getBoundingClientRect();
+        const origen = { x: caja.left + caja.width / 2, y: caja.bottom };
+        escopeta.style.setProperty('--angulo', `${anguloEscopeta(origen, { x: e.clientX, y: e.clientY })}deg`);
+    }
+
+    function disparar() {
+        escopeta.classList.remove('disparando');
+        void escopeta.offsetWidth;   // reinicia la animación aunque se dispare seguido
+        escopeta.classList.add('disparando');
+    }
+
+    // Destello de impacto y explosión de plumas donde estaba el pato
+    function estallar(pato) {
+        const dibujo = pato.querySelector('.pato-dibujo').getBoundingClientRect();
+        const base = efectos.getBoundingClientRect();
+        const impacto = document.createElement('div');
+        impacto.className = 'pato-impacto';
+        impacto.style.left = `${dibujo.left + dibujo.width / 2 - base.left}px`;
+        impacto.style.top = `${dibujo.top + dibujo.height / 2 - base.top}px`;
+
+        const destello = document.createElement('span');
+        destello.className = 'pato-destello';
+        const plumas = Array.from({ length: PLUMAS }, (_, i) => {
+            const pluma = document.createElement('span');
+            const direccion = (i / PLUMAS) * 2 * Math.PI + Math.random() * 0.4;
+            const distancia = 45 + Math.random() * 65;
+            pluma.className = i % 3 === 0 ? 'pato-pluma clara' : 'pato-pluma';
+            pluma.style.setProperty('--x', `${Math.cos(direccion) * distancia}px`);
+            pluma.style.setProperty('--y', `${Math.sin(direccion) * distancia}px`);
+            pluma.style.setProperty('--giro', `${azar(360)}deg`);
+            return pluma;
+        });
+        impacto.append(destello, ...plumas);
+        efectos.append(impacto);
+        setTimeout(() => impacto.remove(), 950);
+    }
+
+    // Después de resolver un objetivo: deja ver el resultado y sigue
+    function continuar(pausa) {
+        setTimeout(() => {
+            if (vidas === 0) return terminar();
+            indice++;
+            if (indice < ronda.length) mostrarObjetivo();
+            else terminar();
+        }, pausa);
+    }
+
+    function seEscapo() {
+        resuelto = true;
+        perderVida();
+        mensaje.textContent = `Se escapó: era "${objetivo.en}"`;
+        continuar(1300);
+    }
+
+    cielo.addEventListener('pointermove', apuntar);
+
+    cielo.addEventListener('click', (e) => {
+        // Disparar al aire no cuesta vidas: solo cuenta darle a un pato
+        apuntar(e);
+        disparar();
+        const pato = e.target.closest('.pato');
+        if (!pato || resuelto || pato.disabled) return;
+
+        if (pato.dataset.id === String(objetivo.id)) {
+            resuelto = true;
+            clearTimeout(escape);
+            aciertos++;
+            pato.classList.add('cazado');
+            estallar(pato);
+            mensaje.textContent = '¡Le diste!';
+            pronunciar(objetivo.en);
+            continuar(850);
+            return;
+        }
+
+        pato.disabled = true;
+        pato.classList.add('fallado');
+        perderVida();
+        if (vidas === 0) {
+            resuelto = true;
+            clearTimeout(escape);
+            mensaje.textContent = `Sin vidas: era "${objetivo.en}"`;
+            continuar(1300);
+        } else {
+            mensaje.textContent = 'Ese no era';
+        }
+    });
+
+    function terminar() {
+        const tiempo = reloj.parar();
+        // Los patos que quedaron sin jugar cuentan como errores en la precisión
+        const sinJugar = vidas === 0 ? ronda.length - indice - 1 : 0;
+        const perfecta = errores === 0;
+        $('patosFinalIcono').textContent = perfecta ? '🏆' : vidas > 0 ? '🎉' : '💪';
+        $('patosFinalTitulo').textContent = perfecta ? '¡Ronda perfecta!' : vidas > 0 ? '¡Muy bien!' : 'Se acabaron las vidas';
+        $('patosFinalAciertos').textContent = `${aciertos}/${ronda.length}`;
+        $('patosFinalErrores').textContent = errores;
+        $('patosFinalTiempo').textContent = formatoTiempo(tiempo);
+
+        cielo.replaceChildren();
+        zona.hidden = true;
+        final.hidden = false;
+        $('patosOtra').focus();
+        guardarResultado(juego.dataset.resultadoUrl,
+            { ids: ronda.map((p) => p.id), errores: errores + sinJugar, segundos: tiempo }, $('patosFinalNota'));
+    }
+
+    $('patosOtra').addEventListener('click', nuevaRonda);
+    nuevaRonda();
+}
+
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         const unir = $('juegoUnir');
@@ -780,10 +1015,15 @@ if (typeof document !== 'undefined') {
         if (sopa) iniciarSopa(sopa);
         const ahorcado = $('juegoAhorcado');
         if (ahorcado) iniciarAhorcado(ahorcado);
+        const patos = $('juegoPatos');
+        if (patos) iniciarPatos(patos);
     });
 }
 
-// Los tests (app/test/test_juegos.py) cargan el armado de la sopa y el ahorcado con Node
+// Los tests (app/test/test_juegos.py) cargan la lógica de los juegos con Node
 if (typeof module !== 'undefined') {
-    module.exports = { generarSopa, buscarEnTablero, DIRECCIONES, estadoAhorcado, VIDAS_AHORCADO };
+    module.exports = {
+        generarSopa, buscarEnTablero, DIRECCIONES, estadoAhorcado, VIDAS_AHORCADO,
+        opcionesPatos, duracionPato, anguloEscopeta, VIDAS_PATOS, PATOS_EN_PANTALLA,
+    };
 }
