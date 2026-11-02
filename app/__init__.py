@@ -22,6 +22,7 @@ from app.routes import (
 )
 from app.services.admin import registrar_comandos as registrar_comandos_admin
 from app.services.correo import registrar_comandos
+from app.services.motivacion import tarjeta_del_dia
 from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
 
 
@@ -157,6 +158,7 @@ def create_app(config_overrides=None):
             'tema_sitio': tema_del_sitio(session.get('tema_sitio')),
             'personaje_sitio': personaje_del_sitio(session.get('tema_sitio')),
             'requisitos_contrasena': REQUISITOS_CONTRASENA,
+            'tarjeta_dia': tarjeta_del_dia(),
         }
 
     def _wants_json():

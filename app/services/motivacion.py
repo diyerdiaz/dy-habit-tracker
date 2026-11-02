@@ -5,6 +5,8 @@ fecha, así todo el día se ve la misma y al día siguiente cambia sola.
 """
 
 from datetime import date, timedelta
+from random import Random
+from app.services.frases_anime import GRUPOS
 
 FRASES = [
     {'texto': 'Si no te gusta tu destino, no lo aceptes. Ten el valor de cambiarlo como tú quieras.',
@@ -69,6 +71,16 @@ FRASES = [
      'personaje': 'Erwin Smith', 'anime': 'Attack on Titan', 'icono': 'bi-shield-shaded'},
 ]
 
+FRASES += [
+    {'texto': texto, 'personaje': personaje, 'anime': anime, 'icono': icono}
+    for personaje, anime, icono, frases in GRUPOS
+    for texto in frases
+]
+
+# Se mezclan con semilla fija para no ver varios días seguidos el mismo anime:
+# el orden es siempre el mismo, también después de reiniciar el servidor
+Random(2026).shuffle(FRASES)
+
 # Mensaje corto para aplicar la frase a los hábitos, uno por cada día de la semana
 RETOS = [
     'Empieza la semana completando tu hábito más difícil primero.',
@@ -90,6 +102,12 @@ def frase_del_dia(fecha=None):
 def reto_del_dia(fecha=None):
     fecha = fecha or date.today()
     return RETOS[fecha.weekday()]
+
+
+def tarjeta_del_dia(fecha=None):
+    """Lo que muestra la tarjeta que aparece sola al abrir la app cada día."""
+    fecha = fecha or date.today()
+    return {'fecha': fecha.isoformat(), 'frase': frase_del_dia(fecha), 'reto': reto_del_dia(fecha)}
 
 
 def frases_anteriores(dias=6, fecha=None):

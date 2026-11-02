@@ -197,6 +197,83 @@
     margin-top: 28px;
 }
 
+/* ── Tarjeta que aparece sola al empezar el día ── */
+.frase-dia-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(5, 0, 15, 0.75);
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+}
+
+.frase-dia-fondo[hidden] {
+    display: none;
+}
+
+.frase-dia-card {
+    width: 100%;
+    max-width: 560px;
+    max-height: 100%;
+    overflow-y: auto;
+    background: linear-gradient(145deg, rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35), rgba(15, 5, 30, 0.95));
+    text-align: center;
+}
+
+.frase-dia-cerrar {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    transition: background 0.2s ease;
+}
+
+.frase-dia-cerrar:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.frase-dia-titulo {
+    color: var(--tema-vivo, #d966ff);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 12px;
+}
+
+.frase-dia-reto {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.9rem;
+    margin: 20px 0 0;
+}
+
+.frase-dia-reto i {
+    color: #ffd700;
+}
+
+.frase-dia-btn {
+    margin-top: 22px;
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.6);
+    border: 1px solid var(--tema-vivo, #d966ff);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 24px;
+    padding: 10px 26px;
+    transition: background 0.2s ease;
+}
+
+.frase-dia-btn:hover {
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.9);
+}
+
 @media (max-width: 576px) {
     .motivacion-wrapper {
         padding: 12vh 4px 40px;
