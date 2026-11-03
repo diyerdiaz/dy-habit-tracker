@@ -7,6 +7,8 @@ Ahorcado: hay que adivinar la palabra en inglés letra por letra; la pista es tu
 propio ejemplo en inglés con la palabra tapada, sin nada de español mientras se juega.
 Caza de patos: sale un significado y hay que dispararle al pato con su palabra en inglés.
 Crucigrama: los significados son las pistas y las palabras en inglés se cruzan en la cuadrícula.
+Carrera del mono: para saltar cada obstáculo hay que elegir la palabra que completa tu
+ejemplo en inglés; al fallar se muestra la frase completa con su significado.
 El navegador recibe todas las palabras al abrir la página y arma las rondas solo,
 así se puede jugar aunque el internet esté lento; al terminar cada ronda envía
 el resultado para guardarlo en tus estadísticas.
@@ -36,6 +38,8 @@ HUECO = '____'
 MINIMO_PALABRAS_CRUCIGRAMA = 6
 MAXIMO_PALABRAS_CRUCIGRAMA = 8
 LETRAS_CRUCIGRAMA = (3, 12)
+# Carrera del mono: las mismas palabras del ahorcado (necesitan un ejemplo que las use)
+OBSTACULOS_POR_CARRERA = 10
 
 
 def _palabras_para_jugar(idUser):
@@ -64,13 +68,18 @@ def ejemplos_con_hueco(palabra, ejemplos):
     """Cada línea de los ejemplos con la palabra tapada: 'Please give me' -> 'Please ____ me'.
     Se tapan también sus formas ('gives', 'giving' no porque cambia la raíz) y se
     descartan las líneas sin la palabra: no sirven de pista."""
-    patron = re.compile(rf'\b{re.escape(palabra)}\w*', re.IGNORECASE)
-    salida = []
-    for linea in (ejemplos or '').splitlines():
-        con_hueco, veces = patron.subn(HUECO, linea.strip())
-        if veces:
-            salida.append(con_hueco)
-    return salida
+    patron = _patron_palabra(palabra)
+    return [patron.sub(HUECO, linea) for linea in _lineas_con_palabra(palabra, ejemplos)]
+
+
+def _patron_palabra(palabra):
+    return re.compile(rf'\b{re.escape(palabra)}\w*', re.IGNORECASE)
+
+
+def _lineas_con_palabra(palabra, ejemplos):
+    patron = _patron_palabra(palabra)
+    lineas = [linea.strip() for linea in (ejemplos or '').splitlines()]
+    return [linea for linea in lineas if patron.search(linea)]
 
 
 def _palabras_para_sopa(idUser):
@@ -93,6 +102,14 @@ def _palabras_para_ahorcado(idUser):
             vistas.add(letras)
             salida.append({'id': p.idVocab, 'en': nombre, 'es': significado, 'letras': letras, 'pistas': pistas})
     return salida
+
+
+def _palabras_para_mono(idUser):
+    """Como las del ahorcado, y con cada ejemplo completo para enseñarlo: 'pistas[i]'
+    es 'frases[i]' con la palabra tapada."""
+    ejemplos = {p.idVocab: p.ejemplos for p in Vocabulario.query.filter_by(idUser=idUser).all()}
+    return [{**p, 'frases': _lineas_con_palabra(p['en'], ejemplos[p['id']])}
+            for p in _palabras_para_ahorcado(idUser)]
 
 
 def _palabras_para_crucigrama(idUser):
@@ -199,6 +216,18 @@ def crucigrama():
     )
 
 
+@bp.route('/mono')
+@login_required
+def mono():
+    return render_template(
+        'juegos/mono.html',
+        palabras=_palabras_para_mono(current_user.idUser),
+        total_palabras=len(_palabras_para_jugar(current_user.idUser)),
+        minimo=MINIMO_PALABRAS,
+        por_ronda=OBSTACULOS_POR_CARRERA,
+    )
+
+
 @bp.route('/<juego>/resultado', methods=['POST'])
 @login_required
 def resultado(juego):
@@ -209,7 +238,8 @@ def resultado(juego):
     data = request.get_json(silent=True) or {}
     ids = data.get('ids')
     errores, segundos = data.get('errores'), data.get('segundos')
-    maximo_palabras = MAXIMO_PALABRAS_CRUCIGRAMA if juego == 'crucigrama' else PAREJAS_POR_RONDA
+    maximo_palabras = {'crucigrama': MAXIMO_PALABRAS_CRUCIGRAMA,
+                       'mono': OBSTACULOS_POR_CARRERA}.get(juego, PAREJAS_POR_RONDA)
 
     if (not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids)
             or len(set(ids)) != len(ids) or not MINIMO_PALABRAS <= len(ids) <= maximo_palabras

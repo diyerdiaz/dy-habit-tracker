@@ -9,6 +9,8 @@
 //    su palabra en inglés antes de que cruce la pantalla.
 //  - Crucigrama: los significados son las pistas y las palabras en inglés se
 //    cruzan en una cuadrícula que se arma aquí con las palabras de la ronda.
+//  - Carrera del mono: para saltar cada obstáculo se elige la palabra que completa
+//    un ejemplo en inglés; al tropezar se enseña la frase completa con su significado.
 
 const $ = (id) => document.getElementById(id);
 const normalizar = (texto) => texto.trim().toLowerCase();
@@ -1456,6 +1458,228 @@ function iniciarCrucigrama(juego) {
     nuevaRonda();
 }
 
+// ═══════════════════════════ Carrera del mono ═══════════════════════════
+
+const VIDAS_MONO = 3;
+const LIANAS = 3;
+const RACHA_BANANA = 3;         // aciertos seguidos para ganar una banana
+const OBSTACULOS = ['roca', 'tronco', 'charco'];
+const POSICION_MONO = 14;       // % de la escena donde corre el mono
+const TIEMPO_SALTO = 350;       // ms desde el acierto hasta pasar por encima del obstáculo
+
+// Hay que leer la frase: empieza con calma y nunca baja de lo que toma leerla
+const segundosMono = (indice) => Math.max(5, 10 - indice * 0.5);
+
+const ganaBanana = (racha) => racha > 0 && racha % RACHA_BANANA === 0;
+
+function iniciarMono(juego) {
+    const palabras = JSON.parse($('monoPalabras').textContent);
+    const porRonda = Number(juego.dataset.porRonda);
+    const zona = $('monoZona');
+    const escena = $('monoEscena');
+    const personaje = $('monoPersonaje');
+    const obstaculo = $('monoObstaculo');
+    const lianas = $('monoLianas');
+    const aprende = $('monoAprende');
+    const final = $('monoFinal');
+    const frase = $('monoFrase');
+    const pronunciar = crearSonido($('monoSonido'));
+    const bolsa = crearBolsa('juegosMonoPendientes', palabras);
+    const reloj = crearReloj($('monoTiempo'));
+    const clavesMono = (p) => ['letras:' + p.letras];
+
+    let ronda = [];
+    let indice = 0;
+    let objetivo = null;
+    let ejemplo = 0;           // cuál de los ejemplos de la palabra se está usando
+    let resuelto = false;
+    let vidas = VIDAS_MONO;
+    let aciertos = 0;
+    let errores = 0;
+    let racha = 0;
+    let bananas = 0;
+    let repaso = [];           // palabras falladas, para repasarlas al final
+    let llegada = null;        // temporizador del obstáculo
+    let vuelo = null;          // animación del obstáculo
+
+    function nuevaRonda() {
+        ronda = bolsa.sacar(Math.min(porRonda, palabras.length), clavesMono);
+        indice = 0;
+        vidas = VIDAS_MONO;
+        aciertos = 0;
+        errores = 0;
+        racha = 0;
+        bananas = 0;
+        repaso = [];
+        $('monoTotal').textContent = ronda.length;
+        $('monoVidas').textContent = vidas;
+        $('monoBananas').textContent = 0;
+        final.hidden = true;
+        zona.hidden = false;
+        reloj.empezar();
+        mostrarObstaculo();
+    }
+
+    function mostrarObstaculo() {
+        objetivo = ronda[indice];
+        resuelto = false;
+        ejemplo = azar(objetivo.pistas.length);
+        $('monoNumero').textContent = indice + 1;
+        frase.textContent = objetivo.pistas[ejemplo];
+        frase.classList.remove('completa');
+        personaje.classList.remove('saltando', 'tropezando');
+        escena.classList.remove('parada');
+        aprende.hidden = true;
+        lianas.hidden = false;
+
+        lianas.replaceChildren(...opcionesPatos(objetivo, palabras, LIANAS).map((p, i) => {
+            const liana = document.createElement('button');
+            liana.type = 'button';
+            liana.className = 'mono-liana';
+            liana.dataset.id = p.id;
+            liana.lang = 'en';
+            const numero = document.createElement('span');
+            numero.textContent = i + 1;
+            // En minúsculas: una mayúscula guardada en el vocabulario delataría la respuesta
+            liana.append(numero, ` ${p.en.toLowerCase()}`);
+            return liana;
+        }));
+
+        const segundos = segundosMono(indice);
+        // El obstáculo cruza toda la escena; llega al mono cuando se cumple el tiempo
+        const fraccion = (100 - POSICION_MONO) / 115;
+        obstaculo.className = `mono-obstaculo ${OBSTACULOS[azar(OBSTACULOS.length)]}`;
+        vuelo = obstaculo.animate([{ left: '100%' }, { left: '-15%' }],
+            { duration: (segundos * 1000) / fraccion, fill: 'forwards' });
+        llegada = setTimeout(() => tropezar('Se acabó el tiempo'), segundos * 1000);
+    }
+
+    function completarFrase() {
+        const texto = objetivo.frases[ejemplo];
+        frase.textContent = texto;
+        frase.classList.add('completa');
+        return texto;
+    }
+
+    function saltar() {
+        resuelto = true;
+        clearTimeout(llegada);
+        aciertos++;
+        racha++;
+        const faltan = ((segundosMono(indice) * 1000) - (vuelo.currentTime || 0)) / TIEMPO_SALTO;
+        vuelo.playbackRate = Math.max(1, faltan);
+        personaje.classList.add('saltando');
+        if (ganaBanana(racha)) {
+            bananas++;
+            $('monoBananas').textContent = bananas;
+            const premio = $('monoPremio');
+            premio.classList.remove('visible');
+            void premio.offsetWidth;
+            premio.classList.add('visible');
+        }
+        pronunciar(completarFrase());
+        setTimeout(siguiente, 1700);
+    }
+
+    // Tropezar detiene la carrera y enseña la respuesta: sigue cuando lo decidas
+    function tropezar(titulo) {
+        resuelto = true;
+        clearTimeout(llegada);
+        vuelo.pause();
+        errores++;
+        vidas--;
+        racha = 0;
+        $('monoVidas').textContent = vidas;
+        personaje.classList.add('tropezando');
+        escena.classList.add('parada');
+        const texto = completarFrase();
+        repaso.push({ palabra: objetivo, frase: texto });
+
+        $('monoAprendeTitulo').textContent = titulo;
+        $('monoAprendePalabra').textContent = objetivo.en;
+        $('monoAprendeSignificado').textContent = objetivo.es;
+        $('monoAprendeFrase').textContent = texto;
+        $('monoSeguir').textContent = vidas === 0 || indice + 1 === ronda.length ? 'Ver resultado' : 'Seguir corriendo';
+        lianas.hidden = true;
+        aprende.hidden = false;
+        $('monoSeguir').focus();
+        pronunciar(texto);
+    }
+
+    function siguiente() {
+        vuelo.cancel();
+        if (vidas === 0) return terminar();
+        indice++;
+        if (indice < ronda.length) mostrarObstaculo();
+        else terminar();
+    }
+
+    function elegir(liana) {
+        if (resuelto) return;
+        if (liana.dataset.id === String(objetivo.id)) {
+            liana.classList.add('acertada');
+            saltar();
+        } else {
+            liana.classList.add('fallida');
+            tropezar('Esa no era');
+        }
+    }
+
+    function dibujarRepaso() {
+        $('monoRepaso').hidden = repaso.length === 0;
+        $('monoRepasoLista').replaceChildren(...repaso.map(({ palabra, frase: texto }) => {
+            const item = document.createElement('li');
+            const ingles = document.createElement('strong');
+            ingles.lang = 'en';
+            ingles.textContent = palabra.en;
+            const significado = document.createElement('span');
+            significado.textContent = ` — ${palabra.es}`;
+            const ejemploEl = document.createElement('em');
+            ejemploEl.lang = 'en';
+            ejemploEl.textContent = texto;
+            item.append(ingles, significado, ejemploEl);
+            return item;
+        }));
+    }
+
+    function terminar() {
+        const tiempo = reloj.parar();
+        // Los obstáculos que quedaron sin jugar cuentan como errores en la precisión
+        const sinJugar = vidas === 0 ? ronda.length - indice - 1 : 0;
+        const perfecta = errores === 0;
+        $('monoFinalIcono').textContent = perfecta ? '🏆' : vidas > 0 ? '🎉' : '💪';
+        $('monoFinalTitulo').textContent = perfecta ? '¡Carrera perfecta!' : vidas > 0 ? '¡Llegaste a la meta!' : 'Se acabaron las vidas';
+        $('monoFinalAciertos').textContent = `${aciertos}/${ronda.length}`;
+        $('monoFinalBananas').textContent = bananas;
+        $('monoFinalErrores').textContent = errores;
+        $('monoFinalTiempo').textContent = formatoTiempo(tiempo);
+        dibujarRepaso();
+
+        zona.hidden = true;
+        final.hidden = false;
+        $('monoOtra').focus();
+        guardarResultado(juego.dataset.resultadoUrl,
+            { ids: ronda.map((p) => p.id), errores: errores + sinJugar, segundos: tiempo }, $('monoFinalNota'));
+    }
+
+    lianas.addEventListener('click', (e) => {
+        const liana = e.target.closest('.mono-liana');
+        if (liana) elegir(liana);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        // La tarjeta de la frase del día puede estar abierta encima del juego
+        if (zona.hidden || resuelto || e.ctrlKey || e.metaKey || e.altKey
+            || document.querySelector('.frase-dia-fondo:not([hidden])')) return;
+        const liana = lianas.children[Number(e.key) - 1];
+        if (liana) elegir(liana);
+    });
+
+    $('monoSeguir').addEventListener('click', siguiente);
+    $('monoOtra').addEventListener('click', nuevaRonda);
+    nuevaRonda();
+}
+
 if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         const unir = $('juegoUnir');
@@ -1468,6 +1692,8 @@ if (typeof document !== 'undefined') {
         if (patos) iniciarPatos(patos);
         const crucigrama = $('juegoCrucigrama');
         if (crucigrama) iniciarCrucigrama(crucigrama);
+        const mono = $('juegoMono');
+        if (mono) iniciarMono(mono);
     });
 }
 
@@ -1477,5 +1703,6 @@ if (typeof module !== 'undefined') {
         generarSopa, buscarEnTablero, DIRECCIONES, estadoAhorcado, VIDAS_AHORCADO,
         opcionesPatos, duracionPato, anguloEscopeta, VIDAS_PATOS, PATOS_EN_PANTALLA,
         generarCrucigrama, DIRECCIONES_CRUCIGRAMA, LADO_CRUCIGRAMA,
+        segundosMono, ganaBanana, VIDAS_MONO, LIANAS,
     };
 }

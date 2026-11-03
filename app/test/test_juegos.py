@@ -675,6 +675,117 @@ def test_armado_del_crucigrama_siempre_es_valido():
     assert r['vacio'] is None
 
 
+# ═══════════════ Carrera del mono ═══════════════
+from app.routes.juegos_route import OBSTACULOS_POR_CARRERA
+
+MONO = [(f'word{letra}', f'palabra {letra}', f'I use word{letra} here.') for letra in 'abcdefghijkl']
+
+
+def _vocabulario_mono(user, datos=MONO):
+    for en, es, ejemplos in datos:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es, ejemplos=ejemplos))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_mono(html):
+    bloque = re.search(r'<script type="application/json" id="monoPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_mono(client, ids, **extra):
+    return client.post('/menu/ingles/juegos/mono/resultado', json={'ids': ids, 'errores': 2, 'segundos': 80, **extra})
+
+
+def test_mono_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/mono').status_code == 302
+
+
+def test_mono_manda_cada_frase_con_y_sin_hueco(logged_client, user):
+    # 'run' tiene una línea sin la palabra: las dos listas deben seguir alineadas
+    _vocabulario_mono(user, AHORCADO[:5] + [('run', 'correr', 'She is fast.\nI run daily.\nRun now!')])
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'id="juegoMono"' in html and 'js/juegos.js' in html
+    datos = {p['letras']: p for p in _palabras_mono(html)}
+    assert datos['RUN']['pistas'] == ['I ____ daily.', '____ now!']
+    assert datos['RUN']['frases'] == ['I run daily.', 'Run now!']
+    for palabra in datos.values():
+        assert set(palabra) == {'id', 'en', 'es', 'letras', 'pistas', 'frases'}
+        assert len(palabra['pistas']) == len(palabra['frases'])
+
+
+def test_mono_solo_lleva_palabras_con_ejemplo(logged_client, user):
+    _vocabulario_mono(user, AHORCADO)
+    datos = _palabras_mono(logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True))
+    assert {p['letras'] for p in datos} == {'GIVE', 'TELL', 'SURPRISE', 'THINK', 'UNDERSTANDING'}
+
+
+def test_mono_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_mono(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='x', ejemplos='a secret here'))
+    db.session.commit()
+    datos = _palabras_mono(logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True))
+    assert 'SECRET' not in {p['letras'] for p in datos}
+
+
+def test_mono_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_mono(user, AHORCADO[:3] + AHORCADO[5:])
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoMono"' not in html
+
+
+def test_guardar_carrera_de_diez_obstaculos(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())[:OBSTACULOS_POR_CARRERA]
+    respuesta = _enviar_mono(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('mono', 10, 2, 0, None, 80)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_mono_invalido(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())
+    assert _enviar_mono(logged_client, ids[:11]).status_code == 400
+    assert _enviar_mono(logged_client, ids[:3]).status_code == 400
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_la_carrera_del_mono(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())[:10]
+    _enviar_mono(logged_client, ids, errores=0, segundos=70)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/mono' in html and 'Carrera del mono' in html
+    assert '1</span> carrera' in html and '70s</span> mejor carrera perfecta' in html
+
+
+def test_mono_usa_dibujos_propios(logged_client, user):
+    _vocabulario_mono(user)
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'id="monoPersonaje"' in html and 'Donkey' not in html
+
+
+SCRIPT_MONO = r"""
+const { segundosMono, ganaBanana, VIDAS_MONO, LIANAS } = require(process.argv[1]);
+console.log(JSON.stringify({
+  tiempos: [0, 1, 5, 9, 30].map(segundosMono),
+  bananas: [0, 1, 2, 3, 4, 6, 9].map(ganaBanana),
+  vidas: VIDAS_MONO, lianas: LIANAS,
+}));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_reglas_de_la_carrera_del_mono():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_MONO, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['tiempos'] == [10, 9.5, 7.5, 5.5, 5]    # siempre queda tiempo para leer
+    assert r['bananas'] == [False, False, False, True, False, True, True]
+    assert (r['vidas'], r['lianas']) == (3, 3)
+
+
 def test_tarjeta_de_patos_lleva_su_dibujo(logged_client, user):
     _vocabulario(user)
     menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)

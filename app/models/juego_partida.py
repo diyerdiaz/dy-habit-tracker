@@ -8,6 +8,7 @@ JUEGOS = {
     'ahorcado': 'Ahorcado',
     'patos': 'Caza de patos',
     'crucigrama': 'Crucigrama',
+    'mono': 'Carrera del mono',
 }
 NIVELES_SOPA = ('facil', 'normal', 'dificil')
 

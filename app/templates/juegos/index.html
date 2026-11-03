@@ -110,6 +110,29 @@
             </ul>
             {% endif %}
         </a>
+        {% set mono = resumen.get('mono') %}
+        <a href="{{ url_for('juegos.mono') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+            <svg class="pato-icono" viewBox="0 0 64 44" aria-hidden="true">
+                <circle cx="14" cy="20" r="8"/>
+                <circle cx="50" cy="20" r="8"/>
+                <circle cx="32" cy="22" r="20"/>
+                <path class="pato-icono-ala" d="M21 18 Q26 11 32 16 Q38 11 43 18 Q47 34 32 38 Q17 34 21 18 Z"/>
+                <circle cx="26" cy="21" r="2.5"/>
+                <circle cx="38" cy="21" r="2.5"/>
+                <path class="mono-icono-boca" d="M26 30 Q32 35 38 30"/>
+            </svg>
+            <h3>Carrera del mono</h3>
+            <p class="juego-desc">Completa la frase en inglés para saltar cada obstáculo.</p>
+            {% if total_ahorcado < minimo %}
+            <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
+            {% elif mono %}
+            <ul class="juego-stats">
+                <li><span>{{ mono.jugadas }}</span> {{ 'carrera' if mono.jugadas == 1 else 'carreras' }}</li>
+                <li><span>{{ mono.precision }}%</span> precisión</li>
+                {% if mono.mejor_tiempo is not none %}<li><span>{{ mono.mejor_tiempo }}s</span> mejor carrera perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
     </div>
 </div>
 {% endblock %}
