@@ -119,6 +119,28 @@ def registrar_toggle_habito(idUser, marcado_como_hecho):
     return progress
 
 
+def registrar_anotacion_admin(idUser, fecha, marcado_como_hecho, dia_sin_otros):
+    """
+    El administrador marcó o desmarcó un hábito del usuario en `fecha` (hoy o un
+    día pasado). Suma o resta el XP del hábito y recalcula la racha. Si ese día
+    tocaba, ya se había penalizado y no tenía otra actividad (`dia_sin_otros`),
+    marcarlo devuelve la penalización y desmarcarlo la vuelve a aplicar.
+    Debe llamarse DESPUÉS de crear/eliminar el registro en HistHabit.
+    """
+    progress = get_or_create_progress(idUser)
+    aplicar_penalizaciones_pendientes(progress)
+    signo = 1 if marcado_como_hecho else -1
+    progress.xpTotal = max(0, progress.xpTotal + signo * XP_POR_HABITO)
+    progress.habitosCompletados = max(0, progress.habitosCompletados + signo)
+    if (dia_sin_otros and progress.ultimaFechaPenalizada
+            and fecha <= progress.ultimaFechaPenalizada and dias_programados(idUser)(fecha)):
+        progress.xpTotal = max(0, progress.xpTotal + signo * PENALIZACION_POR_DIA_PERDIDO)
+    sincronizar_racha(progress)
+    if marcado_como_hecho:
+        progress.ultimaFechaActividad = max(progress.ultimaFechaActividad or fecha, fecha)
+    db.session.commit()
+    return progress
+
 def registrar_recuperacion(idUser, fecha_perdida, dia_estaba_vacio):
     """
     Un día recuperado cuenta como hábito hecho: suma su XP, cuenta en los hábitos

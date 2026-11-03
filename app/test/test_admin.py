@@ -453,3 +453,87 @@ def test_variables_del_admin_en_compose_sin_valores():
     compose = (raiz / 'docker-compose.yml').read_text()
     assert 'ADMIN_USUARIO: ${ADMIN_USUARIO:-}' in compose and 'ADMIN_CONTRASENA: ${ADMIN_CONTRASENA:-}' in compose
     assert 'asegurar_admin_del_entorno()' in (raiz / 'run.py').read_text()
+
+
+# ── Anotar hábitos de un usuario ──
+
+def _xp(user):
+    from app.models.user_progress import UserProgress
+    progreso = db.session.get(UserProgress, user.idUser)
+    return progreso.xpTotal if progreso else 0
+
+
+def test_admin_anota_el_habito_de_ayer(admin_client, user):
+    from app.services.level_config import XP_POR_HABITO
+    habito = _habito(user)
+    ayer = date.today() - timedelta(days=1)
+    url = f'/admin/usuarios/{user.idUser}/habitos/{habito.idHabit}/anotar'
+    respuesta = admin_client.post(url, data={'fecha': ayer.isoformat()})
+    assert respuesta.status_code == 302 and f'fecha={ayer.isoformat()}' in respuesta.headers['Location']
+    assert HistHabit.query.filter_by(idHabit=habito.idHabit, fecha=ayer).count() == 1
+    assert _xp(user) == XP_POR_HABITO
+    assert servicio_admin.calcular_racha(user.idUser)[0] == 1
+
+    # Otro clic lo quita y devuelve el XP
+    admin_client.post(url, data={'fecha': ayer.isoformat()})
+    assert HistHabit.query.filter_by(idHabit=habito.idHabit, fecha=ayer).count() == 0
+    assert _xp(user) == 0
+
+
+def test_anotar_un_dia_penalizado_devuelve_la_penalizacion(admin_client, user):
+    from app.models.user_progress import UserProgress
+    from app.services.level_config import XP_POR_HABITO, PENALIZACION_POR_DIA_PERDIDO
+    habito = _habito(user)
+    hace_3 = date.today() - timedelta(days=3)
+    ayer = date.today() - timedelta(days=1)
+    _marcar(user, habito, hace_3)
+    db.session.add(UserProgress(idUser=user.idUser, xpTotal=100, ultimaFechaActividad=hace_3,
+                                ultimaFechaPenalizada=ayer))
+    db.session.commit()
+    url = f'/admin/usuarios/{user.idUser}/habitos/{habito.idHabit}/anotar'
+    admin_client.post(url, data={'fecha': ayer.isoformat()})
+    assert _xp(user) == 100 + XP_POR_HABITO + PENALIZACION_POR_DIA_PERDIDO
+    admin_client.post(url, data={'fecha': ayer.isoformat()})
+    assert _xp(user) == 100
+
+
+def test_anotar_no_acepta_fechas_futuras_ni_invalidas(admin_client, user):
+    habito = _habito(user)
+    url = f'/admin/usuarios/{user.idUser}/habitos/{habito.idHabit}/anotar'
+    for fecha in [(date.today() + timedelta(days=1)).isoformat(), 'ayer', '']:
+        admin_client.post(url, data={'fecha': fecha})
+    assert HistHabit.query.count() == 0
+
+
+def test_anotar_solo_habitos_del_usuario_y_nunca_de_un_admin(admin_client, admin, user, other_user):
+    ajeno = _habito(other_user)
+    hoy = date.today().isoformat()
+    assert admin_client.post(f'/admin/usuarios/{user.idUser}/habitos/{ajeno.idHabit}/anotar',
+                             data={'fecha': hoy}).status_code == 404
+    eliminado = _habito(user, 'Viejo', estado='Eliminado')
+    assert admin_client.post(f'/admin/usuarios/{user.idUser}/habitos/{eliminado.idHabit}/anotar',
+                             data={'fecha': hoy}).status_code == 404
+    assert admin_client.post(f'/admin/usuarios/{admin.idUser}/habitos/{ajeno.idHabit}/anotar',
+                             data={'fecha': hoy}).status_code == 404
+    assert HistHabit.query.count() == 0
+
+
+def test_usuario_normal_no_puede_anotar_por_otro(logged_client, user, other_user):
+    habito = _habito(other_user)
+    respuesta = logged_client.post(f'/admin/usuarios/{other_user.idUser}/habitos/{habito.idHabit}/anotar',
+                                   data={'fecha': date.today().isoformat()})
+    assert respuesta.status_code == 404 and HistHabit.query.count() == 0
+
+
+def test_detalle_muestra_los_habitos_del_dia_elegido(admin_client, user):
+    leer = _habito(user, 'Leer')
+    _habito(user, 'Correr')
+    ayer = date.today() - timedelta(days=1)
+    _marcar(user, leer, ayer)
+    html = admin_client.get(f'/admin/usuarios/{user.idUser}?fecha={ayer.isoformat()}').get_data(as_text=True)
+    assert 'Anotar hábitos' in html and f'value="{ayer.isoformat()}"' in html
+    assert html.count('Quitar') == 1 and html.count('Marcar hecho') == 1
+    # Una fecha futura o rota muestra hoy
+    manana = (date.today() + timedelta(days=1)).isoformat()
+    html = admin_client.get(f'/admin/usuarios/{user.idUser}?fecha={manana}').get_data(as_text=True)
+    assert f'value="{date.today().isoformat()}"' in html

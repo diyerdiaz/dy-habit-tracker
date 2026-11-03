@@ -20,7 +20,7 @@ from app.models.users import User, ROL_ADMIN, mensaje_requisitos
 from app.models.vision_board import MetaVision
 from app.models.vocabulario import Vocabulario
 from app.services.correo import ocultar_email
-from app.services.gamificacion import calcular_racha
+from app.services.gamificacion import calcular_racha, registrar_anotacion_admin
 from app.services.level_config import calcular_progreso
 
 # Días que se muestran en la tira de actividad del detalle de un usuario
@@ -70,6 +70,30 @@ def estadisticas_usuario(user, hoy=None):
         'palabras': _contar(Vocabulario, user.idUser),
         'minutos_shadowing': round((segundos or 0) / 60),
     }
+
+
+def habitos_del_dia(user, fecha):
+    """Hábitos del usuario para anotar en `fecha`: (hábito, ya marcado, le tocaba)."""
+    marcados = {i for (i,) in db.session.query(HistHabit.idHabit).filter(
+        HistHabit.idUser == user.idUser, HistHabit.fecha == fecha)}
+    habitos = Habit.visibles(user.idUser).order_by(Habit.habitName).all()
+    return [(h, h.idHabit in marcados, h.toca_el(fecha)) for h in habitos]
+
+
+def anotar_habito(user, habito, fecha):
+    """El admin marca o desmarca el hábito del usuario en `fecha`, con su XP y racha.
+    Devuelve True si quedó marcado."""
+    registro = HistHabit.query.filter_by(idHabit=habito.idHabit, fecha=fecha).first()
+    if registro:
+        db.session.delete(registro)
+    else:
+        db.session.add(HistHabit(idUser=user.idUser, idHabit=habito.idHabit, fecha=fecha))
+    db.session.flush()
+    otros = db.session.query(func.count()).select_from(HistHabit).filter(
+        HistHabit.idUser == user.idUser, HistHabit.fecha == fecha,
+        HistHabit.idHabit != habito.idHabit).scalar()
+    registrar_anotacion_admin(user.idUser, fecha, registro is None, otros == 0)
+    return registro is None
 
 
 def usuarios_registrados():

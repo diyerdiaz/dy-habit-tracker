@@ -33,6 +33,29 @@
         <div class="adm-actividad-pie"><span>{{ e.actividad[0][0].strftime('%d/%m') }}</span><span>Hoy</span></div>
     </section>
 
+    <section class="adm-bloque adm-acciones" id="anotar">
+        <h2 class="adm-subtitulo">Anotar hábitos <span class="adm-tenue">· por si {{ e.usuario }} no pudo marcarlos</span></h2>
+        <form method="get" action="{{ url_for('admin.detalle', id_user=e.id) }}#anotar" class="adm-form-fecha">
+            <input type="date" name="fecha" class="adm-input" value="{{ fecha.isoformat() }}" max="{{ hoy.isoformat() }}" aria-label="Día a anotar">
+            <button type="submit" class="adm-boton">Ver día</button>
+        </form>
+        {% for h, marcado, tocaba in habitos %}
+        <div class="adm-accion">
+            <div>
+                <strong>{{ h.habitName }}</strong>
+                <p class="adm-tenue">{{ 'Hecho' if marcado else 'Sin marcar' }} el {{ fecha.strftime('%d/%m/%Y') }}{{ '' if tocaba else ' · ese día no le tocaba' }}</p>
+            </div>
+            <form method="post" action="{{ url_for('admin.anotar', id_user=e.id, id_habit=h.idHabit) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="fecha" value="{{ fecha.isoformat() }}">
+                <button type="submit" class="adm-boton{{ ' adm-boton-hecho' if marcado else '' }}">{{ 'Quitar' if marcado else 'Marcar hecho' }}</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="adm-tenue">Este usuario todavía no tiene hábitos.</p>
+        {% endfor %}
+    </section>
+
     <section class="adm-bloque adm-acciones">
         <h2 class="adm-subtitulo">Cuenta</h2>
         <div class="adm-accion">

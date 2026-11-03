@@ -1,11 +1,13 @@
+from datetime import date
 from functools import wraps
 
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 
 from app import db
+from app.models.habitos import Habit
 from app.models.users import User
-from app.services.admin import estadisticas_usuario, usuarios_registrados, resumen
+from app.services.admin import estadisticas_usuario, usuarios_registrados, resumen, habitos_del_dia, anotar_habito
 from app.services.cuentas import borrar_cuenta, error_cambio_usuario, error_cambio_contrasena, MAX_USUARIO
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -37,10 +39,41 @@ def index():
     return render_template('admin/index.html', usuarios=estadisticas, resumen=resumen(estadisticas))
 
 
+def _fecha_para_anotar(texto):
+    """Fecha válida para anotar hábitos: hoy o un día pasado. None si no sirve."""
+    try:
+        fecha = date.fromisoformat(texto or '')
+    except ValueError:
+        return None
+    return fecha if fecha <= date.today() else None
+
+
 @bp.route('/usuarios/<int:id_user>')
 @solo_admin
 def detalle(id_user):
-    return render_template('admin/detalle.html', e=estadisticas_usuario(_usuario_normal(id_user)))
+    user = _usuario_normal(id_user)
+    fecha = _fecha_para_anotar(request.args.get('fecha')) or date.today()
+    return render_template('admin/detalle.html', e=estadisticas_usuario(user),
+                           fecha=fecha, hoy=date.today(), habitos=habitos_del_dia(user, fecha))
+
+
+@bp.route('/usuarios/<int:id_user>/habitos/<int:id_habit>/anotar', methods=['POST'])
+@solo_admin
+def anotar(id_user, id_habit):
+    """El admin marca o desmarca un hábito del usuario en un día (por si él no pudo)."""
+    user = _usuario_normal(id_user)
+    habito = Habit.visibles(user.idUser).filter_by(idHabit=id_habit).first_or_404()
+    fecha = _fecha_para_anotar(request.form.get('fecha'))
+    if fecha is None:
+        flash('Elige una fecha válida: hoy o un día pasado.', 'danger')
+        return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='anotar'))
+    marcado = anotar_habito(user, habito, fecha)
+    dia = fecha.strftime('%d/%m/%Y')
+    if marcado:
+        flash(f'"{habito.habitName}" quedó anotado para {user.nameUser} el {dia}.', 'success')
+    else:
+        flash(f'Se quitó "{habito.habitName}" de {user.nameUser} el {dia}.', 'info')
+    return redirect(url_for('admin.detalle', id_user=user.idUser, fecha=fecha.isoformat(), _anchor='anotar'))
 
 
 @bp.route('/usuarios/<int:id_user>/bloquear', methods=['POST'])
