@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Ahorcado{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Ahorcado</h1>
+        <p class="ingles-desc">Adivina la palabra en inglés. Puedes tocar las letras o usar tu teclado.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza con un ejemplo en inglés que las use.
+            Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoAhorcado"
+         data-por-ronda="{{ por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='ahorcado') }}">
+
+        <div class="juego-barra">
+            <span><i class="bi bi-spellcheck"></i> <strong id="ahorcadoNumero">1</strong>/<span id="ahorcadoTotal">0</span></span>
+            <span><i class="bi bi-heart-fill"></i> <strong id="ahorcadoVidas">6</strong> vidas</span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="ahorcadoTiempo">0:00</strong></span>
+            <button type="button" class="juego-sonido" id="ahorcadoPista" title="Revela una letra (una por palabra)">
+                <i class="bi bi-lightbulb"></i> <span id="ahorcadoPistas">0</span>
+            </button>
+            <button type="button" class="juego-sonido" id="ahorcadoSonido" aria-pressed="true" title="Pronunciar la palabra al terminarla">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="ahorcado-zona" id="ahorcadoZona">
+            <svg class="ahorcado-dibujo" id="ahorcadoDibujo" viewBox="0 0 200 220" role="img" aria-label="Dibujo del ahorcado">
+                <path class="ahorcado-poste" d="M20 210 H120 M50 210 V15 H140 V40 M50 55 L85 15"/>
+                <circle class="ahorcado-parte" cx="140" cy="60" r="20"/>
+                <path class="ahorcado-parte" d="M140 80 V140"/>
+                <path class="ahorcado-parte" d="M140 95 L112 120"/>
+                <path class="ahorcado-parte" d="M140 95 L168 120"/>
+                <path class="ahorcado-parte" d="M140 140 L115 180"/>
+                <path class="ahorcado-parte" d="M140 140 L165 180"/>
+            </svg>
+
+            <div class="ahorcado-juego">
+                <div class="ahorcado-pista" lang="en">
+                    <span class="ahorcado-pista-titulo">Complete the sentence</span>
+                    <p id="ahorcadoEjemplo"></p>
+                </div>
+                <div class="ahorcado-casillas" id="ahorcadoCasillas" lang="en" aria-live="polite"></div>
+
+                <div class="ahorcado-teclado" id="ahorcadoTeclado" role="group" aria-label="Letras"></div>
+
+                <div class="ahorcado-veredicto" id="ahorcadoVeredicto" hidden>
+                    <h2 id="ahorcadoVeredictoTitulo"></h2>
+                    <p class="ahorcado-respuesta" id="ahorcadoRespuesta" lang="en"></p>
+                    <p class="ahorcado-significado" id="ahorcadoSignificado"></p>
+                    <button type="button" class="btn btn-juego fw-bold" id="ahorcadoSiguiente">Siguiente palabra</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="juego-final" id="ahorcadoFinal" hidden>
+            <div class="juego-final-icono" id="ahorcadoFinalIcono">🏆</div>
+            <h2 id="ahorcadoFinalTitulo">¡Ronda completa!</h2>
+            <ul class="juego-final-stats">
+                <li><span id="ahorcadoFinalAciertos">0</span> adivinadas</li>
+                <li><span id="ahorcadoFinalErrores">0</span> errores</li>
+                <li><span id="ahorcadoFinalPistas">0</span> pistas</li>
+                <li><span id="ahorcadoFinalTiempo">0:00</span> tiempo</li>
+            </ul>
+            <p class="juego-final-nota" id="ahorcadoFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="ahorcadoOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+    <script type="application/json" id="ahorcadoPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}

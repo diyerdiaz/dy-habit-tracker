@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Caza de patos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Caza de patos</h1>
+        <p class="ingles-desc">Dispárale al pato que lleva la palabra en inglés antes de que se escape. Cada pato va más rápido.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras en tu vocabulario para jugar. Tienes {{ palabras | length }}.</p>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoPatos"
+         data-por-ronda="{{ por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='patos') }}">
+
+        <div class="juego-barra">
+            <span><i class="bi bi-bullseye"></i> <strong id="patosNumero">1</strong>/<span id="patosTotal">0</span></span>
+            <span><i class="bi bi-heart-fill"></i> <strong id="patosVidas">3</strong> vidas</span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="patosTiempo">0:00</strong></span>
+            <button type="button" class="juego-sonido" id="patosSonido" aria-pressed="true" title="Pronunciar la palabra al acertar">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="patos-zona" id="patosZona">
+            <p class="patos-significado" id="patosSignificado"></p>
+            <div class="patos-campo">
+                <div class="patos-cielo" id="patosCielo"></div>
+                <div class="patos-efectos" id="patosEfectos" aria-hidden="true"></div>
+                <div class="escopeta" id="patosEscopeta" aria-hidden="true">
+                    <svg class="escopeta-dibujo" viewBox="0 0 60 190">
+                        <path class="escopeta-fogonazo" d="M30 0 L37 16 L52 8 L42 24 L30 20 L18 24 L8 8 L23 16 Z"/>
+                        <rect x="21" y="24" width="8" height="96" rx="2" fill="#39424e"/>
+                        <rect x="31" y="24" width="8" height="96" rx="2" fill="#4d5866"/>
+                        <rect x="19" y="84" width="22" height="26" rx="4" fill="#7a4a24"/>
+                        <rect x="20" y="116" width="20" height="24" rx="3" fill="#2b323b"/>
+                        <path d="M21 138 H39 L46 186 H16 Z" fill="#8a5a2e"/>
+                        <path d="M24 142 H31 L28 182 H21 Z" fill="#a9733f"/>
+                    </svg>
+                </div>
+            </div>
+            <p class="patos-mensaje" id="patosMensaje" aria-live="polite"></p>
+        </div>
+
+        <div class="juego-final" id="patosFinal" hidden>
+            <div class="juego-final-icono" id="patosFinalIcono">🏆</div>
+            <h2 id="patosFinalTitulo">¡Ronda completa!</h2>
+            <ul class="juego-final-stats">
+                <li><span id="patosFinalAciertos">0</span> cazados</li>
+                <li><span id="patosFinalErrores">0</span> errores</li>
+                <li><span id="patosFinalTiempo">0:00</span> tiempo</li>
+            </ul>
+            <p class="juego-final-nota" id="patosFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="patosOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+
+    <svg width="0" height="0" class="position-absolute" aria-hidden="true">
+        <symbol id="patoDibujo" viewBox="0 0 64 44">
+            <ellipse cx="26" cy="27" rx="22" ry="13" fill="#6d4c2f"/>
+            <path d="M6 24 L0 15 L14 19 Z" fill="#6d4c2f"/>
+            <path class="pato-ala" d="M14 25 Q28 2 38 22 Z" fill="#a9825c"/>
+            <circle cx="47" cy="15" r="10" fill="#1f8a4c"/>
+            <rect x="38" y="23" width="12" height="3" fill="#fff"/>
+            <path d="M56 12 L64 16 L56 19 Z" fill="#ffb300"/>
+            <circle cx="50" cy="13" r="2" fill="#111"/>
+        </symbol>
+    </svg>
+    <script type="application/json" id="patosPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}

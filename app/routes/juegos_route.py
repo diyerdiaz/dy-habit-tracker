@@ -3,6 +3,12 @@
 Unir parejas: palabras en inglés a la izquierda y significados a la derecha.
 Sopa de letras: los significados son las pistas y hay que encontrar la palabra
 en inglés dentro de la cuadrícula.
+Ahorcado: hay que adivinar la palabra en inglés letra por letra; la pista es tu
+propio ejemplo en inglés con la palabra tapada, sin nada de español mientras se juega.
+Caza de patos: sale un significado y hay que dispararle al pato con su palabra en inglés.
+Crucigrama: los significados son las pistas y las palabras en inglés se cruzan en la cuadrícula.
+Carrera del mono: para saltar cada obstáculo hay que elegir la palabra que completa tu
+ejemplo en inglés; al fallar se muestra la frase completa con su significado.
 El navegador recibe todas las palabras al abrir la página y arma las rondas solo,
 así se puede jugar aunque el internet esté lento; al terminar cada ronda envía
 el resultado para guardarlo en tus estadísticas.
@@ -24,6 +30,16 @@ PAREJAS_POR_RONDA = 6
 # Sopa de letras: solo palabras de una pieza que quepan en la cuadrícula
 MINIMO_PALABRAS_SOPA = 5
 LETRAS_SOPA = (3, 10)
+# Ahorcado: palabras de una pieza con un ejemplo en inglés que sirva de pista
+PALABRAS_POR_RONDA_AHORCADO = 5
+LETRAS_AHORCADO = (3, 20)
+HUECO = '____'
+# Crucigrama: de 4 a 8 palabras por tablero; hacen falta más candidatas para que crucen
+MINIMO_PALABRAS_CRUCIGRAMA = 6
+MAXIMO_PALABRAS_CRUCIGRAMA = 8
+LETRAS_CRUCIGRAMA = (3, 12)
+# Carrera del mono: las mismas palabras del ahorcado (necesitan un ejemplo que las use)
+OBSTACULOS_POR_CARRERA = 10
 
 
 def _palabras_para_jugar(idUser):
@@ -35,13 +51,35 @@ def _palabras_para_jugar(idUser):
     ]
 
 
-def letras_para_sopa(palabra):
-    """'Borrow' -> 'BORROW'. Devuelve None si no sirve para la sopa
-    (espacios, guiones, apóstrofos, números o largo fuera de 3 a 10 letras)."""
+def solo_letras(palabra, rango):
+    """'Borrow' -> 'BORROW'. Devuelve None si tiene espacios, guiones, apóstrofos,
+    números o su largo queda fuera del rango."""
     sin_tildes = unicodedata.normalize('NFD', palabra.strip()).encode('ascii', 'ignore').decode()
     letras = sin_tildes.upper()
-    minimo, maximo = LETRAS_SOPA
+    minimo, maximo = rango
     return letras if re.fullmatch(rf'[A-Z]{{{minimo},{maximo}}}', letras) else None
+
+
+def letras_para_sopa(palabra):
+    return solo_letras(palabra, LETRAS_SOPA)
+
+
+def ejemplos_con_hueco(palabra, ejemplos):
+    """Cada línea de los ejemplos con la palabra tapada: 'Please give me' -> 'Please ____ me'.
+    Se tapan también sus formas ('gives', 'giving' no porque cambia la raíz) y se
+    descartan las líneas sin la palabra: no sirven de pista."""
+    patron = _patron_palabra(palabra)
+    return [patron.sub(HUECO, linea) for linea in _lineas_con_palabra(palabra, ejemplos)]
+
+
+def _patron_palabra(palabra):
+    return re.compile(rf'\b{re.escape(palabra)}\w*', re.IGNORECASE)
+
+
+def _lineas_con_palabra(palabra, ejemplos):
+    patron = _patron_palabra(palabra)
+    lineas = [linea.strip() for linea in (ejemplos or '').splitlines()]
+    return [linea for linea in lineas if patron.search(linea)]
 
 
 def _palabras_para_sopa(idUser):
@@ -49,6 +87,38 @@ def _palabras_para_sopa(idUser):
     for p in _palabras_para_jugar(idUser):
         letras = letras_para_sopa(p['en'])
         if letras:
+            salida.append({**p, 'letras': letras})
+    return salida
+
+
+def _palabras_para_ahorcado(idUser):
+    """Solo palabras con pista en inglés, y cada una una sola vez."""
+    salida, vistas = [], set()
+    for p in Vocabulario.query.filter_by(idUser=idUser).all():
+        nombre, significado = (p.nombre or '').strip(), (p.significado or '').strip()
+        letras = solo_letras(nombre, LETRAS_AHORCADO)
+        pistas = ejemplos_con_hueco(nombre, p.ejemplos)
+        if letras and significado and pistas and letras not in vistas:
+            vistas.add(letras)
+            salida.append({'id': p.idVocab, 'en': nombre, 'es': significado, 'letras': letras, 'pistas': pistas})
+    return salida
+
+
+def _palabras_para_mono(idUser):
+    """Como las del ahorcado, y con cada ejemplo completo para enseñarlo: 'pistas[i]'
+    es 'frases[i]' con la palabra tapada."""
+    ejemplos = {p.idVocab: p.ejemplos for p in Vocabulario.query.filter_by(idUser=idUser).all()}
+    return [{**p, 'frases': _lineas_con_palabra(p['en'], ejemplos[p['id']])}
+            for p in _palabras_para_ahorcado(idUser)]
+
+
+def _palabras_para_crucigrama(idUser):
+    """Palabras de una pieza, cada una una sola vez."""
+    salida, vistas = [], set()
+    for p in _palabras_para_jugar(idUser):
+        letras = solo_letras(p['en'], LETRAS_CRUCIGRAMA)
+        if letras and letras not in vistas:
+            vistas.add(letras)
             salida.append({**p, 'letras': letras})
     return salida
 
@@ -78,6 +148,9 @@ def index():
         minimo=MINIMO_PALABRAS,
         total_sopa=len(_palabras_para_sopa(current_user.idUser)),
         minimo_sopa=MINIMO_PALABRAS_SOPA,
+        total_ahorcado=len(_palabras_para_ahorcado(current_user.idUser)),
+        total_crucigrama=len(_palabras_para_crucigrama(current_user.idUser)),
+        minimo_crucigrama=MINIMO_PALABRAS_CRUCIGRAMA,
         resumen=_resumen(current_user.idUser),
         letras_flotantes=get_letras_flotantes(current_user.idUser),
     )
@@ -108,28 +181,80 @@ def sopa():
     )
 
 
+@bp.route('/ahorcado')
+@login_required
+def ahorcado():
+    return render_template(
+        'juegos/ahorcado.html',
+        palabras=_palabras_para_ahorcado(current_user.idUser),
+        total_palabras=len(_palabras_para_jugar(current_user.idUser)),
+        minimo=MINIMO_PALABRAS,
+        por_ronda=PALABRAS_POR_RONDA_AHORCADO,
+    )
+
+
+@bp.route('/patos')
+@login_required
+def patos():
+    return render_template(
+        'juegos/patos.html',
+        palabras=_palabras_para_jugar(current_user.idUser),
+        minimo=MINIMO_PALABRAS,
+        por_ronda=PAREJAS_POR_RONDA,
+    )
+
+
+@bp.route('/crucigrama')
+@login_required
+def crucigrama():
+    return render_template(
+        'juegos/crucigrama.html',
+        palabras=_palabras_para_crucigrama(current_user.idUser),
+        total_palabras=len(_palabras_para_jugar(current_user.idUser)),
+        minimo=MINIMO_PALABRAS_CRUCIGRAMA,
+        por_ronda=MAXIMO_PALABRAS_CRUCIGRAMA,
+    )
+
+
+@bp.route('/mono')
+@login_required
+def mono():
+    return render_template(
+        'juegos/mono.html',
+        palabras=_palabras_para_mono(current_user.idUser),
+        total_palabras=len(_palabras_para_jugar(current_user.idUser)),
+        minimo=MINIMO_PALABRAS,
+        por_ronda=OBSTACULOS_POR_CARRERA,
+    )
+
+
 @bp.route('/<juego>/resultado', methods=['POST'])
 @login_required
 def resultado(juego):
-    """Guarda una ronda terminada. Recibe JSON: {"ids": [...], "errores": 2, "segundos": 41}
-    y, en la sopa de letras, también "pistas" y "nivel"."""
+    """Guarda una ronda terminada. Recibe JSON: {"ids": [...], "errores": 2, "segundos": 41},
+    en la sopa de letras también "pistas" y "nivel", y en ahorcado y crucigrama "pistas"."""
     if juego not in JUEGOS:
         return jsonify({'success': False, 'error': 'Juego no válido.'}), 404
     data = request.get_json(silent=True) or {}
     ids = data.get('ids')
     errores, segundos = data.get('errores'), data.get('segundos')
+    maximo_palabras = {'crucigrama': MAXIMO_PALABRAS_CRUCIGRAMA,
+                       'mono': OBSTACULOS_POR_CARRERA}.get(juego, PAREJAS_POR_RONDA)
 
     if (not isinstance(ids, list) or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids)
-            or len(set(ids)) != len(ids) or not MINIMO_PALABRAS <= len(ids) <= PAREJAS_POR_RONDA
+            or len(set(ids)) != len(ids) or not MINIMO_PALABRAS <= len(ids) <= maximo_palabras
             or not isinstance(errores, int) or not 0 <= errores <= 500
             or not isinstance(segundos, int) or not 0 <= segundos <= 3600):
         return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400
 
     pistas, nivel = 0, None
+    if juego in ('sopa', 'ahorcado', 'crucigrama'):
+        pistas = data.get('pistas', 0)
+        if not isinstance(pistas, int) or isinstance(pistas, bool) or not 0 <= pistas <= len(ids):
+            return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400
     if juego == 'sopa':
-        pistas, nivel = data.get('pistas', 0), data.get('nivel')
-        if (not isinstance(pistas, int) or isinstance(pistas, bool) or not 0 <= pistas <= len(ids)
-                or nivel not in NIVELES_SOPA):
+        nivel = data.get('nivel')
+        if nivel not in NIVELES_SOPA:
             return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400
 
     # Las palabras tienen que ser del usuario: no se puede inventar una ronda

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Carrera del mono{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Carrera del mono</h1>
+        <p class="ingles-desc">Elige la palabra que completa la frase antes de llegar al obstáculo. Puedes tocarla o usar las teclas 1, 2 y 3.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza con un ejemplo en inglés que las use.
+            Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoMono"
+         data-por-ronda="{{ por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='mono') }}">
+
+        <div class="juego-barra">
+            <span><i class="bi bi-flag-fill"></i> <strong id="monoNumero">1</strong>/<span id="monoTotal">0</span></span>
+            <span><i class="bi bi-heart-fill"></i> <strong id="monoVidas">3</strong> vidas</span>
+            <span>🍌 <strong id="monoBananas">0</strong></span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="monoTiempo">0:00</strong></span>
+            <button type="button" class="juego-sonido" id="monoSonido" aria-pressed="true" title="Pronunciar la frase completa">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="mono-zona" id="monoZona">
+            <p class="mono-frase" id="monoFrase" lang="en"></p>
+
+            <div class="mono-escena" id="monoEscena" aria-hidden="true">
+                <div class="mono-suelo"></div>
+                <svg class="mono-personaje" id="monoPersonaje" viewBox="0 0 80 90">
+                    <path class="mono-cola" d="M20 56 Q2 52 6 34 Q9 24 16 30"/>
+                    <path class="mono-pierna" d="M30 66 L18 84"/>
+                    <path class="mono-pierna otra" d="M42 66 L54 84"/>
+                    <ellipse cx="36" cy="54" rx="17" ry="19" fill="#7a4a24"/>
+                    <ellipse cx="38" cy="58" rx="10" ry="12" fill="#d9a873"/>
+                    <path class="mono-brazo" d="M46 46 L64 56"/>
+                    <circle cx="27" cy="20" r="7" fill="#7a4a24"/>
+                    <circle cx="59" cy="20" r="7" fill="#7a4a24"/>
+                    <circle cx="43" cy="24" r="17" fill="#7a4a24"/>
+                    <path d="M31 20 Q36 13 43 18 Q50 13 55 20 Q59 36 43 38 Q27 36 31 20 Z" fill="#d9a873"/>
+                    <circle cx="38" cy="22" r="2.6" fill="#111"/>
+                    <circle cx="49" cy="22" r="2.6" fill="#111"/>
+                    <path d="M37 30 Q43 35 50 30" fill="none" stroke="#4a2c14" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <div class="mono-obstaculo" id="monoObstaculo"></div>
+                <div class="mono-premio" id="monoPremio"></div>
+            </div>
+
+            <div class="mono-lianas" id="monoLianas" role="group" aria-label="Palabras"></div>
+
+            <div class="mono-aprende" id="monoAprende" hidden>
+                <h2 id="monoAprendeTitulo"></h2>
+                <p class="mono-aprende-palabra" id="monoAprendePalabra" lang="en"></p>
+                <p class="mono-aprende-significado" id="monoAprendeSignificado"></p>
+                <p class="mono-aprende-frase" id="monoAprendeFrase" lang="en"></p>
+                <button type="button" class="btn btn-juego fw-bold" id="monoSeguir">Seguir corriendo</button>
+            </div>
+        </div>
+
+        <div class="juego-final" id="monoFinal" hidden>
+            <div class="juego-final-icono" id="monoFinalIcono">🏆</div>
+            <h2 id="monoFinalTitulo">¡Carrera completa!</h2>
+            <ul class="juego-final-stats">
+                <li><span id="monoFinalAciertos">0</span> saltados</li>
+                <li><span id="monoFinalBananas">0</span> bananas</li>
+                <li><span id="monoFinalErrores">0</span> errores</li>
+                <li><span id="monoFinalTiempo">0:00</span> tiempo</li>
+            </ul>
+            <div class="mono-repaso" id="monoRepaso" hidden>
+                <h3>Repasa estas palabras</h3>
+                <ul id="monoRepasoLista"></ul>
+            </div>
+            <p class="juego-final-nota" id="monoFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="monoOtra"><i class="bi bi-arrow-repeat"></i> Otra carrera</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+    <script type="application/json" id="monoPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}

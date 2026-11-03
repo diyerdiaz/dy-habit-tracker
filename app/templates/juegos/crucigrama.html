@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Crucigrama{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/juegos.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<div class="ingles-wrapper juegos-wrapper">
+    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+
+    <div class="text-center mb-3">
+        <h1 class="ingles-title unir-titulo">Crucigrama</h1>
+        <p class="ingles-desc">Escribe en inglés la palabra de cada significado. Toca dos veces una casilla para cambiar de dirección.</p>
+    </div>
+
+    {% if palabras | length < minimo %}
+    <div class="juegos-vacio">
+        <i class="bi bi-journal-plus"></i>
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza (de 3 a 12 letras, sin espacios) para jugar.
+            Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+    </div>
+    {% else %}
+    <div id="juegoCrucigrama"
+         data-por-ronda="{{ por_ronda }}"
+         data-resultado-url="{{ url_for('juegos.resultado', juego='crucigrama') }}">
+
+        <div class="juego-barra">
+            <span><i class="bi bi-puzzle"></i> <strong id="cruciResueltas">0</strong>/<span id="cruciTotal">0</span></span>
+            <span><i class="bi bi-x-circle"></i> <strong id="cruciErrores">0</strong> errores</span>
+            <span><i class="bi bi-stopwatch"></i> <strong id="cruciTiempo">0:00</strong></span>
+            <button type="button" class="juego-sonido" id="cruciPista" title="Revela una letra de la palabra elegida">
+                <i class="bi bi-lightbulb"></i> <span id="cruciPistas">0</span>
+            </button>
+            <button type="button" class="juego-sonido" id="cruciSonido" aria-pressed="true" title="Pronunciar las palabras al acertarlas">
+                <i class="bi bi-volume-up-fill"></i>
+            </button>
+        </div>
+
+        <div class="cruci-zona" id="cruciZona">
+            <div class="cruci-tablero">
+                <p class="cruci-activa" id="cruciActiva" aria-live="polite"></p>
+                <div class="cruci-rejilla" id="cruciRejilla" role="grid" aria-label="Crucigrama"></div>
+                <p class="cruci-mensaje" id="cruciMensaje" aria-live="polite"></p>
+                <div class="cruci-botones" id="cruciBotones">
+                    <button type="button" class="btn btn-juego fw-bold" id="cruciComprobar"><i class="bi bi-check2-circle"></i> Comprobar</button>
+                    <button type="button" class="btn btn-outline-light" id="cruciSolucion"><i class="bi bi-eye"></i> Ver solución</button>
+                </div>
+            </div>
+            <div class="cruci-pistas">
+                <h2 class="unir-columna-titulo">Horizontales</h2>
+                <ol class="cruci-lista" id="cruciHorizontales"></ol>
+                <h2 class="unir-columna-titulo">Verticales</h2>
+                <ol class="cruci-lista" id="cruciVerticales"></ol>
+            </div>
+        </div>
+
+        <div class="juego-final" id="cruciFinal" hidden>
+            <div class="juego-final-icono" id="cruciFinalIcono">🏆</div>
+            <h2 id="cruciFinalTitulo">¡Crucigrama completo!</h2>
+            <ul class="juego-final-stats">
+                <li><span id="cruciFinalAciertos">0</span> palabras</li>
+                <li><span id="cruciFinalErrores">0</span> errores</li>
+                <li><span id="cruciFinalPistas">0</span> pistas</li>
+                <li><span id="cruciFinalTiempo">0:00</span> tiempo</li>
+            </ul>
+            <p class="juego-final-nota" id="cruciFinalNota" aria-live="polite"></p>
+            <div class="juego-final-botones">
+                <button type="button" class="btn btn-juego fw-bold" id="cruciOtra"><i class="bi bi-arrow-repeat"></i> Otro crucigrama</button>
+                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+            </div>
+        </div>
+    </div>
+    <script type="application/json" id="cruciPalabras">{{ palabras | tojson }}</script>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/juegos.js') }}"></script>
+{% endblock %}

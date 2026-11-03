@@ -2,10 +2,6 @@
 
 {% block titulo_pagina %}Motivación{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/motivacion.css') }}">
-{% endblock %}
-
 {% block content %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
@@ -125,7 +121,7 @@
         <i class="bi bi-quote motivacion-comillas"></i>
         <blockquote class="motivacion-frase">{{ frase.texto }}</blockquote>
         <div class="motivacion-autor">
-            <span class="motivacion-personaje">{{ frase.personaje }}</span>
+            <span class="motivacion-personaje">Inspirada en {{ frase.personaje }}</span>
             <span class="motivacion-anime">{{ frase.anime }}</span>
         </div>
     </div>
@@ -147,7 +143,7 @@
         <div class="motivacion-mini">
             <div class="motivacion-mini-fecha">{{ f.fecha_texto }}</div>
             <p class="motivacion-mini-frase">“{{ f.texto }}”</p>
-            <div class="motivacion-mini-autor">{{ f.personaje }} · {{ f.anime }}</div>
+            <div class="motivacion-mini-autor">Inspirada en {{ f.personaje }} · {{ f.anime }}</div>
         </div>
         {% endfor %}
     </div>

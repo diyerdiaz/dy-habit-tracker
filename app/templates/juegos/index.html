@@ -60,6 +60,79 @@
             </ul>
             {% endif %}
         </a>
+        {% set ahorcado = resumen.get('ahorcado') %}
+        <a href="{{ url_for('juegos.ahorcado') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+            <i class="bi bi-person-exclamation"></i>
+            <h3>Ahorcado</h3>
+            <p class="juego-desc">Adivina la palabra letra por letra. La pista es tu ejemplo en inglés.</p>
+            {% if total_ahorcado < minimo %}
+            <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
+            {% elif ahorcado %}
+            <ul class="juego-stats">
+                <li><span>{{ ahorcado.jugadas }}</span> {{ 'ronda' if ahorcado.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ ahorcado.precision }}%</span> precisión</li>
+                {% if ahorcado.mejor_tiempo is not none %}<li><span>{{ ahorcado.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
+        {% set patos = resumen.get('patos') %}
+        <a href="{{ url_for('juegos.patos') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
+            <svg class="pato-icono" viewBox="0 0 64 44" aria-hidden="true">
+                <ellipse cx="26" cy="27" rx="22" ry="13"/>
+                <path d="M6 24 L0 15 L14 19 Z"/>
+                <circle cx="47" cy="15" r="10"/>
+                <path d="M56 12 L64 16 L56 19 Z"/>
+                <path class="pato-icono-ala" d="M14 25 Q28 2 38 22 Z"/>
+                <circle class="pato-icono-ojo" cx="50" cy="13" r="2"/>
+            </svg>
+            <h3>Caza de patos</h3>
+            <p class="juego-desc">Dispárale al pato que lleva la palabra en inglés del significado.</p>
+            {% if patos %}
+            <ul class="juego-stats">
+                <li><span>{{ patos.jugadas }}</span> {{ 'ronda' if patos.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ patos.precision }}%</span> precisión</li>
+                {% if patos.mejor_tiempo is not none %}<li><span>{{ patos.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
+        {% set crucigrama = resumen.get('crucigrama') %}
+        <a href="{{ url_for('juegos.crucigrama') }}" class="ingles-card juego-card{% if total_crucigrama < minimo_crucigrama %} bloqueado{% endif %}">
+            <i class="bi bi-puzzle"></i>
+            <h3>Crucigrama</h3>
+            <p class="juego-desc">Escribe en inglés la palabra de cada significado y crúzalas.</p>
+            {% if total_crucigrama < minimo_crucigrama %}
+            <p class="juego-desc">Necesitas {{ minimo_crucigrama }} palabras de una sola pieza (tienes {{ total_crucigrama }}).</p>
+            {% elif crucigrama %}
+            <ul class="juego-stats">
+                <li><span>{{ crucigrama.jugadas }}</span> {{ 'ronda' if crucigrama.jugadas == 1 else 'rondas' }}</li>
+                <li><span>{{ crucigrama.precision }}%</span> precisión</li>
+                {% if crucigrama.mejor_tiempo is not none %}<li><span>{{ crucigrama.mejor_tiempo }}s</span> mejor ronda perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
+        {% set mono = resumen.get('mono') %}
+        <a href="{{ url_for('juegos.mono') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+            <svg class="pato-icono" viewBox="0 0 64 44" aria-hidden="true">
+                <circle cx="14" cy="20" r="8"/>
+                <circle cx="50" cy="20" r="8"/>
+                <circle cx="32" cy="22" r="20"/>
+                <path class="pato-icono-ala" d="M21 18 Q26 11 32 16 Q38 11 43 18 Q47 34 32 38 Q17 34 21 18 Z"/>
+                <circle cx="26" cy="21" r="2.5"/>
+                <circle cx="38" cy="21" r="2.5"/>
+                <path class="mono-icono-boca" d="M26 30 Q32 35 38 30"/>
+            </svg>
+            <h3>Carrera del mono</h3>
+            <p class="juego-desc">Completa la frase en inglés para saltar cada obstáculo.</p>
+            {% if total_ahorcado < minimo %}
+            <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
+            {% elif mono %}
+            <ul class="juego-stats">
+                <li><span>{{ mono.jugadas }}</span> {{ 'carrera' if mono.jugadas == 1 else 'carreras' }}</li>
+                <li><span>{{ mono.precision }}%</span> precisión</li>
+                {% if mono.mejor_tiempo is not none %}<li><span>{{ mono.mejor_tiempo }}s</span> mejor carrera perfecta</li>{% endif %}
+            </ul>
+            {% endif %}
+        </a>
     </div>
 </div>
 {% endblock %}

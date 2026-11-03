@@ -299,3 +299,557 @@ def test_armado_de_la_sopa_nunca_corta_ni_repite_palabras(tmp_path):
     resultado = json.loads(salida.stdout)
     assert resultado['tableros'] >= 350          # casi siempre logra armar el tablero
     assert resultado['problemas'] == []
+
+
+# ═══════════════ Ahorcado ═══════════════
+from app.routes.juegos_route import ejemplos_con_hueco, solo_letras, LETRAS_AHORCADO
+
+AHORCADO = [('give', 'dar', 'Please give me the book.'),
+            ('tell', 'decir', 'Can you tell me the truth?\r\nTell her now.'),
+            ('surprise', 'sorpresa', 'That party was a total surprise.'),
+            ('think', 'pensar', 'I think it is a great idea.'),
+            ('understanding', 'comprensión', 'Thanks for your understanding.'),
+            ('go', 'ir', 'We want to go.'),                     # muy corta
+            ('give up', 'rendirse', 'Never give up.'),          # dos piezas
+            ('know', 'saber', None),                            # sin ejemplo
+            ('run', 'correr', 'She is very fast.')]             # el ejemplo no la usa
+
+
+def _vocabulario_ahorcado(user, datos=AHORCADO):
+    for en, es, ejemplos in datos:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es, ejemplos=ejemplos))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_ahorcado(html):
+    bloque = re.search(r'<script type="application/json" id="ahorcadoPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_ahorcado(client, ids, **extra):
+    datos = {'ids': ids, 'errores': 3, 'segundos': 70, 'pistas': 1, **extra}
+    return client.post('/menu/ingles/juegos/ahorcado/resultado', json=datos)
+
+
+def test_que_palabras_sirven_para_el_ahorcado():
+    assert solo_letras('understanding', LETRAS_AHORCADO) == 'UNDERSTANDING'
+    for mala in ('go', 'give up', "don't", 'R2D2', ''):
+        assert solo_letras(mala, LETRAS_AHORCADO) is None, mala
+
+
+def test_la_pista_tapa_la_palabra_sin_importar_mayusculas():
+    assert ejemplos_con_hueco('tell', 'Can you tell me?\r\nTell her.') == ['Can you ____ me?', '____ her.']
+    assert ejemplos_con_hueco('give', 'She gives it and I give it.') == ['She ____ it and I ____ it.']
+
+
+def test_la_pista_descarta_lineas_sin_la_palabra():
+    assert ejemplos_con_hueco('run', 'She is fast.\nI run.') == ['I ____.']
+    assert ejemplos_con_hueco('run', 'She is fast.') == []
+    assert ejemplos_con_hueco('run', None) == []
+
+
+def test_ahorcado_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/ahorcado').status_code == 302
+
+
+def test_ahorcado_solo_manda_palabras_con_pista_en_ingles(logged_client, user):
+    _vocabulario_ahorcado(user)
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'id="juegoAhorcado"' in html and 'js/juegos.js' in html
+    datos = _palabras_ahorcado(html)
+    assert {p['letras'] for p in datos} == {'GIVE', 'TELL', 'SURPRISE', 'THINK', 'UNDERSTANDING'}
+    for palabra in datos:
+        assert set(palabra) == {'id', 'en', 'es', 'letras', 'pistas'}
+        # La pista nunca deja ver la palabra
+        assert all(palabra['en'].lower() not in pista.lower() and '____' in pista for pista in palabra['pistas'])
+
+
+def test_ahorcado_no_repite_palabras_iguales(logged_client, user):
+    _vocabulario_ahorcado(user, AHORCADO[:5] + [('Give', 'regalar', 'I give it.')])
+    datos = _palabras_ahorcado(logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True))
+    assert len(datos) == 5
+
+
+def test_ahorcado_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_ahorcado(user, AHORCADO[:3] + AHORCADO[5:])
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoAhorcado"' not in html
+    assert 'Tienes 3 de 7' in html
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'Necesitas 4 palabras de una sola pieza con ejemplo (tienes 3)' in menu
+
+
+def test_ahorcado_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_ahorcado(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='x', ejemplos='a secret here'))
+    db.session.commit()
+    html = logged_client.get('/menu/ingles/juegos/ahorcado').get_data(as_text=True)
+    assert 'SECRET' not in {p['letras'] for p in _palabras_ahorcado(html)}
+
+
+def test_guardar_ronda_de_ahorcado(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    respuesta = _enviar_ahorcado(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('ahorcado', 5, 3, 1, None, 70)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_ahorcado_invalido(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    for extra in ({'pistas': -1}, {'pistas': 6}, {'pistas': '1'}, {'pistas': True}):
+        assert _enviar_ahorcado(logged_client, ids, **extra).status_code == 400, extra
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_el_ahorcado(logged_client, user):
+    ids = list(_vocabulario_ahorcado(user).values())[:5]
+    _enviar_ahorcado(logged_client, ids, errores=0, pistas=0, segundos=45)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/ahorcado' in html
+    assert '45s</span> mejor ronda perfecta' in html
+
+
+SCRIPT_AHORCADO = r"""
+const { estadoAhorcado, VIDAS_AHORCADO } = require(process.argv[1]);
+const inicial = estadoAhorcado('TELL', new Set());
+const parcial = estadoAhorcado('TELL', new Set(['L', 'X']));
+const ganada = estadoAhorcado('TELL', new Set(['T', 'E', 'L']));
+const perdida = estadoAhorcado('TELL', new Set(['A', 'B', 'C', 'D', 'F', 'G']));
+console.log(JSON.stringify({ vidas: VIDAS_AHORCADO, inicial, parcial, ganada, perdida }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_reglas_del_ahorcado():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_AHORCADO, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['vidas'] == 6
+    assert r['inicial'] == {'casillas': ['', '', '', ''], 'errores': 0, 'ganada': False, 'perdida': False}
+    # Una letra repetida se revela en todas sus casillas
+    assert r['parcial'] == {'casillas': ['', '', 'L', 'L'], 'errores': 1, 'ganada': False, 'perdida': False}
+    assert r['ganada']['ganada'] and not r['ganada']['perdida']
+    assert r['perdida']['perdida'] and not r['perdida']['ganada']
+
+
+# ═══════════════ Caza de patos ═══════════════
+
+def _palabras_patos(html):
+    bloque = re.search(r'<script type="application/json" id="patosPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def test_patos_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/patos').status_code == 302
+
+
+def test_patos_trae_las_palabras_del_usuario(logged_client, user, other_user):
+    _vocabulario(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='secreto'))
+    db.session.commit()
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'id="juegoPatos"' in html and 'js/juegos.js' in html and 'css/juegos.css' in html
+    assert {p['en'] for p in _palabras_patos(html)} == {en for en, _ in PALABRAS}
+
+
+def test_patos_admite_frases_de_varias_palabras(logged_client, user):
+    _vocabulario(user)
+    db.session.add(Vocabulario(idUser=user.idUser, nombre='give up', significado='rendirse'))
+    db.session.commit()
+    datos = _palabras_patos(logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True))
+    assert 'give up' in {p['en'] for p in datos}
+
+
+def test_patos_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario(user, cuantas=3)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoPatos"' not in html
+
+
+def test_guardar_ronda_de_patos(logged_client, user):
+    ids = [p.idVocab for p in _vocabulario(user)][:6]
+    respuesta = logged_client.post('/menu/ingles/juegos/patos/resultado',
+                                   json={'ids': ids, 'errores': 2, 'segundos': 33})
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('patos', 6, 2, 0, None, 33)
+    assert _xp(user) == 0
+
+
+def test_menu_muestra_caza_de_patos(logged_client, user):
+    ids = [p.idVocab for p in _vocabulario(user)][:4]
+    logged_client.post('/menu/ingles/juegos/patos/resultado', json={'ids': ids, 'errores': 0, 'segundos': 25})
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/patos' in html and 'Caza de patos' in html
+    assert '25s</span> mejor ronda perfecta' in html
+
+
+def test_patos_no_usa_material_de_duck_hunt(logged_client, user):
+    _vocabulario(user)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'Duck Hunt' not in html and 'Nintendo' not in html
+    assert 'id="patoDibujo"' in html  # dibujo propio, sin imágenes externas
+
+
+# ═══════════════ Crucigrama ═══════════════
+from app.routes.juegos_route import LETRAS_CRUCIGRAMA
+
+CRUCI = [('borrow', 'pedir prestado'), ('enough', 'suficiente'), ('although', 'aunque'),
+         ('wear', 'llevar puesto'), ('learn', 'aprender'), ('break', 'romper'),
+         ('remember', 'recordar'), ('because', 'porque'), ('think', 'pensar'),
+         ('give up', 'rendirse'), ('go', 'ir'), ('understandings', 'comprensiones')]
+
+
+def _vocabulario_cruci(user, pares=CRUCI):
+    for en, es in pares:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_cruci(html):
+    bloque = re.search(r'<script type="application/json" id="cruciPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_cruci(client, ids, **extra):
+    datos = {'ids': ids, 'errores': 1, 'segundos': 120, 'pistas': 2, **extra}
+    return client.post('/menu/ingles/juegos/crucigrama/resultado', json=datos)
+
+
+def test_crucigrama_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/crucigrama').status_code == 302
+
+
+def test_crucigrama_solo_manda_palabras_que_caben(logged_client, user):
+    _vocabulario_cruci(user)
+    html = logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True)
+    assert 'id="juegoCrucigrama"' in html and 'js/juegos.js' in html
+    datos = _palabras_cruci(html)
+    assert all(LETRAS_CRUCIGRAMA[0] <= len(p['letras']) <= LETRAS_CRUCIGRAMA[1] for p in datos)
+    assert {p['en'] for p in datos} == {en for en, _ in CRUCI[:9]}  # sin frases, cortas ni muy largas
+    assert all(set(p) == {'id', 'en', 'es', 'letras'} for p in datos)
+
+
+def test_crucigrama_no_repite_palabras_iguales(logged_client, user):
+    _vocabulario_cruci(user, CRUCI[:6] + [('Borrow', 'tomar prestado')])
+    datos = _palabras_cruci(logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True))
+    assert len(datos) == 6
+
+
+def test_crucigrama_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_cruci(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='secreto'))
+    db.session.commit()
+    datos = _palabras_cruci(logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True))
+    assert 'SECRET' not in {p['letras'] for p in datos}
+
+
+def test_crucigrama_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_cruci(user, CRUCI[:5] + CRUCI[9:])
+    html = logged_client.get('/menu/ingles/juegos/crucigrama').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoCrucigrama"' not in html
+    assert 'Tienes 5 de 8' in html
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'Necesitas 6 palabras de una sola pieza (tienes 5)' in menu
+
+
+def test_guardar_crucigrama_de_ocho_palabras(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:8]
+    respuesta = _enviar_cruci(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('crucigrama', 8, 1, 2, None, 120)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_crucigrama_invalido(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())
+    assert _enviar_cruci(logged_client, ids[:9]).status_code == 400   # más de 8 palabras
+    assert _enviar_cruci(logged_client, ids[:3]).status_code == 400   # menos de 4
+    for extra in ({'pistas': -1}, {'pistas': 9}, {'pistas': '1'}, {'pistas': True}):
+        assert _enviar_cruci(logged_client, ids[:8], **extra).status_code == 400, extra
+    assert JuegoPartida.query.count() == 0
+
+
+def test_los_demas_juegos_siguen_con_seis_palabras_como_maximo(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:7]
+    assert _enviar(logged_client, ids).status_code == 400
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_el_crucigrama(logged_client, user):
+    ids = list(_vocabulario_cruci(user).values())[:6]
+    _enviar_cruci(logged_client, ids, errores=0, pistas=0, segundos=90)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/crucigrama' in html and 'bi-puzzle' in html
+    assert '90s</span> mejor ronda perfecta' in html
+
+
+SCRIPT_CRUCIGRAMA = r"""
+const { generarCrucigrama, DIRECCIONES_CRUCIGRAMA: DIRS, LADO_CRUCIGRAMA } = require(process.argv[1]);
+const conjuntos = [
+  ['BORROW', 'ENOUGH', 'ALTHOUGH', 'WEAR', 'LEARN', 'BREAK', 'REMEMBER', 'BECAUSE', 'THINK', 'TELL', 'KNOW', 'WHAT'],
+  ['NOW', 'MAKE', 'GIVE', 'GOING', 'FINE', 'SURPRISE', 'TELL', 'THINK', 'ANYTHING', 'WHAT', 'ARE', 'KNOW'],
+  ['ABCDEFGHIJKL', 'MNOPQRSTUVWX', 'LIE', 'WELL', 'JUST', 'REALLY', 'WAY', 'CHOOSE'],
+];
+const problemas = [];
+let tableros = 0, palabrasTotal = 0;
+const contar = (l) => { palabrasTotal += l; };
+for (const letras of conjuntos) {
+  const palabras = letras.map((l, id) => ({ id, letras: l }));
+  for (let vez = 0; vez < 150; vez++) {
+    const t = generarCrucigrama(palabras.slice().sort(() => Math.random() - 0.5), 8);
+    if (!t) { problemas.push(`sin tablero ${letras[0]}`); continue; }
+    tableros++;
+    contar(t.colocadas.length);
+    if (t.filas > LADO_CRUCIGRAMA || t.columnas > LADO_CRUCIGRAMA) problemas.push('demasiado grande');
+    if (t.colocadas.length < 4 || t.colocadas.length > 8) problemas.push(`salen ${t.colocadas.length}`);
+    const grilla = Array.from({ length: t.filas }, () => Array(t.columnas).fill(null));
+    const celdasDe = (c) => [...c.palabra.letras].map((_, i) => [c.fila + DIRS[c.dir][0] * i, c.columna + DIRS[c.dir][1] * i]);
+    for (const c of t.colocadas) {
+      celdasDe(c).forEach(([f, col], i) => {
+        if (f < 0 || col < 0 || f >= t.filas || col >= t.columnas) { problemas.push('fuera del tablero'); return; }
+        if (grilla[f][col] && grilla[f][col] !== c.palabra.letras[i]) problemas.push('cruce con letras distintas');
+        grilla[f][col] = c.palabra.letras[i];
+      });
+    }
+    // Toda línea de 2 letras o más debe ser una palabra del crucigrama: ni más ni menos
+    const esperadas = new Set(t.colocadas.map((c) => `${c.dir}:${c.fila},${c.columna}:${c.palabra.letras}`));
+    const halladas = new Set();
+    const recorrer = (dir, n1, n2, celda) => {
+      for (let a = 0; a < n1; a++) {
+        let inicio = null, texto = '';
+        for (let b = 0; b <= n2; b++) {
+          const l = b < n2 ? celda(a, b) : null;
+          if (l) { if (!texto) inicio = b; texto += l; }
+          else {
+            if (texto.length > 1) halladas.add(dir === 'h' ? `h:${a},${inicio}:${texto}` : `v:${inicio},${a}:${texto}`);
+            texto = '';
+          }
+        }
+      }
+    };
+    recorrer('h', t.filas, t.columnas, (f, c) => grilla[f][c]);
+    recorrer('v', t.columnas, t.filas, (c, f) => grilla[f][c]);
+    if ([...halladas].sort().join() !== [...esperadas].sort().join()) problemas.push('se formaron palabras de más');
+    // Todas conectadas entre sí
+    const vistos = new Set();
+    const pendientes = [t.colocadas[0]];
+    while (pendientes.length) {
+      const c = pendientes.pop();
+      if (vistos.has(c)) continue;
+      vistos.add(c);
+      const propias = new Set(celdasDe(c).map(String));
+      t.colocadas.filter((o) => !vistos.has(o) && celdasDe(o).some((x) => propias.has(String(x)))).forEach((o) => pendientes.push(o));
+    }
+    if (vistos.size !== t.colocadas.length) problemas.push('palabras sueltas');
+    // Números en orden de lectura; el mismo número solo para la misma casilla
+    const inicios = t.colocadas.slice().sort((a, b) => a.fila - b.fila || a.columna - b.columna);
+    if (new Set(inicios.map((c) => `${c.fila},${c.columna}`)).size !== Math.max(...inicios.map((c) => c.numero))) problemas.push('numeración');
+    inicios.reduce((prev, c) => { if (c.numero < prev) problemas.push('números desordenados'); return c.numero; }, 0);
+  }
+}
+const sinCruce = generarCrucigrama(['AAA', 'BBB', 'CCC', 'DDD'].map((letras, id) => ({ id, letras })), 8);
+console.log(JSON.stringify({ tableros, media: palabrasTotal / tableros, problemas: [...new Set(problemas)], sinCruce, vacio: generarCrucigrama([], 8) }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_armado_del_crucigrama_siempre_es_valido():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_CRUCIGRAMA, str(juegos_js)], capture_output=True, text=True, timeout=120)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['problemas'] == []
+    assert r['tableros'] == 450
+    assert r['media'] >= 6            # normalmente se logran tableros bien cruzados
+    assert r['sinCruce'] is None      # sin letras en común no hay crucigrama
+    assert r['vacio'] is None
+
+
+# ═══════════════ Carrera del mono ═══════════════
+from app.routes.juegos_route import OBSTACULOS_POR_CARRERA
+
+MONO = [(f'word{letra}', f'palabra {letra}', f'I use word{letra} here.') for letra in 'abcdefghijkl']
+
+
+def _vocabulario_mono(user, datos=MONO):
+    for en, es, ejemplos in datos:
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=en, significado=es, ejemplos=ejemplos))
+    db.session.commit()
+    return {p.nombre: p.idVocab for p in Vocabulario.query.filter_by(idUser=user.idUser).all()}
+
+
+def _palabras_mono(html):
+    bloque = re.search(r'<script type="application/json" id="monoPalabras">(.*?)</script>', html, re.S)
+    return json.loads(bloque.group(1))
+
+
+def _enviar_mono(client, ids, **extra):
+    return client.post('/menu/ingles/juegos/mono/resultado', json={'ids': ids, 'errores': 2, 'segundos': 80, **extra})
+
+
+def test_mono_requiere_login(client):
+    assert client.get('/menu/ingles/juegos/mono').status_code == 302
+
+
+def test_mono_manda_cada_frase_con_y_sin_hueco(logged_client, user):
+    # 'run' tiene una línea sin la palabra: las dos listas deben seguir alineadas
+    _vocabulario_mono(user, AHORCADO[:5] + [('run', 'correr', 'She is fast.\nI run daily.\nRun now!')])
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'id="juegoMono"' in html and 'js/juegos.js' in html
+    datos = {p['letras']: p for p in _palabras_mono(html)}
+    assert datos['RUN']['pistas'] == ['I ____ daily.', '____ now!']
+    assert datos['RUN']['frases'] == ['I run daily.', 'Run now!']
+    for palabra in datos.values():
+        assert set(palabra) == {'id', 'en', 'es', 'letras', 'pistas', 'frases'}
+        assert len(palabra['pistas']) == len(palabra['frases'])
+
+
+def test_mono_solo_lleva_palabras_con_ejemplo(logged_client, user):
+    _vocabulario_mono(user, AHORCADO)
+    datos = _palabras_mono(logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True))
+    assert {p['letras'] for p in datos} == {'GIVE', 'TELL', 'SURPRISE', 'THINK', 'UNDERSTANDING'}
+
+
+def test_mono_no_manda_palabras_de_otra_persona(logged_client, user, other_user):
+    _vocabulario_mono(user)
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre='secret', significado='x', ejemplos='a secret here'))
+    db.session.commit()
+    datos = _palabras_mono(logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True))
+    assert 'SECRET' not in {p['letras'] for p in datos}
+
+
+def test_mono_pide_mas_palabras_si_no_alcanzan(logged_client, user):
+    _vocabulario_mono(user, AHORCADO[:3] + AHORCADO[5:])
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'Necesitas al menos' in html and 'id="juegoMono"' not in html
+
+
+def test_guardar_carrera_de_diez_obstaculos(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())[:OBSTACULOS_POR_CARRERA]
+    respuesta = _enviar_mono(logged_client, ids)
+    assert respuesta.status_code == 200 and respuesta.get_json() == {'success': True}
+    partida = JuegoPartida.query.one()
+    assert (partida.juego, partida.parejas, partida.errores, partida.pistas, partida.nivel, partida.segundos) == \
+        ('mono', 10, 2, 0, None, 80)
+    assert _xp(user) == 0
+
+
+def test_resultado_de_mono_invalido(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())
+    assert _enviar_mono(logged_client, ids[:11]).status_code == 400
+    assert _enviar_mono(logged_client, ids[:3]).status_code == 400
+    assert JuegoPartida.query.count() == 0
+
+
+def test_menu_muestra_la_carrera_del_mono(logged_client, user):
+    ids = list(_vocabulario_mono(user).values())[:10]
+    _enviar_mono(logged_client, ids, errores=0, segundos=70)
+    html = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert '/menu/ingles/juegos/mono' in html and 'Carrera del mono' in html
+    assert '1</span> carrera' in html and '70s</span> mejor carrera perfecta' in html
+
+
+def test_mono_usa_dibujos_propios(logged_client, user):
+    _vocabulario_mono(user)
+    html = logged_client.get('/menu/ingles/juegos/mono').get_data(as_text=True)
+    assert 'id="monoPersonaje"' in html and 'Donkey' not in html
+
+
+SCRIPT_MONO = r"""
+const { segundosMono, ganaBanana, VIDAS_MONO, LIANAS } = require(process.argv[1]);
+console.log(JSON.stringify({
+  tiempos: [0, 1, 5, 9, 30].map(segundosMono),
+  bananas: [0, 1, 2, 3, 4, 6, 9].map(ganaBanana),
+  vidas: VIDAS_MONO, lianas: LIANAS,
+}));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_reglas_de_la_carrera_del_mono():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_MONO, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['tiempos'] == [10, 9.5, 7.5, 5.5, 5]    # siempre queda tiempo para leer
+    assert r['bananas'] == [False, False, False, True, False, True, True]
+    assert (r['vidas'], r['lianas']) == (3, 3)
+
+
+def test_tarjeta_de_patos_lleva_su_dibujo(logged_client, user):
+    _vocabulario(user)
+    menu = logged_client.get('/menu/ingles/juegos/').get_data(as_text=True)
+    assert 'class="pato-icono"' in menu
+    juego = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'bi-crosshair' not in menu + juego  # no existe en Bootstrap Icons 1.10.5
+
+
+def test_patos_trae_escopeta_y_capa_de_efectos(logged_client, user):
+    _vocabulario(user)
+    html = logged_client.get('/menu/ingles/juegos/patos').get_data(as_text=True)
+    assert 'id="patosEscopeta"' in html and 'id="patosEfectos"' in html
+    # Fuera del cielo: al cambiar de pato se vacía y se llevaría la escopeta con él
+    assert re.search(r'id="patosCielo"></div>\s*<div class="patos-efectos"', html)
+    css = logged_client.get('/static/css/juegos.css').get_data(as_text=True)
+    assert css.count('pointer-events: none') >= 2  # nunca le roban el clic a los patos
+
+
+SCRIPT_PATOS = r"""
+const { opcionesPatos, duracionPato, anguloEscopeta, VIDAS_PATOS, PATOS_EN_PANTALLA } = require(process.argv[1]);
+const palabras = [
+  { id: 1, en: 'give', es: 'dar' }, { id: 2, en: 'offer', es: 'Dar ' }, { id: 3, en: 'take', es: 'tomar' },
+  { id: 4, en: 'run', es: 'correr' }, { id: 5, en: 'eat', es: 'comer' }, { id: 6, en: 'GIVE', es: 'regalar' },
+  { id: 7, en: 'read', es: 'leer' },
+];
+const problemas = [];
+for (let vez = 0; vez < 500; vez++) {
+  for (const objetivo of palabras) {
+    const op = opcionesPatos(objetivo, palabras, PATOS_EN_PANTALLA);
+    if (!op.includes(objetivo)) problemas.push('falta el correcto');
+    if (op.length !== PATOS_EN_PANTALLA) problemas.push(`salen ${op.length}`);
+    const en = op.map((p) => p.en.trim().toLowerCase());
+    const es = op.map((p) => p.es.trim().toLowerCase());
+    if (new Set(en).size !== en.length) problemas.push('palabra repetida');
+    if (new Set(es).size !== es.length) problemas.push('significado repetido');
+  }
+}
+const pocas = opcionesPatos(palabras[0], palabras.slice(0, 3), PATOS_EN_PANTALLA).length;
+const tiempos = [0, 1, 2, 3, 4, 5, 20].map(duracionPato);
+const o = { x: 100, y: 100 };
+const angulos = {
+  arriba: anguloEscopeta(o, { x: 100, y: 0 }),
+  derecha45: anguloEscopeta(o, { x: 200, y: 0 }),
+  izquierda45: anguloEscopeta(o, { x: 0, y: 0 }),
+  topeDerecha: anguloEscopeta(o, { x: 900, y: 100 }),
+  topeIzquierda: anguloEscopeta(o, { x: -900, y: 100 }),
+  debajo: anguloEscopeta(o, { x: 100, y: 300 }),
+};
+console.log(JSON.stringify({ problemas: [...new Set(problemas)], pocas, tiempos, vidas: VIDAS_PATOS, angulos }));
+"""
+
+
+@pytest.mark.skipif(NODE is None, reason='Node no está instalado')
+def test_opciones_y_velocidad_de_los_patos():
+    juegos_js = Path(__file__).resolve().parent.parent / 'static' / 'js' / 'juegos.js'
+    salida = subprocess.run([NODE, '-e', SCRIPT_PATOS, str(juegos_js)], capture_output=True, text=True, timeout=30)
+    assert salida.returncode == 0, salida.stderr
+    r = json.loads(salida.stdout)
+    assert r['problemas'] == []
+    assert r['pocas'] == 2           # 'offer' significa lo mismo que 'give': no puede salir
+    assert r['vidas'] == 3
+    assert r['tiempos'] == sorted(r['tiempos'], reverse=True) and r['tiempos'][-1] == 4.5  # con tope
+    a = r['angulos']
+    assert a['arriba'] == 0
+    assert a['derecha45'] == pytest.approx(45) and a['izquierda45'] == pytest.approx(-45)
+    # Nunca gira de más, ni apuntando abajo de la escopeta
+    assert a['topeDerecha'] == 70 and a['topeIzquierda'] == -70 and a['debajo'] == 70

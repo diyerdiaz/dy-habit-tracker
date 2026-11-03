@@ -1,0 +1,18 @@
+<div class="frase-dia-fondo" id="fraseDia" data-fecha="{{ tarjeta_dia.fecha }}"
+     role="dialog" aria-modal="true" aria-label="Frase del día" hidden>
+    <div class="motivacion-card frase-dia-card">
+        <button type="button" class="frase-dia-cerrar" data-cerrar-frase aria-label="Cerrar">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="motivacion-icono"><i class="bi {{ tarjeta_dia.frase.icono }}"></i></div>
+        <i class="bi bi-quote motivacion-comillas"></i>
+        <p class="frase-dia-titulo">Frase del día</p>
+        <blockquote class="motivacion-frase">{{ tarjeta_dia.frase.texto }}</blockquote>
+        <div class="motivacion-autor">
+            <span class="motivacion-personaje">Inspirada en {{ tarjeta_dia.frase.personaje }}</span>
+            <span class="motivacion-anime">{{ tarjeta_dia.frase.anime }}</span>
+        </div>
+        <p class="frase-dia-reto"><i class="bi bi-bullseye"></i> {{ tarjeta_dia.reto }}</p>
+        <button type="button" class="frase-dia-btn" data-cerrar-frase>¡A seguir adelante!</button>
+    </div>
+</div>
