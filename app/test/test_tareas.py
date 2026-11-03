@@ -126,9 +126,9 @@ def test_proximas_de_otro_usuario_no_se_ven(logged_client, user, other_user):
     assert 'Ajena' not in logged_client.get('/tareas/').get_data(as_text=True)
 
 
-def test_completar_y_borrar_tarea_programada(logged_client, user):
+def test_tarea_programada_no_se_marca_pero_se_borra(logged_client, user):
     id_tarea = _agregar(logged_client, 'Futura', (HOY() + timedelta(days=3)).isoformat()).get_json()['id']
-    assert logged_client.post(f'/tareas/{id_tarea}/toggle').get_json()['completada'] is True
+    assert logged_client.post(f'/tareas/{id_tarea}/toggle').status_code == 400
     assert logged_client.post(f'/tareas/{id_tarea}/delete').get_json()['success']
     assert db.session.get(Tarea, id_tarea) is None
 
@@ -214,3 +214,42 @@ def test_hora_texto():
     assert Tarea(horaRecordatorio='00:05').hora_texto() == '12:05 a. m.'
     assert Tarea(horaRecordatorio='12:00').hora_texto() == '12:00 p. m.'
     assert Tarea(horaRecordatorio=None).hora_texto() == ''
+
+
+def test_tamano_de_letra_ajustable(logged_client, user):
+    html = logged_client.get('/tareas/').get_data(as_text=True)
+    assert 'id="letraMenos"' in html and 'id="letraMas"' in html
+
+    js = logged_client.get('/static/js/tareas.js').get_data(as_text=True)
+    assert "setProperty('--tarea-escala'" in js
+    assert 'localStorage.setItem(CLAVE_LETRA' in js
+
+    css = logged_client.get('/static/css/tareas.css').get_data(as_text=True)
+    assert 'var(--tarea-escala, 1)' in css
+    # Ya no corta palabras por la mitad ("habitacio / n")
+    texto = css[css.index('.tarea-text {'):]
+    texto = texto[:texto.index('}')]
+    assert 'word-break: break-word' not in texto and 'overflow-wrap: break-word' in texto
+
+
+def test_no_se_puede_marcar_una_tarea_de_otro_dia(logged_client, user):
+    hoy_id = _agregar(logged_client, 'De hoy').get_json()['id']
+    manana_id = _agregar(logged_client, 'De mañana', (HOY() + timedelta(days=1)).isoformat()).get_json()['id']
+
+    respuesta = logged_client.post(f'/tareas/{manana_id}/toggle')
+    assert respuesta.status_code == 400 and 'otro día' in respuesta.get_json()['error']
+    assert db.session.get(Tarea, manana_id).completada is False
+
+    assert logged_client.post(f'/tareas/{hoy_id}/toggle').get_json()['completada'] is True
+
+    # En la página, la de mañana sale marcada como futura y la de hoy no
+    html = logged_client.get('/tareas/').get_data(as_text=True)
+    assert f'futura" data-id="{manana_id}"' in html
+    assert f'futura" data-id="{hoy_id}"' not in html
+
+
+def test_la_tarea_de_manana_se_puede_marcar_cuando_llega_su_dia(logged_client, user):
+    tarea = Tarea(idUser=user.idUser, descripcion='Era de mañana', fecha=HOY())
+    db.session.add(tarea)
+    db.session.commit()
+    assert logged_client.post(f'/tareas/{tarea.idTarea}/toggle').get_json()['completada'] is True

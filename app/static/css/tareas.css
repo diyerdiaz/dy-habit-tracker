@@ -124,9 +124,10 @@
     color: #fff;
     font-style: italic;
     font-weight: 600;
-    font-size: 1.02rem;
+    font-size: calc(1.02rem * var(--tarea-escala, 1));
+    line-height: 1.35;
     transition: 0.25s ease;
-    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .tarea-item.done .tarea-text {
@@ -187,6 +188,7 @@
 .tareas-hist-toggle-row {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin: 0 0 16px 0;
 }
 
@@ -725,4 +727,58 @@
 
 .tareas-aviso[hidden] {
     display: none;
+}
+
+/* ── Tamaño de letra de las tareas (A− / A+), lo guarda tareas.js ── */
+.tareas-letra {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    padding: 4px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.tareas-letra-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.tareas-letra-btn:hover:not(:disabled) {
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.18);
+    color: #fff;
+}
+
+.tareas-letra-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.tareas-letra-menos { font-size: 0.8rem; }
+.tareas-letra-mas { font-size: 1.05rem; }
+
+/* En el celular: menos relleno y botones más chicos para que el texto tenga espacio */
+@media (max-width: 480px) {
+    .tareas-card { padding: 8px; border-radius: 18px; }
+    .tarea-item { gap: 10px; padding: 10px 8px; }
+    .tarea-circle { width: 26px; height: 26px; }
+    .tarea-text { font-size: calc(0.9rem * var(--tarea-escala, 1)); }
+    .tarea-acciones { gap: 4px; }
+    .tarea-btn, .tarea-delete { width: 30px; height: 30px; font-size: 0.85rem; }
+}
+
+/* Tareas de días futuros: no se pueden marcar todavía */
+.tarea-item.futura { cursor: default; }
+.tarea-item.futura .tarea-circle {
+    border-style: dashed;
+    opacity: 0.45;
 }
