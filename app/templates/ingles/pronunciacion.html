@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Pronunciación{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pronunciacion.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('ingles.ingles') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Inglés
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Speak Up 🇺🇸</span>
+        <h1 class="ingles-title">Pronunciación</h1>
+        <p class="ingles-desc">Pega un texto en inglés, toca Iniciar y léelo en voz alta: las palabras se pintan de verde si las dijiste bien y de rojo si no.</p>
+    </div>
+
+    <p class="pron-aviso" id="pronAviso" role="status" hidden></p>
+
+    <!-- La carpeta: pestaña arriba y el texto adentro -->
+    <section class="pron-carpeta fade-in-section" id="pronCarpeta">
+        <div class="pron-pestana">
+            <i class="bi bi-folder2-open"></i> Mi texto
+        </div>
+        <div class="pron-hoja">
+            <textarea id="pronTexto" class="pron-textarea" rows="7" maxlength="3000"
+                      placeholder="Pega o escribe aquí tu texto en inglés..." aria-label="Texto en inglés"></textarea>
+            <div class="pron-palabras" id="pronPalabras" hidden></div>
+        </div>
+    </section>
+
+    <div class="pron-controles fade-in-section">
+        <button type="button" class="btn btn-vocab-accent fw-bold pron-btn-mic" id="pronIniciar">
+            <i class="bi bi-mic-fill"></i> <span>Iniciar</span>
+        </button>
+        <button type="button" class="btn pron-btn-sec" id="pronEditar" hidden>
+            <i class="bi bi-pencil"></i> Editar texto
+        </button>
+        <button type="button" class="btn pron-btn-sec" id="pronReiniciar" hidden>
+            <i class="bi bi-arrow-counterclockwise"></i> Otra vez
+        </button>
+    </div>
+
+    <div class="pron-resultado fade-in-section" id="pronResultado" hidden>
+        <div class="pron-puntaje">
+            <span class="pron-num pron-num-bien" id="pronBien">0</span> bien
+            <span class="pron-num pron-num-mal" id="pronMal">0</span> mal
+            <span class="pron-num pron-num-falta" id="pronFalta">0</span> faltan
+            <strong class="pron-porcentaje" id="pronPorcentaje">0 %</strong>
+        </div>
+        <div class="pron-barra"><div class="pron-barra-relleno" id="pronBarra"></div></div>
+        <p class="pron-escuche"><i class="bi bi-ear"></i> Lo que escuché: <span id="pronEscuche">—</span></p>
+        <p class="pron-ayuda">Toca una palabra para escuchar cómo se pronuncia.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pronunciacion.js') }}"></script>
+{% endblock %}

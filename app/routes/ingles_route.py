@@ -39,6 +39,12 @@ def palabras_aleatorias():
         letras_flotantes=letras_flotantes,
     )
 
+@bp.route('/pronunciacion')
+@login_required
+def pronunciacion():
+    letras_flotantes = get_letras_flotantes(current_user.idUser)
+    return render_template('ingles/pronunciacion.html', letras_flotantes=letras_flotantes)
+
 @bp.route('/shadowing')
 @login_required
 def shadowing():
