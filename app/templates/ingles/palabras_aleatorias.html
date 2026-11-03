@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Palabras Aleatorias{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vocabulario.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/palabras_aleatorias.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include 'ingles/_sidebar_ingles.html' %}
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <a href="{{ url_for('ingles.ingles') }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a Inglés
+        </a>
+        <span class="ingles-flag-badge">🇬🇧 Random Words 🇺🇸</span>
+        <h1 class="ingles-title">Palabras Aleatorias</h1>
+        <p class="ingles-desc">Elige cuántas palabras quieres y arma una frase en inglés con cada una.</p>
+    </div>
+
+    <form method="get" action="{{ url_for('ingles.palabras_aleatorias') }}" class="vocab-setup-card palabras-setup fade-in-section">
+        <h3>¿Cuántas palabras?</h3>
+        <input type="number" name="cantidad" id="palabrasCantidad" class="form-control palabras-input"
+               min="{{ minimo }}" max="{{ maximo }}" value="{{ cantidad }}" required>
+        <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">
+            <i class="bi bi-shuffle"></i> {% if palabras %}Otra tanda{% else %}Iniciar{% endif %}
+        </button>
+    </form>
+
+    {% if palabras %}
+    <p class="palabras-ayuda fade-in-section">Toca una palabra cuando ya hayas hecho tu frase con ella.</p>
+    <p class="palabras-progreso fade-in-section"><span id="palabrasHechas">0</span> / {{ palabras|length }} frases</p>
+    <div class="palabras-grid fade-in-section">
+        {% for p in palabras %}
+        <button type="button" class="ingles-card palabras-card">
+            <span class="palabras-numero">{{ loop.index }}</span>
+            <h3>{{ p.palabra }}</h3>
+            <p class="palabras-significado">{{ p.significado }}</p>
+            <i class="bi bi-check-circle-fill palabras-check"></i>
+        </button>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/palabras_aleatorias.js') }}"></script>
+{% endblock %}

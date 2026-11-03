@@ -5,6 +5,9 @@ from flask import url_for
 from app.services.ingles import (
     calcular_rango, get_letras_flotantes, RANGOS_VOCABULARIO, RANGOS_DOMINIO,
 )
+from app.services.palabras_aleatorias import (
+    palabras_aleatorias, normalizar_cantidad, PALABRAS_INGLES, MAXIMO_PALABRAS,
+)
 from app.models.vocabulario import Vocabulario
 from app import db
 
@@ -20,6 +23,7 @@ PAGINAS = [
     "/menu/ingles/vocabulario/aprender",
     "/menu/ingles/vocabulario/rango",
     "/menu/ingles/vocabulario/historial",
+    "/menu/ingles/palabras-aleatorias",
 ]
 
 
@@ -74,3 +78,56 @@ def test_calcular_rango():
     assert actual["nombre"] == "Aprendiz" and pct == 50 and faltan == 25
     actual, siguiente, pct, faltan = calcular_rango(100, RANGOS_DOMINIO)
     assert actual["nombre"] == "Dominado" and siguiente is None and (pct, faltan) == (100, 0)
+
+
+def test_ingles_muestra_tarjeta_de_palabras_aleatorias(logged_client):
+    html = logged_client.get("/menu/ingles").get_data(as_text=True)
+    assert 'href="/menu/ingles/palabras-aleatorias"' in html
+    assert "Palabras aleatorias" in html
+
+
+def test_palabras_aleatorias_sin_cantidad_muestra_solo_el_formulario(logged_client):
+    html = logged_client.get("/menu/ingles/palabras-aleatorias").get_data(as_text=True)
+    assert 'name="cantidad"' in html
+    assert "Iniciar" in html
+    assert "palabras-card" not in html
+
+
+def test_palabras_aleatorias_muestra_la_cantidad_pedida(logged_client):
+    html = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=7").get_data(as_text=True)
+    assert html.count('class="ingles-card palabras-card"') == 7
+    assert "Otra tanda" in html
+
+
+@pytest.mark.parametrize("valor, esperado", [("0", 1), ("-3", 1), ("500", MAXIMO_PALABRAS)])
+def test_palabras_aleatorias_limita_la_cantidad(logged_client, valor, esperado):
+    html = logged_client.get(f"/menu/ingles/palabras-aleatorias?cantidad={valor}").get_data(as_text=True)
+    assert html.count('class="ingles-card palabras-card"') == esperado
+
+
+def test_palabras_aleatorias_ignora_cantidad_no_numerica(logged_client):
+    respuesta = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=abc")
+    assert respuesta.status_code == 200
+    assert "palabras-card" not in respuesta.get_data(as_text=True)
+
+
+def test_normalizar_cantidad():
+    assert normalizar_cantidad("5") == 5
+    assert normalizar_cantidad(None) is None
+    assert normalizar_cantidad("x") is None
+    assert normalizar_cantidad("0") == 1
+    assert normalizar_cantidad("999") == MAXIMO_PALABRAS
+
+
+def test_palabras_aleatorias_no_se_repiten_y_vienen_de_la_lista():
+    elegidas = palabras_aleatorias(MAXIMO_PALABRAS)
+    nombres = [p["palabra"] for p in elegidas]
+    assert len(nombres) == MAXIMO_PALABRAS == len(set(nombres))
+    lista = dict(PALABRAS_INGLES)
+    assert all(lista[p["palabra"]] == p["significado"] for p in elegidas)
+
+
+def test_lista_de_palabras_sin_repetidas_y_suficiente():
+    nombres = [palabra for palabra, _ in PALABRAS_INGLES]
+    assert len(nombres) == len(set(nombres))
+    assert len(nombres) >= MAXIMO_PALABRAS
