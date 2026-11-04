@@ -128,9 +128,9 @@ calSiguiente.addEventListener('click', () => {
 });
 
 // Mismo HTML que templates/tareas/_tarea_item.html
-function crearItem(id, descripcion) {
+function crearItem(id, descripcion, fecha) {
     const item = document.createElement('div');
-    item.className = 'tarea-item';
+    item.className = fecha > HOY ? 'tarea-item futura' : 'tarea-item';
     item.dataset.id = id;
     item.dataset.hora = '';
     item.innerHTML = `
@@ -274,10 +274,14 @@ function attachTareaHandlers(item) {
 
     item.addEventListener('click', () => {
         if (item.classList.contains('editando')) return;
+        if (item.classList.contains('futura')) {
+            avisar('Esta tarea es de otro día: podrás marcarla cuando llegue.', 'error');
+            return;
+        }
         fetch(`/tareas/${id}/toggle`, { method: 'POST' })
             .then(res => res.json())
             .then(data => {
-                if (!data.success) return;
+                if (!data.success) { avisar(data.error || 'No se pudo actualizar la tarea.', 'error'); return; }
                 item.classList.toggle('done', data.completada);
             })
             .catch(() => alert('No se pudo actualizar la tarea.'));
@@ -328,7 +332,7 @@ addForm.addEventListener('submit', function (e) {
                 alert(data.error || 'No se pudo agregar la tarea.');
                 return;
             }
-            const item = crearItem(data.id, data.descripcion);
+            const item = crearItem(data.id, data.descripcion, data.fecha);
             sumarConteo(data.fecha, 1);
             if (data.esHoy) {
                 tareasList.appendChild(item);
@@ -376,3 +380,26 @@ if (historialSelect) {
         });
     });
 }
+
+// ── Tamaño de letra de las tareas: se guarda en este navegador ──
+const ESCALAS_LETRA = [0.75, 0.85, 1, 1.15, 1.3];
+const CLAVE_LETRA = 'tareas-escala-letra';
+const tareasWrapper = document.querySelector('.tareas-wrapper');
+const letraMenos = document.getElementById('letraMenos');
+const letraMas = document.getElementById('letraMas');
+let nivelLetra = ESCALAS_LETRA.indexOf(1);
+try {
+    const guardado = parseInt(localStorage.getItem(CLAVE_LETRA), 10);
+    if (guardado >= 0 && guardado < ESCALAS_LETRA.length) nivelLetra = guardado;
+} catch (e) { /* sin almacenamiento */ }
+
+function aplicarLetra() {
+    tareasWrapper.style.setProperty('--tarea-escala', ESCALAS_LETRA[nivelLetra]);
+    letraMenos.disabled = nivelLetra === 0;
+    letraMas.disabled = nivelLetra === ESCALAS_LETRA.length - 1;
+    try { localStorage.setItem(CLAVE_LETRA, nivelLetra); } catch (e) { /* sin almacenamiento */ }
+}
+
+letraMenos.addEventListener('click', () => { if (nivelLetra > 0) { nivelLetra--; aplicarLetra(); } });
+letraMas.addEventListener('click', () => { if (nivelLetra < ESCALAS_LETRA.length - 1) { nivelLetra++; aplicarLetra(); } });
+aplicarLetra();

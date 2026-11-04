@@ -103,6 +103,9 @@ def add():
 @login_required
 def toggle(tarea_id):
     tarea = Tarea.query.filter_by(idTarea=tarea_id, idUser=current_user.idUser).first_or_404()
+    # Cada día va por separado: una tarea de mañana (o después) se marca ese día, no antes
+    if tarea.fecha > date.today():
+        return jsonify({'success': False, 'error': 'Esta tarea es de otro día: podrás marcarla cuando llegue.'}), 400
     tarea.completada = not tarea.completada
     db.session.commit()
     return jsonify({'success': True, 'completada': tarea.completada})

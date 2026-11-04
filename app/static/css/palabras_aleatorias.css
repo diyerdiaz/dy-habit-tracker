@@ -1,0 +1,89 @@
+/* Palabras aleatorias: usa los colores azules de ingles.css y vocabulario.css */
+
+.palabras-setup {
+    margin-bottom: 35px;
+}
+
+.palabras-input {
+    margin: 18px 0;
+    text-align: center;
+    font-size: 1.4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(13, 110, 253, 0.4);
+    color: #fff;
+}
+
+.palabras-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #4dabff;
+    box-shadow: 0 0 12px rgba(77, 171, 255, 0.4);
+    color: #fff;
+}
+
+.palabras-ayuda {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-bottom: 4px;
+}
+
+.palabras-progreso {
+    text-align: center;
+    color: #4dabff;
+    font-style: italic;
+    margin-bottom: 25px;
+}
+
+.palabras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto 60px auto;
+}
+
+/* Las tarjetas son <button>: quitar el estilo del navegador */
+.palabras-card {
+    width: 100%;
+    padding: 28px 16px;
+    font: inherit;
+}
+
+.palabras-card h3 {
+    font-size: 1.6rem;
+}
+
+.palabras-numero {
+    position: absolute !important;
+    top: 10px;
+    left: 14px;
+    color: rgba(169, 209, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.palabras-significado {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.palabras-card i.palabras-check {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 1.2rem;
+    color: #00e676;
+    opacity: 0;
+    animation: none;
+    transition: opacity 0.3s;
+}
+
+.palabras-card.hecha {
+    background: rgba(0, 230, 118, 0.08);
+    border-color: rgba(0, 230, 118, 0.4);
+}
+
+.palabras-card.hecha i.palabras-check {
+    opacity: 1;
+}

@@ -1,0 +1,246 @@
+/* Pronunciación: usa los colores azules de ingles.css y vocabulario.css */
+
+.pron-aviso {
+    max-width: 640px;
+    margin: 0 auto 16px auto;
+    padding: 10px 16px;
+    border-radius: 12px;
+    text-align: center;
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid rgba(255, 170, 0, 0.4);
+    color: #ffd27a;
+}
+
+/* ── La carpeta ── */
+.pron-carpeta {
+    position: relative;
+    max-width: 760px;
+    margin: 30px auto 24px auto;
+    padding-top: 38px;
+}
+
+.pron-pestana {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    padding: 0 26px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-weight: 700;
+    font-style: italic;
+    background: linear-gradient(135deg, #0d6efd, #0099ff);
+    border-radius: 14px 14px 0 0;
+    clip-path: polygon(0 0, 86% 0, 100% 100%, 0 100%);
+    box-shadow: 0 -4px 16px rgba(13, 110, 253, 0.3);
+}
+
+.pron-hoja {
+    position: relative;
+    min-height: 220px;
+    padding: 24px;
+    border-radius: 0 18px 18px 18px;
+    background:
+        linear-gradient(rgba(13, 110, 253, 0.12), rgba(13, 110, 253, 0.06)),
+        rgba(8, 18, 38, 0.94);
+    border: 2px solid rgba(13, 110, 253, 0.55);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(13, 110, 253, 0.08);
+}
+
+/* Borde de papel que asoma detrás, como hojas dentro de la carpeta */
+.pron-hoja::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 12%;
+    right: 3%;
+    height: 12px;
+    border-radius: 6px 6px 0 0;
+    background: rgba(169, 209, 255, 0.18);
+    z-index: -1;
+}
+
+.pron-textarea {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.pron-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+.pron-palabras {
+    text-align: left;
+    font-size: 1.25rem;
+    line-height: 2.1;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.pron-palabra {
+    display: inline;
+    padding: 2px 4px;
+    margin: 0 1px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.pron-palabra:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pron-palabra.bien {
+    color: #00e676;
+    background: rgba(0, 230, 118, 0.12);
+}
+
+.pron-palabra.mal {
+    color: #ff5c5c;
+    background: rgba(255, 92, 92, 0.14);
+    text-decoration: underline wavy rgba(255, 92, 92, 0.6);
+    text-underline-offset: 5px;
+}
+
+.pron-palabra.sonando {
+    outline: 2px solid #4dabff;
+}
+
+/* ── Botones ── */
+.pron-controles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.pron-controles .btn {
+    width: auto;
+    flex: 0 1 auto;
+}
+
+.pron-btn-mic {
+    min-width: 170px;
+    padding: 12px 26px;
+    border-radius: 30px;
+}
+
+.pron-btn-mic.grabando {
+    background: linear-gradient(135deg, #ff3b5c, #ff6b6b);
+    animation: pron-pulso 1.4s ease-in-out infinite;
+}
+
+@keyframes pron-pulso {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 92, 0.55); }
+    50% { box-shadow: 0 0 0 12px rgba(255, 59, 92, 0); }
+}
+
+.pron-btn-sec {
+    padding: 12px 22px;
+    border-radius: 30px;
+    color: #a9d1ff;
+    border: 1px solid rgba(13, 110, 253, 0.45);
+    background: rgba(13, 110, 253, 0.08);
+}
+
+.pron-btn-sec:hover {
+    color: #fff;
+    background: rgba(13, 110, 253, 0.2);
+}
+
+/* ── Resultado ── */
+.pron-resultado {
+    max-width: 760px;
+    margin: 0 auto 60px auto;
+    padding: 20px 24px;
+    border-radius: 18px;
+    background: rgba(13, 110, 253, 0.08);
+    border: 1px solid rgba(13, 110, 253, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.pron-puntaje {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+
+.pron-num {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.pron-num-bien { color: #00e676; }
+.pron-num-mal { color: #ff5c5c; }
+.pron-num-falta { color: rgba(255, 255, 255, 0.5); }
+
+.pron-porcentaje {
+    margin-left: auto;
+    font-size: 1.5rem;
+    color: #4dabff;
+}
+
+.pron-barra {
+    height: 8px;
+    margin: 12px 0 14px 0;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.pron-barra-relleno {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #00c853, #00e676);
+    transition: width 0.3s ease;
+}
+
+.pron-escuche {
+    margin-bottom: 4px;
+    font-style: italic;
+}
+
+.pron-escuche span {
+    color: #a9d1ff;
+}
+
+.pron-ayuda {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 480px) {
+    .pron-hoja { padding: 16px; }
+    .pron-palabras { font-size: 1.05rem; line-height: 1.95; }
+    .pron-textarea { font-size: 1rem; }
+    .pron-porcentaje { margin-left: 0; width: 100%; }
+}
+
+/* .btn de Bootstrap pisa el atributo hidden */
+.pron-controles [hidden],
+.pron-resultado[hidden] {
+    display: none !important;
+}
+
+/* Que las letras flotantes del fondo no pasen por encima de la carpeta ni del resultado */
+.pron-carpeta,
+.pron-controles,
+.pron-resultado {
+    position: relative;
+    z-index: 2;
+}
+.pron-resultado {
+    background: rgba(8, 18, 38, 0.92);
+}

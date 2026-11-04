@@ -8,6 +8,10 @@ from app.services.ingles import (
     get_letras_flotantes, calcular_rango,
     RANGOS_VOCABULARIO, RANGOS_DOMINIO, MINIMO_CALIFICACIONES_DOMINIO,
 )
+from app.services.palabras_aleatorias import (
+    palabras_aleatorias as elegir_palabras_aleatorias, normalizar_cantidad,
+    MINIMO_PALABRAS, MAXIMO_PALABRAS, CANTIDAD_POR_DEFECTO,
+)
 from collections import defaultdict
 from datetime import date, timedelta
 from math import ceil
@@ -19,6 +23,27 @@ bp = Blueprint('ingles', __name__, url_prefix='/menu/ingles')
 def ingles():
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     return render_template('ingles/index.html', letras_flotantes=letras_flotantes)
+
+@bp.route('/palabras-aleatorias')
+@login_required
+def palabras_aleatorias():
+    letras_flotantes = get_letras_flotantes(current_user.idUser)
+    cantidad = normalizar_cantidad(request.args.get('cantidad'))
+    palabras = elegir_palabras_aleatorias(cantidad) if cantidad else []
+    return render_template(
+        'ingles/palabras_aleatorias.html',
+        palabras=palabras,
+        cantidad=cantidad or CANTIDAD_POR_DEFECTO,
+        minimo=MINIMO_PALABRAS,
+        maximo=MAXIMO_PALABRAS,
+        letras_flotantes=letras_flotantes,
+    )
+
+@bp.route('/pronunciacion')
+@login_required
+def pronunciacion():
+    letras_flotantes = get_letras_flotantes(current_user.idUser)
+    return render_template('ingles/pronunciacion.html', letras_flotantes=letras_flotantes)
 
 @bp.route('/shadowing')
 @login_required

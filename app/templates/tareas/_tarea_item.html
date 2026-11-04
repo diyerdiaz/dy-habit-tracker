@@ -1,5 +1,5 @@
 {# Una tarea de la lista (hoy o mañana). tareas.js arma el mismo HTML al agregar una nueva. #}
-<div class="tarea-item{{ ' done' if tarea.completada else '' }}" data-id="{{ tarea.idTarea }}" data-hora="{{ tarea.horaRecordatorio or '' }}">
+<div class="tarea-item{{ ' done' if tarea.completada else '' }}{{ ' futura' if tarea.fecha.isoformat() > hoy else '' }}" data-id="{{ tarea.idTarea }}" data-hora="{{ tarea.horaRecordatorio or '' }}">
     <div class="tarea-circle"><i class="bi bi-check-lg"></i></div>
     <div class="tarea-cuerpo">
         <div class="tarea-text">{{ tarea.descripcion }}</div>
