@@ -24,9 +24,18 @@
         </a>
         <span class="ingles-flag-badge">🇬🇧 Random Words 🇺🇸</span>
         <h1 class="ingles-title">Palabras Aleatorias</h1>
-        <p class="ingles-desc">Elige cuántas palabras quieres y arma una frase en inglés con cada una.</p>
+        <p class="ingles-desc">Elige cuántas palabras de tu vocabulario quieres y arma una frase en inglés con cada una.</p>
     </div>
 
+    {% if total_vocabulario == 0 %}
+    <div class="vocab-setup-card palabras-setup palabras-vacio fade-in-section">
+        <h3>Tu vocabulario está vacío</h3>
+        <p>Las palabras salen de tu vocabulario. Agrega algunas y vuelve aquí para practicar.</p>
+        <a href="{{ url_for('ingles.vocabulario') }}" class="btn w-100 btn-vocab-accent fw-bold">
+            <i class="bi bi-plus-circle"></i> Agregar vocabulario
+        </a>
+    </div>
+    {% else %}
     <form method="get" action="{{ url_for('ingles.palabras_aleatorias') }}" class="vocab-setup-card palabras-setup fade-in-section">
         <h3>¿Cuántas palabras?</h3>
         <input type="number" name="cantidad" id="palabrasCantidad" class="form-control palabras-input"
@@ -34,8 +43,12 @@
         <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">
             <i class="bi bi-shuffle"></i> {% if palabras %}Otra tanda{% else %}Iniciar{% endif %}
         </button>
+        <p class="palabras-total">Tienes {{ total_vocabulario }} palabra{{ 's' if total_vocabulario != 1 }} en tu vocabulario.</p>
     </form>
 
+    {% if palabras and pedidas > palabras|length %}
+    <p class="palabras-aviso fade-in-section">Pediste {{ pedidas }}, pero solo tienes {{ palabras|length }} en tu vocabulario: te salen todas.</p>
+    {% endif %}
     {% if palabras %}
     <p class="palabras-ayuda fade-in-section">Toca una palabra cuando ya hayas hecho tu frase con ella.</p>
     <p class="palabras-progreso fade-in-section"><span id="palabrasHechas">0</span> / {{ palabras|length }} frases</p>
@@ -49,6 +62,7 @@
         </button>
         {% endfor %}
     </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}

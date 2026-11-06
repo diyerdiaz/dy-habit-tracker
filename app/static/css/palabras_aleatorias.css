@@ -87,3 +87,22 @@
 .palabras-card.hecha i.palabras-check {
     opacity: 1;
 }
+
+/* ── Lo que sale del vocabulario del usuario ── */
+.palabras-total {
+    margin: 12px 0 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.palabras-aviso {
+    text-align: center;
+    color: #ffc76b;
+    margin-bottom: 10px;
+}
+
+.palabras-vacio p {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 12px 0 18px;
+}
