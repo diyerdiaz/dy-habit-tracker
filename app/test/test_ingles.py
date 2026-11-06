@@ -70,6 +70,29 @@ def test_letras_flotantes_usan_vocabulario_del_usuario(app, user):
         assert get_letras_flotantes(user.idUser) == ["Tree"] * 10
 
 
+def test_letras_flotantes_salen_al_azar_de_todo_el_vocabulario(app, user, other_user):
+    for k in range(30):
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=f"word{k}", significado="x"))
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre="ajena", significado="x"))
+    db.session.commit()
+    vistas = set()
+    for _ in range(20):
+        letras = get_letras_flotantes(user.idUser)
+        assert len(letras) == 10 == len(set(letras))
+        assert "ajena" not in letras
+        vistas.update(letras)
+    # No son siempre las 10 primeras: aparecen palabras de más adelante
+    assert len(vistas) > 10 and vistas - {f"word{k}" for k in range(10)}
+
+
+def test_letras_flotantes_con_pocas_palabras_las_repite(app, user):
+    for nombre in ("Tree", "Sky", "Sun"):
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=nombre, significado="x"))
+    db.session.commit()
+    letras = get_letras_flotantes(user.idUser)
+    assert len(letras) == 10 and set(letras) == {"Tree", "Sky", "Sun"}
+
+
 def test_calcular_rango():
     actual, siguiente, pct, faltan = calcular_rango(0, RANGOS_VOCABULARIO)
     assert actual["nombre"] == "Novato" and siguiente["nombre"] == "Aprendiz"
