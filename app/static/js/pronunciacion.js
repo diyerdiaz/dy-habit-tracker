@@ -72,6 +72,7 @@ if (typeof document !== 'undefined') {
     const textarea = document.getElementById('pronTexto');
     const cajaPalabras = document.getElementById('pronPalabras');
     const btnIniciar = document.getElementById('pronIniciar');
+    const btnEscuchar = document.getElementById('pronEscuchar');
     const btnEditar = document.getElementById('pronEditar');
     const btnReiniciar = document.getElementById('pronReiniciar');
     const resultado = document.getElementById('pronResultado');
@@ -84,6 +85,9 @@ if (typeof document !== 'undefined') {
 
     let spans = [];          // una <span> por palabra del texto
     let objetivo = [];       // las mismas palabras, normalizadas
+    let inicios = [];        // dónde empieza cada palabra dentro del texto (para seguir la lectura)
+    let textoArmado = '';    // el texto que se está practicando
+    let lectura = null;      // la lectura en voz alta de todo el texto, si está sonando
     let textoAnterior = '';  // lo escuchado en tandas anteriores del micrófono
     let textoTanda = '';     // lo ya confirmado en la tanda actual
     let grabando = false;
@@ -119,19 +123,26 @@ if (typeof document !== 'undefined') {
         cajaPalabras.textContent = '';
         spans = [];
         objetivo = [];
+        inicios = [];
+        textoArmado = texto;
+        let posicion = 0;
         texto.split(/(\s+)/).forEach((trozo) => {
             if (!trozo) return;
             if (/^\s+$/.test(trozo)) {
                 cajaPalabras.appendChild(document.createTextNode(trozo.includes('\n') ? '\n' : ' '));
+                posicion += trozo.length;
                 return;
             }
             // "well-known" son dos palabras al hablar
             trozo.split(/(?<=[\-–—])/).forEach((parte) => {
+                const inicio = posicion;
+                posicion += parte.length;
                 const norm = normalizar(parte);
                 if (!norm) {
                     cajaPalabras.appendChild(document.createTextNode(parte));
                     return;
                 }
+                inicios.push(inicio);
                 const span = document.createElement('span');
                 span.className = 'pron-palabra';
                 span.textContent = parte;
@@ -169,6 +180,11 @@ if (typeof document !== 'undefined') {
         }
         if (!window.speechSynthesis) return;
         speechSynthesis.cancel();
+        if (lectura) {
+            lectura = null;
+            marcarSonando(null);
+            ponerBotonEscuchar();
+        }
         const voz = new SpeechSynthesisUtterance(span.textContent.replace(/[^\w'’\-]/g, ''));
         voz.lang = 'en-US';
         voz.rate = 0.85;
@@ -176,6 +192,59 @@ if (typeof document !== 'undefined') {
         voz.onend = voz.onerror = () => span.classList.remove('sonando');
         speechSynthesis.speak(voz);
     }
+
+    function ponerBotonEscuchar() {
+        btnEscuchar.querySelector('i').className = lectura ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
+        btnEscuchar.querySelector('span').textContent = lectura ? 'Parar' : 'Escuchar';
+    }
+
+    function marcarSonando(span) {
+        spans.forEach((s) => s.classList.toggle('sonando', s === span));
+    }
+
+    // Lee todo el texto en inglés; si ya está en palabras, va marcando la que suena
+    function escucharTodo() {
+        if (lectura) {
+            speechSynthesis.cancel();
+            return;
+        }
+        if (grabando) {
+            avisar('Detén el micrófono para escuchar el texto.');
+            return;
+        }
+        const practicando = !cajaPalabras.hidden;
+        const texto = practicando ? textoArmado : textarea.value.trim();
+        if (!texto) {
+            avisar('Primero pega un texto en inglés dentro de la carpeta.');
+            textarea.focus();
+            return;
+        }
+        avisar('');
+        speechSynthesis.cancel();
+        const voz = new SpeechSynthesisUtterance(texto);
+        voz.lang = 'en-US';
+        voz.rate = 0.9;
+        if (practicando) {
+            voz.onboundary = (evento) => {
+                if (evento.name && evento.name !== 'word') return;
+                let k = -1;
+                while (k + 1 < inicios.length && inicios[k + 1] <= evento.charIndex) k++;
+                marcarSonando(spans[k]);
+            };
+        }
+        voz.onend = voz.onerror = () => {
+            if (lectura !== voz) return;  // ya la reemplazó otra lectura
+            lectura = null;
+            marcarSonando(null);
+            ponerBotonEscuchar();
+        };
+        lectura = voz;
+        ponerBotonEscuchar();
+        speechSynthesis.speak(voz);
+    }
+
+    if (!window.speechSynthesis) btnEscuchar.hidden = true;
+    btnEscuchar.addEventListener('click', escucharTodo);
 
     function mostrarCarpeta(practicando) {
         textarea.hidden = practicando;
