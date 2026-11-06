@@ -1,20 +1,22 @@
 """Lógica de la sección Inglés: fondo animado y rangos de vocabulario."""
+import random
+
 from app.models.vocabulario import Vocabulario
 
 
 def get_letras_flotantes(id_user):
-    """Palabras del usuario para el fondo animado de la sección Inglés.
-    Si aún no tiene vocabulario agregado, usa un set genérico por defecto."""
-    nombres = [p.nombre for p in Vocabulario.query.filter_by(idUser=id_user).all()]
+    """Palabras del usuario para el fondo animado de la sección Inglés, elegidas al azar
+    en cada visita. Si aún no tiene vocabulario agregado, usa un set genérico por defecto."""
+    nombres = list({p.nombre for p in Vocabulario.query.filter_by(idUser=id_user).all()})
     if not nombres:
         nombres = ['Hello', 'ABC', 'Learn', 'Yes', 'Go', 'Book', 'Fast', 'Easy', 'Words', 'English']
 
-    letras = []
-    i = 0
-    while len(letras) < 10:
-        letras.append(nombres[i % len(nombres)])
-        i += 1
-    return letras
+    if len(nombres) >= 10:
+        return random.sample(nombres, 10)
+    # Con menos de 10 palabras se repiten, pero en orden revuelto
+    letras = nombres * (10 // len(nombres) + 1)
+    random.shuffle(letras)
+    return letras[:10]
 
 
 # Rangos por cantidad de palabras agregadas, escalados hacia una meta real de 3,650 palabras

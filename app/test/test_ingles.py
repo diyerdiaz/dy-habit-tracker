@@ -6,7 +6,7 @@ from app.services.ingles import (
     calcular_rango, get_letras_flotantes, RANGOS_VOCABULARIO, RANGOS_DOMINIO,
 )
 from app.services.palabras_aleatorias import (
-    palabras_aleatorias, normalizar_cantidad, PALABRAS_INGLES, MAXIMO_PALABRAS,
+    palabras_aleatorias, normalizar_cantidad, total_vocabulario, MAXIMO_PALABRAS,
 )
 from app.models.vocabulario import Vocabulario
 from app import db
@@ -70,6 +70,29 @@ def test_letras_flotantes_usan_vocabulario_del_usuario(app, user):
         assert get_letras_flotantes(user.idUser) == ["Tree"] * 10
 
 
+def test_letras_flotantes_salen_al_azar_de_todo_el_vocabulario(app, user, other_user):
+    for k in range(30):
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=f"word{k}", significado="x"))
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre="ajena", significado="x"))
+    db.session.commit()
+    vistas = set()
+    for _ in range(20):
+        letras = get_letras_flotantes(user.idUser)
+        assert len(letras) == 10 == len(set(letras))
+        assert "ajena" not in letras
+        vistas.update(letras)
+    # No son siempre las 10 primeras: aparecen palabras de más adelante
+    assert len(vistas) > 10 and vistas - {f"word{k}" for k in range(10)}
+
+
+def test_letras_flotantes_con_pocas_palabras_las_repite(app, user):
+    for nombre in ("Tree", "Sky", "Sun"):
+        db.session.add(Vocabulario(idUser=user.idUser, nombre=nombre, significado="x"))
+    db.session.commit()
+    letras = get_letras_flotantes(user.idUser)
+    assert len(letras) == 10 and set(letras) == {"Tree", "Sky", "Sun"}
+
+
 def test_calcular_rango():
     actual, siguiente, pct, faltan = calcular_rango(0, RANGOS_VOCABULARIO)
     assert actual["nombre"] == "Novato" and siguiente["nombre"] == "Aprendiz"
@@ -86,29 +109,62 @@ def test_ingles_muestra_tarjeta_de_palabras_aleatorias(logged_client):
     assert "Palabras aleatorias" in html
 
 
-def test_palabras_aleatorias_sin_cantidad_muestra_solo_el_formulario(logged_client):
+def _agregar_vocabulario(usuario, cantidad):
+    for k in range(cantidad):
+        db.session.add(Vocabulario(idUser=usuario.idUser, nombre=f"word{k}", significado=f"palabra{k}"))
+    db.session.commit()
+
+
+def test_palabras_aleatorias_sin_cantidad_muestra_solo_el_formulario(logged_client, user):
+    _agregar_vocabulario(user, 3)
     html = logged_client.get("/menu/ingles/palabras-aleatorias").get_data(as_text=True)
     assert 'name="cantidad"' in html
     assert "Iniciar" in html
     assert "palabras-card" not in html
+    assert "Tienes 3 palabras en tu vocabulario" in html
 
 
-def test_palabras_aleatorias_muestra_la_cantidad_pedida(logged_client):
+def test_palabras_aleatorias_muestra_la_cantidad_pedida(logged_client, user):
+    _agregar_vocabulario(user, 10)
     html = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=7").get_data(as_text=True)
     assert html.count('class="ingles-card palabras-card"') == 7
     assert "Otra tanda" in html
+    assert "solo tienes" not in html
 
 
 @pytest.mark.parametrize("valor, esperado", [("0", 1), ("-3", 1), ("500", MAXIMO_PALABRAS)])
-def test_palabras_aleatorias_limita_la_cantidad(logged_client, valor, esperado):
+def test_palabras_aleatorias_limita_la_cantidad(logged_client, user, valor, esperado):
+    _agregar_vocabulario(user, MAXIMO_PALABRAS + 5)
     html = logged_client.get(f"/menu/ingles/palabras-aleatorias?cantidad={valor}").get_data(as_text=True)
     assert html.count('class="ingles-card palabras-card"') == esperado
 
 
-def test_palabras_aleatorias_ignora_cantidad_no_numerica(logged_client):
+def test_palabras_aleatorias_ignora_cantidad_no_numerica(logged_client, user):
+    _agregar_vocabulario(user, 3)
     respuesta = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=abc")
     assert respuesta.status_code == 200
     assert "palabras-card" not in respuesta.get_data(as_text=True)
+
+
+def test_palabras_aleatorias_salen_del_vocabulario_del_usuario(logged_client, user):
+    db.session.add(Vocabulario(idUser=user.idUser, nombre="Overwhelmed", significado="Abrumado"))
+    db.session.commit()
+    html = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=1").get_data(as_text=True)
+    assert "Overwhelmed" in html and "Abrumado" in html
+
+
+def test_palabras_aleatorias_con_menos_vocabulario_que_lo_pedido(logged_client, user):
+    _agregar_vocabulario(user, 2)
+    html = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=5").get_data(as_text=True)
+    assert html.count('class="ingles-card palabras-card"') == 2
+    assert "Pediste 5, pero solo tienes 2" in html
+
+
+def test_palabras_aleatorias_sin_vocabulario_invita_a_agregar(logged_client):
+    html = logged_client.get("/menu/ingles/palabras-aleatorias?cantidad=5").get_data(as_text=True)
+    assert "Tu vocabulario está vacío" in html
+    assert 'href="/menu/ingles/vocabulario"' in html
+    assert "palabras-card" not in html and 'name="cantidad"' not in html
 
 
 def test_normalizar_cantidad():
@@ -119,15 +175,19 @@ def test_normalizar_cantidad():
     assert normalizar_cantidad("999") == MAXIMO_PALABRAS
 
 
-def test_palabras_aleatorias_no_se_repiten_y_vienen_de_la_lista():
-    elegidas = palabras_aleatorias(MAXIMO_PALABRAS)
-    nombres = [p["palabra"] for p in elegidas]
-    assert len(nombres) == MAXIMO_PALABRAS == len(set(nombres))
-    lista = dict(PALABRAS_INGLES)
-    assert all(lista[p["palabra"]] == p["significado"] for p in elegidas)
+def test_palabras_aleatorias_no_se_repiten_y_vienen_del_vocabulario(user, other_user):
+    _agregar_vocabulario(user, 6)
+    db.session.add(Vocabulario(idUser=user.idUser, nombre=" WORD0 ", significado="repetida"))
+    db.session.add(Vocabulario(idUser=other_user.idUser, nombre="ajena", significado="de otro"))
+    db.session.commit()
+    elegidas = palabras_aleatorias(user.idUser, MAXIMO_PALABRAS)
+    nombres = [p["palabra"].strip().lower() for p in elegidas]
+    assert len(nombres) == 6 == len(set(nombres))
+    assert "ajena" not in nombres
+    assert total_vocabulario(user.idUser) == 6
+    assert total_vocabulario(other_user.idUser) == 1
 
 
-def test_lista_de_palabras_sin_repetidas_y_suficiente():
-    nombres = [palabra for palabra, _ in PALABRAS_INGLES]
-    assert len(nombres) == len(set(nombres))
-    assert len(nombres) >= MAXIMO_PALABRAS
+def test_palabras_aleatorias_sin_vocabulario_devuelve_vacio(user):
+    assert palabras_aleatorias(user.idUser, 5) == []
+    assert total_vocabulario(user.idUser) == 0

@@ -68,3 +68,24 @@ def test_sin_hablar_todo_queda_pendiente():
 def test_avisa_que_brave_no_sirve(logged_client):
     js = logged_client.get('/static/js/pronunciacion.js').get_data(as_text=True)
     assert 'navigator.brave' in js and 'Brave no permite el reconocimiento de voz' in js
+
+
+# ── Escuchar todo el texto en voz alta ──
+
+def test_pagina_tiene_el_boton_escuchar(logged_client):
+    html = logged_client.get('/menu/ingles/pronunciacion').get_data(as_text=True)
+    assert 'id="pronEscuchar"' in html and 'bi-volume-up-fill' in html and 'Escuchar' in html
+
+
+def test_lee_todo_el_texto_en_ingles_y_sigue_la_palabra(logged_client):
+    js = logged_client.get('/static/js/pronunciacion.js').get_data(as_text=True)
+    assert 'function escucharTodo' in js and 'new SpeechSynthesisUtterance(texto)' in js
+    assert 'onboundary' in js and "getElementById('pronEscuchar')" in js
+
+
+def test_el_js_sigue_cargando_en_node_con_el_boton_escuchar():
+    if not shutil.which('node'):
+        pytest.skip('node no está instalado')
+    salida = subprocess.run(['node', '-e', f"console.log(Object.keys(require({json.dumps(str(JS))})).join())"],
+                            capture_output=True, text=True, check=True)
+    assert salida.stdout.strip() == 'normalizar,palabrasDichas,comparar'

@@ -9,7 +9,7 @@ from app.services.ingles import (
     RANGOS_VOCABULARIO, RANGOS_DOMINIO, MINIMO_CALIFICACIONES_DOMINIO,
 )
 from app.services.palabras_aleatorias import (
-    palabras_aleatorias as elegir_palabras_aleatorias, normalizar_cantidad,
+    palabras_aleatorias as elegir_palabras_aleatorias, normalizar_cantidad, total_vocabulario,
     MINIMO_PALABRAS, MAXIMO_PALABRAS, CANTIDAD_POR_DEFECTO,
 )
 from collections import defaultdict
@@ -29,10 +29,12 @@ def ingles():
 def palabras_aleatorias():
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     cantidad = normalizar_cantidad(request.args.get('cantidad'))
-    palabras = elegir_palabras_aleatorias(cantidad) if cantidad else []
+    palabras = elegir_palabras_aleatorias(current_user.idUser, cantidad) if cantidad else []
     return render_template(
         'ingles/palabras_aleatorias.html',
         palabras=palabras,
+        pedidas=cantidad,
+        total_vocabulario=total_vocabulario(current_user.idUser),
         cantidad=cantidad or CANTIDAD_POR_DEFECTO,
         minimo=MINIMO_PALABRAS,
         maximo=MAXIMO_PALABRAS,
