@@ -689,3 +689,12 @@ def test_panel_del_admin_tiene_margen_en_el_celular(app):
         css = f.read()
     celular = css.split('@media (max-width: 600px) {')[-1]
     assert celular.lstrip().split('\n')[1].strip() == '.adm { padding-left: 16px; padding-right: 16px; }'
+
+
+def test_admin_no_pausa_un_habito_completado(admin_client, user):
+    completado = _habito(user, 'Maratón', estado='Completado')
+    resp = admin_client.post(_url_habito(user, completado, 'pausar'), follow_redirects=True)
+    assert 'no se puede pausar' in resp.get_data(as_text=True)
+    assert db.session.get(Habit, completado.idHabit).habitState == 'Completado'
+    html = admin_client.get(f'/admin/usuarios/{user.idUser}').get_data(as_text=True)
+    assert _url_habito(user, completado, 'pausar') not in html and '>Completado<' in html

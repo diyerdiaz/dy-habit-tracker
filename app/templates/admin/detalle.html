@@ -38,14 +38,16 @@
         {% for h, _, _ in habitos %}
         <div class="adm-accion">
             <div>
-                <strong>{{ h.habitName }}</strong>{% if h.habitState == 'Pausado' %} <span class="adm-insignia">Pausado</span>{% endif %}
+                <strong>{{ h.habitName }}</strong>{% if h.habitState != 'Activo' %} <span class="adm-insignia">{{ h.habitState }}</span>{% endif %}
                 <p class="adm-tenue">{{ h.dias_texto() }} · {{ h.habitCategory }}</p>
             </div>
             <div class="adm-botones">
+                {% if h.habitState in ('Activo', 'Pausado') %}
                 <form method="post" action="{{ url_for('admin.pausar_habito_usuario', id_user=e.id, id_habit=h.idHabit) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="adm-boton">{{ 'Reanudar' if h.habitState == 'Pausado' else 'Pausar' }}</button>
                 </form>
+                {% endif %}
                 <form method="post" action="{{ url_for('admin.eliminar_habito_usuario', id_user=e.id, id_habit=h.idHabit) }}"
                       data-confirmar="¿Eliminar «{{ h.habitName }}»? Se quitan los días que se marcó este mes; los meses anteriores y el XP se conservan.">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -107,7 +109,7 @@
                 <label><input type="radio" name="modo_apuesta" value="cantidad" checked> Una cantidad</label>
                 <label><input type="radio" name="modo_apuesta" value="todo"> Todo su XP <span class="adm-tenue">({{ e.xp }} XP hoy; cuenta el que tenga al aceptar)</span></label>
             </fieldset>
-            <p class="adm-tenue adm-ayuda">Si cumple todos los días gana lo apostado; si un día no marca "Cumplí hoy", lo pierde. Con todo su XP: gana el doble o se queda en 0.</p>
+            <p class="adm-tenue adm-ayuda">Si cumple todos los días gana lo apostado; si un día no marca "Cumplí hoy", lo pierde. Con todo su XP: lo duplica o pierde lo que tenía al aceptar.</p>
             <button type="submit" class="adm-boton">Enviar reto</button>
         </form>
         {% for r in retos %}

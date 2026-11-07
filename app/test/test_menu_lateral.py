@@ -64,7 +64,9 @@ def test_en_el_celular_el_aviso_va_debajo_de_los_botones_sin_tapar_el_texto(app)
     bloque = css.split('@media (max-width: 768px) {\n    .avisos {', 1)[1].split('}', 1)[0]
     # Ocupa su propio espacio (no flota encima de la página) y empieza debajo del menú (20 a 65 px)
     assert 'position: fixed' not in bloque
-    assert 'padding-top: 52px;' in bloque and 'margin: 0 12px 12px;' in bloque
+    assert 'margin: 0 12px 12px;' in bloque
+    # El espacio para no quedar bajo los botones solo va en páginas que tienen el menú
+    assert 'body:has(#sidebarToggle) .avisos { padding-top: 52px; }' in css
 
 
 def test_al_cerrarse_el_aviso_se_encoge(app):

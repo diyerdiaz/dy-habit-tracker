@@ -88,6 +88,9 @@ def pausar_habito_usuario(id_user, id_habit):
     """Pausa o reanuda un hábito del usuario, aunque su plan del mes esté cerrado."""
     user = _usuario_normal(id_user)
     habito = Habit.visibles(user.idUser).filter_by(idHabit=id_habit).first_or_404()
+    if habito.habitState not in ('Activo', 'Pausado'):
+        flash(f'"{habito.habitName}" está {habito.habitState.lower()}: no se puede pausar.', 'warning')
+        return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='habitos'))
     if pausar_habito(habito) == 'Pausado':
         flash(f'"{habito.habitName}" quedó pausado: no le cuenta como pendiente.', 'info')
     else:

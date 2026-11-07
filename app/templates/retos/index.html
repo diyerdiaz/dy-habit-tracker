@@ -173,7 +173,7 @@
                 {% if reto.estado == 'Pendiente' %}
                 {% if reto.todoXp %}
                 <p class="reto-aviso">Este reto es <strong>todo o nada</strong>: apuestas <strong>todo tu XP</strong> ({{ xp }} XP ahora).
-                    Si cumples todos los días lo duplicas; si un día no lo cumples, te quedas en <strong>0 XP</strong>.
+                    Si cumples todos los días lo duplicas; si un día no lo cumples, pierdes <strong>esos {{ xp }} XP</strong>.
                     Si lo rechazas no pierdes nada.</p>
                 {% else %}
                 <p class="reto-aviso">Si aceptas y cumples todos los días ganas <strong>+{{ reto.apuesta }} XP</strong>.

@@ -1471,14 +1471,14 @@ body {
    empuja la página hacia abajo en vez de quedar encima del texto. */
 @media (max-width: 768px) {
     .avisos {
-        /* El contenedor ya baja 24px: 24 + 52 = 76px, debajo de los botones. Va como
-           padding y no como margin porque el margin se juntaba con el del contenedor */
-        padding-top: 52px;
         margin: 0 12px 12px;
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
+    /* Solo en páginas con el botón del menú: el contenedor ya baja 24px, 24 + 52 = 76px,
+       debajo de los botones. Va como padding porque el margin se juntaba con el del contenedor */
+    body:has(#sidebarToggle) .avisos { padding-top: 52px; }
     .avisos .flash-message.alert {
         margin: 0;
         font-size: 0.95rem;
