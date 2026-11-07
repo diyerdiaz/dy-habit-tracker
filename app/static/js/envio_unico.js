@@ -16,7 +16,8 @@
         form.querySelectorAll('button[type="submit"], button:not([type]), input[type="submit"]').forEach(function (boton) {
             boton.classList.add('enviando');
             boton.setAttribute('aria-disabled', 'true');
-            if (boton.tagName === 'BUTTON') {
+            // Sin cargando.js (panel del admin) el botón queda deshabilitado, sin puntos
+            if (boton.tagName === 'BUTTON' && window.puntosCargando) {
                 boton.dataset.textoOriginal = boton.innerHTML;
                 boton.innerHTML = window.puntosCargando('chico') + '<span class="visually-hidden">Procesando…</span>';
             }

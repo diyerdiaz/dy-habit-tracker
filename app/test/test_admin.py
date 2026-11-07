@@ -1,5 +1,6 @@
 """Rol de administrador: solo ve su panel (/admin) con los usuarios y sus estadísticas."""
-from datetime import date, timedelta
+import os
+from datetime import date, datetime, timedelta
 
 import pytest
 
@@ -404,6 +405,42 @@ def test_login_conserva_el_efecto_del_mouse(client):
     assert 'js/cursor.js' in client.get('/').get_data(as_text=True)
 
 
+def test_admin_sin_puntos_de_carga(admin_client):
+    for url in ('/admin/', '/admin/perfil'):
+        assert 'js/cargando.js' not in admin_client.get(url).get_data(as_text=True), url
+
+
+def test_usuario_normal_conserva_los_puntos_de_carga(logged_client):
+    for url in ('/dashboard', '/tareas/'):
+        assert 'js/cargando.js' in logged_client.get(url).get_data(as_text=True), url
+
+
+def test_login_conserva_los_puntos_de_carga(client):
+    assert 'js/cargando.js' in client.get('/').get_data(as_text=True)
+
+
+def test_envio_unico_funciona_sin_puntos_de_carga(app):
+    # En el admin no se carga cargando.js: el botón no debe depender de puntosCargando
+    with open(os.path.join(app.static_folder, 'js', 'envio_unico.js'), encoding='utf-8') as f:
+        assert "window.puntosCargando) {" in f.read()
+
+
+def test_avisos_del_admin_sin_color_del_tema(app):
+    with open(os.path.join(app.static_folder, 'css', 'admin.css'), encoding='utf-8') as f:
+        css = f.read()
+    assert '.flash-message.alert {' in css
+    bloque = css.split('.flash-message.alert {', 1)[1].split('}', 1)[0]
+    assert 'background: #141418' in bloque and 'box-shadow: none' in bloque
+    assert '--tema' not in bloque
+
+
+def test_aviso_del_admin_usa_su_hoja_de_estilos(admin_client):
+    with admin_client.session_transaction() as s:
+        s['_flashes'] = [('success', 'Aviso de prueba')]
+    html = admin_client.get('/admin/').get_data(as_text=True)
+    assert 'Aviso de prueba' in html and 'css/admin.css' in html
+
+
 # ── Admin desde variables de entorno (ADMIN_USUARIO / ADMIN_CONTRASENA) ──
 
 def test_admin_del_entorno_se_crea_al_arrancar(app):
@@ -537,3 +574,111 @@ def test_detalle_muestra_los_habitos_del_dia_elegido(admin_client, user):
     manana = (date.today() + timedelta(days=1)).isoformat()
     html = admin_client.get(f'/admin/usuarios/{user.idUser}?fecha={manana}').get_data(as_text=True)
     assert f'value="{date.today().isoformat()}"' in html
+
+
+# ── Pausar y eliminar hábitos de un usuario ──
+
+def _url_habito(user, habito, accion):
+    return f'/admin/usuarios/{user.idUser}/habitos/{habito.idHabit}/{accion}'
+
+
+def test_admin_pausa_y_reanuda_un_habito(admin_client, user):
+    habito = _habito(user)
+    respuesta = admin_client.post(_url_habito(user, habito, 'pausar'))
+    assert respuesta.status_code == 302 and respuesta.headers['Location'].endswith('#habitos')
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Pausado'
+    admin_client.post(_url_habito(user, habito, 'pausar'))
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Activo'
+
+
+def test_pausar_no_borra_lo_marcado_ni_el_xp(admin_client, user):
+    from app.services.gamificacion import get_or_create_progress
+    habito = _habito(user)
+    _marcar(user, habito, date.today())
+    get_or_create_progress(user.idUser).xpTotal = 40
+    db.session.commit()
+    admin_client.post(_url_habito(user, habito, 'pausar'))
+    assert HistHabit.query.filter_by(idHabit=habito.idHabit).count() == 1
+    assert _xp(user) == 40
+
+
+def test_admin_pausa_aunque_el_plan_del_mes_este_cerrado(admin_client, user):
+    from app.models.plan_mensual import PlanMensual
+    hoy = date.today()
+    db.session.add(PlanMensual(idUser=user.idUser, anio=hoy.year, mes=hoy.month))
+    habito = _habito(user)
+    admin_client.post(_url_habito(user, habito, 'pausar'))
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Pausado'
+
+
+def test_admin_elimina_un_habito_y_sus_dias_del_mes(admin_client, user):
+    from app.services.gamificacion import get_or_create_progress
+    habito = _habito(user)
+    _marcar(user, habito, date.today())
+    get_or_create_progress(user.idUser).xpTotal = 40
+    db.session.commit()
+    respuesta = admin_client.post(_url_habito(user, habito, 'eliminar'), follow_redirects=True)
+    assert 'y 1 día(s) marcados este mes' in respuesta.get_data(as_text=True)
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Eliminado'
+    assert HistHabit.query.filter_by(idHabit=habito.idHabit).count() == 0
+    assert _xp(user) == 40   # el XP ganado se conserva
+    # Ya no aparece para pausar, anotar ni volver a eliminar
+    html = admin_client.get(f'/admin/usuarios/{user.idUser}').get_data(as_text=True)
+    assert 'Leer' not in html
+    assert admin_client.post(_url_habito(user, habito, 'eliminar')).status_code == 404
+
+
+def test_eliminar_conserva_los_meses_anteriores(app, user):
+    from app.models.habito_mes import HabitoMes
+    from app.services.estadisticas import estadisticas_del_mes
+    hoy = date(2026, 11, 15)
+    habito = _habito(user)
+    habito.createdAt = datetime(2026, 9, 1)
+    db.session.commit()
+    for dia in (date(2026, 10, 20), date(2026, 10, 21), date(2026, 11, 2), date(2026, 11, 14)):
+        _marcar(user, habito, dia)
+
+    assert servicio_admin.eliminar_habito(habito, hoy) == 2
+    fechas = sorted(r.fecha for r in HistHabit.query.filter_by(idHabit=habito.idHabit))
+    assert fechas == [date(2026, 10, 20), date(2026, 10, 21)]
+    # Octubre queda guardado como activo: sus estadísticas no cambian
+    fila = HabitoMes.query.filter_by(idHabit=habito.idHabit, anio=2026, mes=10).one()
+    assert fila.habitState == 'Activo'
+    octubre = estadisticas_del_mes(user.idUser, 2026, 10, hoy=hoy)
+    assert [h['cumplidos'] for h in octubre['habitos'] if h['id'] == habito.idHabit] == [2]
+    # Noviembre ya no lo muestra
+    noviembre = estadisticas_del_mes(user.idUser, 2026, 11, hoy=hoy)
+    assert all(h['id'] != habito.idHabit for h in noviembre['habitos'])
+
+
+def test_pausar_conserva_los_meses_anteriores(app, user):
+    from app.models.habito_mes import HabitoMes
+    hoy = date(2026, 11, 15)
+    habito = _habito(user)
+    habito.createdAt = datetime(2026, 9, 1)
+    db.session.commit()
+    assert servicio_admin.pausar_habito(habito, hoy) == 'Pausado'
+    assert HabitoMes.query.filter_by(idHabit=habito.idHabit, anio=2026, mes=10).one().habitState == 'Activo'
+
+
+def test_pausar_y_eliminar_solo_habitos_del_usuario_y_nunca_de_un_admin(admin_client, admin, user, other_user):
+    ajeno = _habito(other_user)
+    for accion in ('pausar', 'eliminar'):
+        assert admin_client.post(_url_habito(user, ajeno, accion)).status_code == 404
+        assert admin_client.post(_url_habito(admin, ajeno, accion)).status_code == 404
+    assert db.session.get(Habit, ajeno.idHabit).habitState == 'Activo'
+
+
+def test_usuario_normal_no_puede_pausar_ni_eliminar_por_otro(logged_client, user, other_user):
+    habito = _habito(other_user)
+    for accion in ('pausar', 'eliminar'):
+        assert logged_client.post(_url_habito(other_user, habito, accion)).status_code == 404
+    assert db.session.get(Habit, habito.idHabit).habitState == 'Activo'
+
+
+def test_detalle_muestra_pausar_eliminar_y_confirmacion(admin_client, user):
+    _habito(user, 'Leer')
+    _habito(user, 'Correr', estado='Pausado')
+    html = admin_client.get(f'/admin/usuarios/{user.idUser}').get_data(as_text=True)
+    assert 'id="habitos"' in html and html.count('Reanudar') == 1 and '>Pausar<' in html
+    assert html.count('data-confirmar="¿Eliminar «') == 2 and 'js/admin.js' in html

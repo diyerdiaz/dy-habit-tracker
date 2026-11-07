@@ -335,3 +335,23 @@ body {
     .adm-nav, .adm-accion { flex-direction: column; align-items: flex-start; }
     .adm-form-eliminar .adm-input { width: 100%; }
 }
+
+/* Avisos (flash) del panel: del mismo tono que el fondo, sin el color ni el brillo del tema */
+.flash-message.alert {
+    --acento: #8b8b96;
+    color: #e8e8ec;
+    background: #141418;
+    border: 1px solid #23232b;
+    border-left: 3px solid var(--acento);
+    border-radius: 10px;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.flash-message.alert::before { box-shadow: none; }
+.flash-message.alert-danger  { --acento: #f87171; border-color: #23232b; box-shadow: none; }
+.flash-message.alert-warning { --acento: #fbbf24; border-color: #23232b; box-shadow: none; }
+
+/* Pausar y eliminar un hábito, uno al lado del otro */
+.adm-botones { display: flex; gap: 8px; flex-shrink: 0; }

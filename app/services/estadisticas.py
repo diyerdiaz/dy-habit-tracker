@@ -9,7 +9,7 @@ from calendar import Calendar, monthrange
 from datetime import date, timedelta
 from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
-from app.services.plan_habitos import dias_del_mes
+from app.services.plan_habitos import dias_del_mes, en_pausa, pausas_del_usuario
 
 MESES =['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
          'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -69,6 +69,7 @@ def estadisticas_del_mes(idUser, anio, mes, hoy=None):
 
     todos = Habit.query.filter_by(idUser=idUser).order_by(Habit.habitName).all()
     dias_por_habito = dias_del_mes(idUser, todos, anio, mes)
+    pausas = pausas_del_usuario(idUser)
 
     habitos = []
     for habit in todos:
@@ -77,7 +78,7 @@ def estadisticas_del_mes(idUser, anio, mes, hoy=None):
         programados = []
         dia = desde
         while dia <= fin_mes:
-            if dia.weekday() in dias_semana:
+            if dia.weekday() in dias_semana and not en_pausa(pausas, habit.idHabit, dia):
                 programados.append(dia)
             dia += timedelta(days=1)
 
@@ -208,6 +209,7 @@ def calendario_del_mes(idUser, anio, mes, hoy=None):
     habitos = Habit.query.filter_by(idUser=idUser).order_by(Habit.habitName).all()
     por_id = {h.idHabit: h for h in habitos}
     dias_por_habito = dias_del_mes(idUser, habitos, anio, mes)
+    pausas = pausas_del_usuario(idUser)
 
     hechos_por_dia = {}
     for registro in HistHabit.query.filter(
@@ -229,7 +231,8 @@ def calendario_del_mes(idUser, anio, mes, hoy=None):
                 continue
             hechos_ids = hechos_por_dia.get(dia, set())
             tocaban = [h for h in habitos
-                       if h.createdAt.date() <= dia and dia.weekday() in dias_por_habito[h.idHabit]]
+                       if h.createdAt.date() <= dia and dia.weekday() in dias_por_habito[h.idHabit]
+                       and not en_pausa(pausas, h.idHabit, dia)]
             hechos = [por_id[i].habitName for i in sorted(hechos_ids, key=lambda i: por_id[i].habitName.lower())]
             futuro = dia > hoy
             pendientes = [] if futuro else [h.habitName for h in tocaban if h.idHabit not in hechos_ids]

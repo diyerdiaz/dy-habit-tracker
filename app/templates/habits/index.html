@@ -204,6 +204,20 @@
                             <button type="button" class="btn-accion accion-ver" title="Ver" aria-label="Ver" onclick="openViewModal({{ habit.idHabit }})">
                                 <i class="bi bi-eye"></i>
                             </button>
+                            {% if habit.habitState == 'Activo' or (habit.habitState == 'Pausado' and (not plan or habit.idHabit in pausados_aqui)) %}
+                            <form method="post" action="{{ url_for('habits.habit_pausar', habit_id=habit.idHabit) }}" class="form-accion">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                {% if habit.habitState == 'Pausado' %}
+                                <button type="submit" class="btn-accion accion-reanudar" title="Reanudar" aria-label="Reanudar">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                {% else %}
+                                <button type="submit" class="btn-accion accion-pausar" title="Pausar" aria-label="Pausar">
+                                    <i class="bi bi-pause-fill"></i>
+                                </button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
                             {% if not plan %}
                             <button type="button" class="btn-accion accion-editar" title="Editar" aria-label="Editar" onclick="openEditModal({{ habit.idHabit }}, {{ (habit.habitName)|tojson|forceescape }}, {{ (habit.habitDesc or '')|tojson|forceescape }}, {{ habit.habitFreq|tojson|forceescape }}, {{ habit.habitCategory|tojson|forceescape }}, {{ habit.dias_lista()|tojson|forceescape }})">
                                 <i class="bi bi-pencil"></i>

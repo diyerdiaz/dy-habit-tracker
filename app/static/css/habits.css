@@ -262,6 +262,10 @@
 .accion-ver { --accion-rgb: 56, 189, 248; }
 .accion-editar { --accion-rgb: 251, 191, 36; }
 .accion-eliminar { --accion-rgb: 248, 113, 113; }
+.accion-pausar { --accion-rgb: 148, 163, 184; }
+.accion-reanudar { --accion-rgb: 74, 222, 128; }
+/* Pausar/reanudar es un formulario POST: no debe romper la fila de botones */
+.form-accion { display: contents; }
 
 /* Filas de "sin hábitos" / "sin resultados" */
 .habits-table .fila-vacia td {

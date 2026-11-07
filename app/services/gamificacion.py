@@ -6,7 +6,7 @@ from app.models.habitos import Habit
 from app.models.hist_habits import HistHabit
 from app.models.user_progress import UserProgress
 from app.services.level_config import XP_POR_HABITO, XP_BONUS_RACHA_SEMANAL, PENALIZACION_POR_DIA_PERDIDO
-from app.services.plan_habitos import dias_del_mes
+from app.services.plan_habitos import dias_del_mes, en_pausa, pausas_del_usuario
 
 
 def get_or_create_progress(idUser):
@@ -22,13 +22,16 @@ def dias_programados(idUser):
     """Función que dice si una fecha tenía al menos un hábito programado, con el
     plan de su mes. Los demás son de descanso: no rompen la racha ni restan XP."""
     habits = Habit.query.filter_by(idUser=idUser).all()
+    pausas = pausas_del_usuario(idUser)
     por_mes = {}
 
     def tocaba(fecha):
         clave = (fecha.year, fecha.month)
         if clave not in por_mes:
-            por_mes[clave] = set().union(*dias_del_mes(idUser, habits, *clave).values())
-        return fecha.weekday() in por_mes[clave]
+            por_mes[clave] = dias_del_mes(idUser, habits, *clave)
+        # Los días en que el hábito estuvo pausado no le tocaban
+        return any(fecha.weekday() in dias and not en_pausa(pausas, idHabit, fecha)
+                   for idHabit, dias in por_mes[clave].items())
 
     return tocaba
 
