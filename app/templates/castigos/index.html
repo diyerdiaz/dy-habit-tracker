@@ -52,6 +52,7 @@
                 <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
             </a>
         </li>
+        {% include 'retos/_item_menu.html' %}
         <li class="sidebar-item">
             <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
                 <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
@@ -89,7 +90,7 @@
             </a>
         </li>
         <li class="sidebar-item">
-            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link" style="color: #ff6666; border-color: rgba(255, 102, 102, 0.2);">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
                 <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
             </button></form>
         </li>

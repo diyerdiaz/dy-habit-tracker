@@ -13,6 +13,7 @@ from app.models.pausa_habito import PausaHabito
 from app.models.plan_mensual import PlanMensual
 from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.recuperacion import Recuperacion, SesionRecuperacion
+from app.models.retos import Reto, RetoDia
 from app.models.resumen_mensual import ResumenEnviado, ResumenVisto
 from app.models.ruleta_castigo import Castigo
 from app.models.shadowing_sesion import ShadowingSesion
@@ -38,7 +39,7 @@ def borrar_cuenta(user):
         borrar_apuntes([a for t in metodo.tarjetas for a in t.apuntes])
         db.session.delete(metodo)  # en cascada: tarjetas del Kanban y apuntes
     # Primero lo que apunta a otras tablas del mismo usuario (sesiones -> temas, historial -> hábitos)
-    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, HabitoMes, PausaHabito, Habit,
+    for modelo in (SesionExplicacion, TemaExplicar, SesionRecuperacion, Recuperacion, HistHabit, HabitoMes, PausaHabito, Habit, RetoDia, Reto,
                    Castigo, Tarea, UserProgress, VocabularioRegistro, Vocabulario, ShadowingSesion,
                    Recordatorio, EnvioPrueba, CodigoRecuperacion, JuegoPartida, PlanMensual, ResumenVisto, ResumenEnviado, MetaVision):
         modelo.query.filter_by(idUser=id_user).delete(synchronize_session=False)

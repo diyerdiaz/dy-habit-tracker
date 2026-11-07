@@ -1,0 +1,8 @@
+{# Botón "Retos" del menú lateral: solo aparece si el admin le puso un reto al usuario #}
+{% if hay_retos() %}
+<li class="sidebar-item">
+    <a href="{{ url_for('retos.index') }}" class="sidebar-link{{ ' active' if request.blueprint == 'retos' else '' }}">
+        <i class="bi bi-lightning-charge-fill sidebar-icon ico-retos"></i> Retos
+    </a>
+</li>
+{% endif %}

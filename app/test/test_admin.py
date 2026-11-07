@@ -682,3 +682,10 @@ def test_detalle_muestra_pausar_eliminar_y_confirmacion(admin_client, user):
     html = admin_client.get(f'/admin/usuarios/{user.idUser}').get_data(as_text=True)
     assert 'id="habitos"' in html and html.count('Reanudar') == 1 and '>Pausar<' in html
     assert html.count('data-confirmar="¿Eliminar «') == 2 and 'js/admin.js' in html
+
+
+def test_panel_del_admin_tiene_margen_en_el_celular(app):
+    with open(os.path.join(app.static_folder, 'css', 'admin.css'), encoding='utf-8') as f:
+        css = f.read()
+    celular = css.split('@media (max-width: 600px) {')[-1]
+    assert celular.lstrip().split('\n')[1].strip() == '.adm { padding-left: 16px; padding-right: 16px; }'

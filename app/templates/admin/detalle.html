@@ -81,6 +81,54 @@
         {% endfor %}
     </section>
 
+    <section class="adm-bloque adm-acciones" id="retos">
+        <h2 class="adm-subtitulo">Retos <span class="adm-tenue">· a {{ e.usuario }} le aparece el botón "Retos" para aceptarlo o rechazarlo</span></h2>
+        <form method="post" action="{{ url_for('admin.crear_reto_usuario', id_user=e.id) }}" class="adm-form adm-form-reto">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>Nombre del reto
+                <input type="text" name="nombre" class="adm-input" maxlength="{{ max_nombre }}" required placeholder="Ej.: no ver redes sociales">
+            </label>
+            <label><span>Descripción <span class="adm-tenue">(opcional)</span></span>
+                <input type="text" name="descripcion" class="adm-input" maxlength="{{ max_descripcion }}">
+            </label>
+            <div class="adm-form-fila">
+                <label>Empieza
+                    <input type="date" name="inicio" class="adm-input" min="{{ hoy.isoformat() }}" value="{{ hoy.isoformat() }}" required id="retoInicio">
+                </label>
+                <label>Termina
+                    <input type="date" name="fin" class="adm-input" min="{{ hoy.isoformat() }}" required id="retoFin">
+                </label>
+                <label>Apuesta (XP)
+                    <input type="number" name="apuesta" class="adm-input" min="0" max="{{ max_apuesta }}" value="500" required id="apuestaCantidad">
+                </label>
+            </div>
+            <fieldset class="adm-modo-apuesta">
+                <legend class="adm-tenue">¿Cuánto apuesta?</legend>
+                <label><input type="radio" name="modo_apuesta" value="cantidad" checked> Una cantidad</label>
+                <label><input type="radio" name="modo_apuesta" value="todo"> Todo su XP <span class="adm-tenue">({{ e.xp }} XP hoy; cuenta el que tenga al aceptar)</span></label>
+            </fieldset>
+            <p class="adm-tenue adm-ayuda">Si cumple todos los días gana lo apostado; si un día no marca "Cumplí hoy", lo pierde. Con todo su XP: gana el doble o se queda en 0.</p>
+            <button type="submit" class="adm-boton">Enviar reto</button>
+        </form>
+        {% for r in retos %}
+        <div class="adm-accion">
+            <div>
+                <strong>{{ r.reto.nombre }}</strong> <span class="adm-insignia">{{ r.reto.estado }}</span>
+                <p class="adm-tenue">{{ r.reto.fechaInicio.strftime('%d/%m/%Y') }} – {{ r.reto.fechaFin.strftime('%d/%m/%Y') }}
+                    · {% if r.reto.todoXp %}Todo su XP{% if r.reto.estado != 'Pendiente' %} ({{ r.reto.apuesta }}){% endif %}{% else %}{{ r.reto.apuesta }} XP{% endif %}
+                    · {{ r.cumplidos }}/{{ r.total }} días cumplidos</p>
+            </div>
+            {% if r.reto.estado in abiertos %}
+            <form method="post" action="{{ url_for('admin.cancelar_reto_usuario', id_user=e.id, id_reto=r.reto.idReto) }}"
+                  data-confirmar="¿Cancelar «{{ r.reto.nombre }}»? Nadie gana ni pierde XP.">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="adm-boton adm-boton-peligro">Cancelar</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+
     <section class="adm-bloque adm-acciones">
         <h2 class="adm-subtitulo">Cuenta</h2>
         <div class="adm-accion">
