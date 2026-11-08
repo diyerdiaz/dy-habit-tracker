@@ -191,3 +191,21 @@ def test_login_sin_texto_de_copyright_en_el_footer(client):
     html = client.get('/').get_data(as_text=True)
     assert 'mi aplicacion de mejoras' not in html
     assert 'Disciplina &bull; Progreso' in html or 'Disciplina • Progreso' in html  # la franja animada sigue
+
+
+def _regla_css(css, selector):
+    m = re.search(re.escape(selector) + r'\s*\{([^}]*)\}', css)
+    assert m, f'no está la regla {selector}'
+    return m.group(1)
+
+
+def test_texto_de_los_campos_se_ve_blanco_al_escribir(client):
+    # Bootstrap pone el texto gris oscuro al enfocar; m.css debe dejarlo blanco
+    css = client.get('/static/css/m.css').get_data(as_text=True)
+    assert re.search(r'color:\s*#fff', _regla_css(css, '.form-control:focus'))
+
+
+def test_autocompletado_no_oscurece_los_campos(client):
+    css = client.get('/static/css/m.css').get_data(as_text=True)
+    assert '.form-control:-webkit-autofill' in css
+    assert '-webkit-text-fill-color: #fff' in css

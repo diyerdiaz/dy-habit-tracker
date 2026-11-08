@@ -379,8 +379,10 @@ body {
 }
 
 
-/* FOCUS */
+/* FOCUS (color: Bootstrap pone el texto gris oscuro al enfocar y no se leía mientras se escribe) */
 .form-control:focus {
+
+    color: #fff;
 
     border: 1px solid var(--tema-vivo, #d966ff);
 
@@ -389,6 +391,21 @@ body {
     box-shadow:
         0 0 25px rgba(var(--tema-vivo-rgb, 217, 102, 255), .45),
         0 0 60px rgba(var(--tema-vivo-rgb, 217, 102, 255), .18);
+}
+
+
+/* AUTOCOMPLETADO: el navegador pinta fondo claro y texto oscuro; se mantiene el estilo oscuro */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover,
+.form-control:-webkit-autofill:focus {
+
+    -webkit-text-fill-color: #fff;
+
+    caret-color: #fff;
+
+    -webkit-box-shadow: 0 0 0 1000px #1e1430 inset;
+
+    transition: background-color 9999s ease-out;
 }
 
 
