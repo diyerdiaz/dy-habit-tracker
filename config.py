@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import timedelta
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
@@ -58,6 +59,8 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     REMEMBER_COOKIE_HTTPONLY = True
+    # Cuánto dura la sesión cuando se marca "Recordarme" en el login
+    PERMANENT_SESSION_LIFETIME = timedelta(days=30)
     # Con HTTPS (en internet) pon SESSION_COOKIE_SECURE=1 para que la cookie
     # de sesión nunca viaje sin cifrar. En local por http debe quedar en 0.
     SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', '0') == '1'

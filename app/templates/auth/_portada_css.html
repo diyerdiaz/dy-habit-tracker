@@ -1,0 +1,5 @@
+{# Fuente, estilos y colores del personaje de las portadas (login, recuperar y actualizar contraseña) #}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{# Colores del personaje que salió: m.css y login.css los usan en el fondo, pétalos, rayos, tarjeta y botones #}
+<style>:root { {% for nombre, valor in personaje.tema.items() %}--tema-{{ nombre }}: {{ valor }}; {% endfor %}}</style>

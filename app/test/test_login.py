@@ -209,3 +209,80 @@ def test_autocompletado_no_oscurece_los_campos(client):
     css = client.get('/static/css/m.css').get_data(as_text=True)
     assert '.form-control:-webkit-autofill' in css
     assert '-webkit-text-fill-color: #fff' in css
+
+
+def test_login_nuevo_diseno(client):
+    html = client.get('/').get_data(as_text=True)
+    assert 'login-dy' in html and 'class="login-topbar"' in html
+    assert 'Mejora hoy... logra más mañana' in html
+    assert 'name="recordarme"' in html and 'Recordarme' in html
+    assert '¿Olvidaste tu contraseña?' in html and 'Crear Cuenta Nueva' in html
+    assert 'icono-loto' in html
+
+
+def test_login_toma_el_color_del_personaje_que_salio(client):
+    for _ in range(3):
+        html = client.get('/').get_data(as_text=True)
+        with client.session_transaction() as s:
+            tema = PERSONAJES[s['personaje_login']]['tema']
+        assert f"--tema-vivo: {tema['vivo']};" in html
+
+
+def test_el_diseno_del_login_usa_los_colores_del_tema(client):
+    # El loto, la tarjeta y los botones se pintan con --tema-*, no con un color fijo
+    css = client.get('/static/css/login.css').get_data(as_text=True)
+    diseno = css[css.index('.login-dy'):]
+    assert 'var(--tema-vivo' in diseno and 'var(--tema-grad-1' in diseno
+    # El loto es común al login y al menú de la app: está en m.css
+    assert "url('../img/loto.svg')" in client.get('/static/css/m.css').get_data(as_text=True)
+    assert client.get('/static/img/loto.svg').status_code == 200
+
+
+def _cookie_de_sesion(respuesta):
+    return next(c for c in respuesta.headers.getlist('Set-Cookie') if c.startswith('session='))
+
+
+def test_recordarme_mantiene_la_sesion_al_cerrar_el_navegador(client, user):
+    r = client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD, 'recordarme': '1'})
+    assert 'Expires=' in _cookie_de_sesion(r)
+
+
+def test_sin_recordarme_la_sesion_se_cierra_con_el_navegador(client, user):
+    r = client.post('/', data={'nameUser': user.nameUser, 'passwordUser': TEST_PASSWORD})
+    assert 'Expires=' not in _cookie_de_sesion(r)
+
+
+def test_animaciones_al_pasar_de_pagina(client):
+    css = client.get('/static/css/login.css').get_data(as_text=True)
+    # Entre páginas (login, recuperar) la tarjeta y el personaje se transforman
+    assert '@view-transition' in css and 'navigation: auto' in css
+    # En el celular no: congelaba la página mientras cargaba la siguiente
+    assert '(prefers-reduced-motion: no-preference) and (min-width: 901px)' in css
+    assert 'view-transition-name: tarjeta-portada' in css
+    assert 'view-transition-name: personaje-portada' in css
+    # Volteo al pasar a Registrarse y entrada suave donde no hay transiciones de vista
+    assert 'tarjeta-voltea-entra' in css and '@supports not (view-transition-name: a)' in css
+    js = client.get('/static/js/login.js').get_data(as_text=True)
+    assert 'document.startViewTransition' in js and 'prefers-reduced-motion' in js
+
+
+def test_registro_directo_no_anima(client):
+    html = client.get('/?register=1').get_data(as_text=True)
+    assert "mostrarFormulario('register')" in html
+
+
+def _quitar_comentarios(css):
+    return re.sub(r'/\*.*?\*/', '', css, flags=re.S)
+
+
+def test_la_portada_no_se_sale_de_la_pantalla_en_el_celular(client):
+    # El personaje y su anillo se recortan: si no, la página queda más ancha y la tarjeta corrida
+    css = _quitar_comentarios(client.get('/static/css/login.css').get_data(as_text=True))
+    assert re.search(r'\.login-dy \{[^}]*overflow-x: clip', css)
+
+
+def test_transiciones_sin_desenfoque_de_pantalla_completa(client):
+    css = _quitar_comentarios(client.get('/static/css/login.css').get_data(as_text=True))
+    for nombre in ('portada-sale', 'portada-entra'):
+        bloque = re.search(r'@keyframes ' + nombre + r' \{(.*?)\n\}', css, re.S).group(1)
+        assert 'blur' not in bloque

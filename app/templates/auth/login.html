@@ -3,114 +3,103 @@
 {% block titulo_pagina %}Iniciar sesión{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-{# Colores del personaje que salió: m.css los usa en el fondo, pétalos, rayos, tarjeta y botón #}
-<style>:root { {% for nombre, valor in personaje.tema.items() %}--tema-{{ nombre }}: {{ valor }}; {% endfor %}}</style>
+{% include "auth/_portada_css.html" %}
 {% endblock %}
 
 {% block content %}
-<div class="login-fondo"></div>
-<div class="lightning-storm">
-    <div class="lightning-flash flash-1"></div>
-    <div class="lightning-flash flash-2"></div>
-    <div class="lightning-flash flash-3"></div>
-</div>
-<div class="sakura">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-</div>
+{% include "auth/_portada_fondo.html" %}
 
-<div class="login-wrapper login-portada">
+<div class="login-wrapper login-portada login-dy">
     <div class="login-left">
         <div class="login-brand">
-            <h1>Bienvenido</h1>
-            <p>Retoma el control de tus hábitos y acelera tu aprendizaje diario con DY Habit Tracker &amp; English.</p>
+            <h1 class="login-bienvenido">Bienvenido <i class="bi bi-stars login-destello" aria-hidden="true"></i></h1>
+            <p>Retoma el control de tus hábitos y acelera tu aprendizaje diario con <strong class="login-resalte">DY Habit Tracker &amp; English</strong>.</p>
 
             <div class="login-features">
-                <div class="login-feature">
-                    <div class="login-feature-icon login-feature-habits">
-                        <i class="bi bi-fire"></i>
-                    </div>
-                    <span>Habits</span>
-                </div>
-                <div class="login-feature">
-                    <div class="login-feature-icon login-feature-english">
-                        <i class="bi bi-translate"></i>
-                    </div>
-                    <span>English</span>
-                </div>
+                <span class="login-pill"><i class="bi bi-fire login-pill-habits"></i> Habits</span>
+                <span class="login-pill"><i class="bi bi-translate login-pill-english"></i> English</span>
             </div>
         </div>
-        <!-- Personaje (ilustración propia en SVG): el borde de abajo se funde con el fondo -->
-        <img src="{{ url_for('static', filename='img/' ~ personaje.archivo) }}" alt="" class="login-personaje" aria-hidden="true">
+        {% include "auth/_portada_personaje.html" %}
     </div>
-    
+
     <div class="login-right">
         <div class="card shadow-lg border-0 rounded-lg login-card">
-            
+
             <!-- SECCIÓN DE LOGIN -->
             <div id="loginSection">
                 <div class="card-header">
+                    <span class="icono-loto login-card-loto" aria-hidden="true"></span>
                     <h1>Iniciar sesión</h1>
-                    <p>Ingresa tus credenciales</p>
+                    <p class="login-subtitulo">Ingresa tus credenciales</p>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('auth.login') }}">
-                        <div class="form-group mb-4">
-                            <label for="nameUser" class="form-label">Usuario</label>
-                            <input type="text" name="nameUser" id="nameUser" class="form-control" placeholder="Nombre de usuario" required>
+                        <div class="form-group login-campo">
+                            <label for="nameUser" class="visually-hidden">Usuario</label>
+                            <i class="bi bi-person-fill login-campo-icono" aria-hidden="true"></i>
+                            <input type="text" name="nameUser" id="nameUser" class="form-control" placeholder="Nombre de usuario" autocomplete="username" required>
                         </div>
-                        <div class="form-group mb-4">
-                            <label for="passwordUser" class="form-label">Contraseña</label>
+                        <div class="form-group login-campo">
+                            <label for="passwordUser" class="visually-hidden">Contraseña</label>
                             <div class="password-field">
-                                <input type="password" name="passwordUser" id="passwordUser" class="form-control" placeholder="Tu contraseña" required>
-                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordUser', this)" tabindex="-1">
+                                <i class="bi bi-lock-fill login-campo-icono" aria-hidden="true"></i>
+                                <input type="password" name="passwordUser" id="passwordUser" class="form-control" placeholder="Tu contraseña" autocomplete="current-password" required>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('passwordUser', this)" tabindex="-1" aria-label="Mostrar contraseña">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="d-grid gap-3">
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="bi bi-lock-fill"></i> Iniciar Sesión
-                            </button>
-                            <a href="{{ url_for('recuperar.inicio') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch login-olvide">
-                                <i class="bi bi-key"></i> ¿Olvidaste tu contraseña?
-                            </a>
-                            <a href="javascript:void(0)" onclick="toggleForms('register')" class="forgot-link text-center w-100 d-block mt-3 login-switch">
-                                <i class="bi bi-person-plus"></i> Crear Cuenta Nueva
-                            </a>
+                        <div class="login-opciones">
+                            <label class="login-recordar">
+                                <input type="checkbox" name="recordarme" value="1" checked>
+                                <span>Recordarme</span>
+                            </label>
+                            <a href="{{ url_for('recuperar.inicio') }}" class="login-olvide">¿Olvidaste tu contraseña?</a>
                         </div>
+                        <button type="submit" class="btn btn-primary btn-block w-100">
+                            <i class="bi bi-arrow-right"></i> Iniciar Sesión
+                        </button>
+                        <div class="login-separador"><span>o</span></div>
+                        <button type="button" class="btn login-btn-secundario w-100" onclick="toggleForms('register')">
+                            <i class="bi bi-person-plus-fill"></i> Crear Cuenta Nueva
+                        </button>
                     </form>
+                    <p class="login-pie">DY Habit Tracker &amp; English</p>
                 </div>
             </div>
 
             <!-- SECCIÓN DE REGISTRO -->
             <div id="registerSection">
                 <div class="card-header">
+                    <span class="icono-loto login-card-loto" aria-hidden="true"></span>
                     <h1>Registrarse</h1>
-                    <p>Crea tu nueva cuenta</p>
+                    <p class="login-subtitulo">Crea tu nueva cuenta</p>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{{ url_for('user.add') }}" onsubmit="return validatePasswords(event)">
-                        <div class="form-group mb-3">
-                            <label for="regNameUser" class="form-label">Usuario</label>
-                            <input type="text" name="nameUser" id="regNameUser" class="form-control" placeholder="Elige un nombre" required>
+                        <div class="form-group login-campo">
+                            <label for="regNameUser" class="visually-hidden">Usuario</label>
+                            <i class="bi bi-person-fill login-campo-icono" aria-hidden="true"></i>
+                            <input type="text" name="nameUser" id="regNameUser" class="form-control" placeholder="Elige un nombre" autocomplete="username" required>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="regPasswordUser" class="form-label">Contraseña</label>
+                        <div class="form-group login-campo">
+                            <label for="regPasswordUser" class="visually-hidden">Contraseña</label>
                             <div class="password-field">
-                                <input type="password" name="passwordUser" id="regPasswordUser" class="form-control" placeholder="Crea una contraseña" required onkeyup="checkPasswordMatch()">
-                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordUser', this)" tabindex="-1">
+                                <i class="bi bi-lock-fill login-campo-icono" aria-hidden="true"></i>
+                                <input type="password" name="passwordUser" id="regPasswordUser" class="form-control" placeholder="Crea una contraseña" autocomplete="new-password" required onkeyup="checkPasswordMatch()">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordUser', this)" tabindex="-1" aria-label="Mostrar contraseña">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
                             {% with campo='regPasswordUser' %}{% include 'auth/_requisitos_contrasena.html' %}{% endwith %}
                         </div>
-                        <div class="form-group mb-4">
-                            <label for="regPasswordConfirm" class="form-label">Confirmar Contraseña</label>
+                        <div class="form-group login-campo">
+                            <label for="regPasswordConfirm" class="visually-hidden">Confirmar Contraseña</label>
                             <div class="password-field">
-                                <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Repite tu contraseña" required onkeyup="checkPasswordMatch()">
-                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordConfirm', this)" tabindex="-1">
+                                <i class="bi bi-shield-lock-fill login-campo-icono" aria-hidden="true"></i>
+                                <input type="password" id="regPasswordConfirm" class="form-control" placeholder="Repite tu contraseña" autocomplete="new-password" required onkeyup="checkPasswordMatch()">
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPasswordConfirm', this)" tabindex="-1" aria-label="Mostrar contraseña">
                                     <i class="bi bi-eye"></i>
                                 </button>
                             </div>
@@ -118,15 +107,15 @@
                                 <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.
                             </div>
                         </div>
-                        <div class="d-grid gap-3">
-                            <button type="submit" id="btnRegister" class="btn btn-primary btn-block">
-                                <i class="bi bi-check2-circle"></i> Registrarse
-                            </button>
-                            <a href="javascript:void(0)" onclick="toggleForms('login')" class="forgot-link text-center w-100 d-block mt-2 login-switch">
-                                <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
-                            </a>
-                        </div>
+                        <button type="submit" id="btnRegister" class="btn btn-primary btn-block w-100">
+                            <i class="bi bi-check2-circle"></i> Registrarse
+                        </button>
+                        <div class="login-separador"><span>o</span></div>
+                        <button type="button" class="btn login-btn-secundario w-100" onclick="toggleForms('login')">
+                            <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
+                        </button>
                     </form>
+                    <p class="login-pie">DY Habit Tracker &amp; English</p>
                 </div>
             </div>
 
@@ -141,7 +130,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         {% if request.args.get('register') %}
-        toggleForms('register');
+        mostrarFormulario('register');
         {% endif %}
     });
 </script>

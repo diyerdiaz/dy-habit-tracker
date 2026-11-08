@@ -4,26 +4,29 @@
 
 {% block tarjeta %}
 <div class="card-header">
+    <span class="icono-loto login-card-loto" aria-hidden="true"></span>
     <h1>Recuperar contraseña</h1>
-    <p>Paso 1 de 3 · ¿Quién eres?</p>
+    <p class="login-subtitulo">Paso 1 de 3 · ¿Quién eres?</p>
 </div>
 <div class="card-body">
     <form method="post" action="{{ url_for('recuperar.inicio') }}">
-        <div class="form-group mb-4">
+        <div class="form-group login-campo">
             <label for="identificador" class="form-label">Usuario o correo electrónico</label>
-            <input type="text" name="identificador" id="identificador" class="form-control"
+            <div class="login-campo-control">
+                <i class="bi bi-person-fill login-campo-icono" aria-hidden="true"></i>
+                <input type="text" name="identificador" id="identificador" class="form-control"
                 placeholder="Tu usuario o tu correo" value="{{ identificador }}"
                 autocomplete="username" maxlength="120" required autofocus>
+            </div>
             <p class="recuperar-ayuda">Te enviaremos un código de 6 dígitos al correo que registraste en tu perfil.</p>
         </div>
-        <div class="d-grid gap-3">
-            <button type="submit" class="btn btn-primary btn-block">
-                <i class="bi bi-envelope-arrow-up"></i> Enviarme el código
-            </button>
-            <a href="{{ url_for('auth.login') }}" class="forgot-link text-center w-100 d-block mt-2 login-switch">
-                <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
-            </a>
-        </div>
+        <button type="submit" class="btn btn-primary btn-block w-100">
+            <i class="bi bi-envelope-arrow-up"></i> Enviarme el código
+        </button>
+        <div class="login-separador"><span>o</span></div>
+        <a href="{{ url_for('auth.login') }}" class="btn login-btn-secundario w-100 d-flex align-items-center justify-content-center">
+            <i class="bi bi-arrow-left"></i> Volver a Iniciar Sesión
+        </a>
     </form>
 </div>
 {% endblock %}

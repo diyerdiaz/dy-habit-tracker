@@ -145,3 +145,652 @@
         border-radius: 10px;
     }
 }
+
+/* =====================================================================
+   Diseño de la portada del login (.login-dy)
+   Todos los colores salen de --tema-*: cambian con el personaje que salió
+   ===================================================================== */
+
+/* ── Barra superior: marca y lema ── */
+.login-topbar {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px clamp(16px, 6vw, 110px) 0;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+}
+
+.login-marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #fff;
+}
+
+.login-marca-dy {
+    font-family: 'Great Vibes', 'Kaushan Script', cursive;
+    font-size: 2.3rem;
+    line-height: 1;
+}
+
+.login-marca-nombre {
+    padding-left: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 1.1rem;
+}
+
+.login-lema {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
+}
+
+.login-lema i {
+    color: var(--tema-vivo, #d966ff);
+    margin-left: 6px;
+}
+
+/* El personaje y su anillo pueden salirse del borde: se recortan para que la
+   página no quede más ancha que la pantalla (en el celular corría la tarjeta) */
+.login-dy {
+    overflow-x: hidden;
+    overflow-x: clip;
+}
+
+/* ── Lado izquierdo ── */
+.login-dy .login-brand h1.login-bienvenido {
+    position: relative;
+    display: inline-block;
+    font-family: 'Great Vibes', 'Kaushan Script', cursive;
+    font-style: normal;
+    font-weight: 400;
+    font-size: clamp(3.6rem, 6vw, 6.6rem) !important;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    text-shadow: 0 0 22px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.75);
+}
+
+/* Trazo curvo debajo de "Bienvenido" */
+.login-bienvenido::after {
+    content: '';
+    position: absolute;
+    left: 8%;
+    right: -4%;
+    bottom: 0;
+    height: 14px;
+    border-bottom: 2px solid var(--tema-vivo, #d966ff);
+    border-radius: 0 0 50% 50%;
+    filter: drop-shadow(0 0 6px var(--tema-vivo, #d966ff));
+}
+
+.login-destello {
+    position: absolute;
+    right: -0.9em;
+    top: 30%;
+    font-size: 0.4em;
+    color: rgb(var(--tema-claro-rgb, 230, 130, 255));
+    text-shadow: 0 0 14px var(--tema-vivo, #d966ff);
+}
+
+.login-dy .login-brand p {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.login-resalte {
+    color: var(--tema-vivo, #d966ff);
+    font-weight: 600;
+}
+
+.login-dy .login-features {
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.login-pill {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    color: #fff;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.login-pill:hover {
+    transform: translateY(-3px);
+    border-color: var(--tema-vivo, #d966ff);
+}
+
+.login-pill i {
+    font-size: 1.3rem;
+}
+
+.login-pill-habits { color: #ff8c42; }
+.login-pill-english { color: #4dabff; }
+
+/* Personaje dentro de un halo y un anillo en órbita */
+.login-personaje-marco {
+    position: relative;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 24px;
+}
+
+.login-personaje-marco::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 12%;
+    width: min(78%, 420px);
+    aspect-ratio: 1;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    background: radial-gradient(circle, rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35), rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.12) 55%, transparent 70%);
+    box-shadow: 0 0 60px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+}
+
+.login-personaje-marco::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 18%;
+    width: min(110%, 600px);
+    height: 22%;
+    transform: translateX(-50%) rotate(-12deg);
+    border-radius: 50%;
+    border: 2px solid rgba(var(--tema-claro-rgb, 230, 130, 255), 0.55);
+    box-shadow: 0 0 18px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.5);
+    pointer-events: none;
+}
+
+.login-dy .login-personaje {
+    position: relative;
+    z-index: 1;
+    margin-top: 0;
+}
+
+/* ── Tarjeta ── */
+.login-dy .card {
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45) !important;
+    border-radius: 44px !important;
+    background: linear-gradient(160deg, rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.35), rgba(255, 255, 255, 0.03));
+    padding: clamp(28px, 3vw, 52px);
+}
+
+/* Línea de luz en el borde de arriba */
+.login-dy .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 30%;
+    right: 30%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgb(var(--tema-claro-rgb, 230, 130, 255)), transparent);
+    z-index: 3;
+}
+
+.login-dy .card-header {
+    margin-bottom: 28px;
+    padding: 0;
+}
+
+.login-card-loto {
+    width: 64px;
+    margin-bottom: 6px;
+}
+
+.login-dy .card-header h1 {
+    font-family: 'Great Vibes', 'Kaushan Script', cursive;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0;
+    font-size: clamp(2.8rem, 3.6vw, 4rem);
+}
+
+/* "Ingresa tus credenciales" con una línea a cada lado */
+.login-subtitulo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: rgb(var(--tema-claro-rgb, 230, 130, 255)) !important;
+    font-style: italic;
+    font-size: 1.05rem !important;
+    margin-top: 6px !important;
+}
+
+.login-subtitulo::before,
+.login-subtitulo::after,
+.login-separador::before,
+.login-separador::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6), transparent);
+}
+
+.login-dy .card-body {
+    padding: 0;
+}
+
+/* Campos con ícono a la izquierda */
+.login-campo {
+    --alto-campo: 72px;
+    position: relative;
+    margin-bottom: 20px !important;
+}
+
+.login-campo-icono {
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.75);
+    pointer-events: none;
+}
+
+/* Si debajo hay requisitos de contraseña, el ícono se centra solo en el campo */
+.login-campo .password-field .login-campo-icono {
+    top: 50%;
+}
+
+.login-campo > .login-campo-icono {
+    top: calc(var(--alto-campo) / 2);
+}
+
+.login-dy .form-control {
+    height: var(--alto-campo);
+    padding-left: 66px;
+    border-radius: 999px;
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    font-style: normal;
+}
+
+/* Recordarme / ¿Olvidaste tu contraseña? */
+.login-opciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 4px 4px 24px;
+    font-size: 0.95rem;
+}
+
+.login-recordar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+}
+
+.login-recordar input {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--tema-vivo, #d966ff);
+    cursor: pointer;
+}
+
+.login-dy .login-olvide {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.login-dy .login-olvide:hover {
+    color: var(--tema-vivo, #d966ff);
+}
+
+.login-dy .btn-primary {
+    height: 68px;
+    border-radius: 999px;
+    font-size: 1.25rem;
+    background: linear-gradient(90deg, var(--tema-grad-1, #8a28ff), var(--tema-grad-2, #e100ff));
+}
+
+.login-dy .btn-primary i {
+    margin-right: 8px;
+}
+
+.login-separador {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 18px 0;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-btn-secundario {
+    height: 62px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.4);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-btn-secundario:hover {
+    color: #fff;
+    border-color: var(--tema-vivo, #d966ff);
+    box-shadow: 0 0 20px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+}
+
+.login-btn-secundario i {
+    margin-right: 8px;
+}
+
+.login-pie {
+    margin: 26px 0 0;
+    text-align: center;
+    color: rgb(var(--tema-claro-rgb, 230, 130, 255));
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* ── Celular y tablet: bienvenida con el personaje a la derecha, tarjeta debajo ── */
+@media (max-width: 900px) {
+    .login-lema {
+        display: none;
+    }
+
+    .login-topbar {
+        padding-top: 16px;
+    }
+
+    .login-dy .login-left {
+        display: block;
+        position: relative;
+        width: 100%;
+        min-height: 300px;
+        padding: 18px 0 0;
+        text-align: left;
+    }
+
+    .login-dy .login-brand {
+        position: relative;
+        z-index: 2;
+        max-width: 58%;
+        text-align: left;
+    }
+
+    .login-dy .login-brand h1.login-bienvenido {
+        font-size: clamp(3rem, 13vw, 4.6rem) !important;
+    }
+
+    .login-dy .login-brand p {
+        font-size: 1rem !important;
+    }
+
+    .login-dy .login-features {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .login-pill {
+        padding: 10px 20px;
+    }
+
+    .login-personaje-marco {
+        position: absolute;
+        right: -6%;
+        top: 0;
+        bottom: 0;
+        width: 52%;
+        margin: 0;
+        z-index: 1;
+    }
+
+    .login-dy .login-personaje {
+        max-height: 100%;
+        max-width: 100%;
+    }
+
+    .login-dy .card {
+        padding: 28px 22px;
+        border-radius: 36px !important;
+    }
+
+    .login-campo {
+        --alto-campo: 62px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-marca-dy {
+        font-size: 1.9rem;
+    }
+
+    .login-marca-nombre {
+        font-size: 0.95rem;
+    }
+
+    .login-dy .login-brand {
+        max-width: 68%;
+    }
+
+    .login-pill {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+
+    .login-recordar input {
+        width: 18px;
+        height: 18px;
+    }
+
+    .login-dy .login-brand p {
+        font-size: 0.92rem !important;
+    }
+
+    .login-opciones,
+    .login-dy .login-olvide {
+        font-size: 0.8rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
+
+/* El formulario oculto sale del flujo: la tarjeta no queda con un hueco abajo */
+.login-dy .login-card:not(.registrando) #registerSection,
+.login-dy .login-card.registrando #loginSection {
+    position: absolute;
+    top: clamp(28px, 3vw, 52px);
+    left: clamp(28px, 3vw, 52px);
+    right: clamp(28px, 3vw, 52px);
+}
+
+@media (max-width: 900px) {
+    .login-dy .login-card:not(.registrando) #registerSection,
+    .login-dy .login-card.registrando #loginSection {
+        top: 28px;
+        left: 22px;
+        right: 22px;
+    }
+}
+
+/* Campo con ícono y etiqueta visible encima (recuperar contraseña) */
+.login-campo-control {
+    position: relative;
+}
+
+.login-campo .login-campo-control .login-campo-icono {
+    top: 50%;
+}
+
+/* Títulos largos de la portada ("¿Olvidaste tu contraseña?", "Protejamos tu cuenta") */
+.login-dy .login-brand h1.login-titulo-largo {
+    font-size: clamp(3rem, 4.6vw, 5rem) !important;
+    line-height: 1.1;
+}
+
+.login-dy .recuperar-section .card-header h1 {
+    white-space: normal;
+    font-size: clamp(2.4rem, 3vw, 3.4rem);
+}
+
+.login-dy .form-label {
+    color: rgba(255, 255, 255, 0.85);
+    margin-left: 18px;
+}
+
+.login-dy .codigo-caja {
+    border-radius: 18px;
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+}
+
+@media (max-width: 900px) {
+    .login-dy .login-brand h1.login-titulo-largo {
+        font-size: clamp(2.4rem, 10vw, 3.4rem) !important;
+    }
+}
+
+/* =====================================================================
+   Animaciones al pasar de página (login ⇄ recuperar ⇄ registro)
+   ===================================================================== */
+
+/* Entre páginas: la tarjeta, el personaje y la barra se transforman de una a otra */
+/* Solo en computador: en el celular congelaba la página mientras cargaba la siguiente */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+    @view-transition {
+        navigation: auto;
+    }
+}
+
+.login-dy .login-card { view-transition-name: tarjeta-portada; }
+.login-dy .login-personaje-marco { view-transition-name: personaje-portada; }
+.login-topbar { view-transition-name: barra-portada; }
+
+::view-transition-group(tarjeta-portada) {
+    animation-duration: 0.65s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root) {
+    animation: portada-sale 0.35s ease both;
+}
+
+::view-transition-new(root) {
+    animation: portada-entra 0.55s ease both;
+}
+
+::view-transition-old(personaje-portada) {
+    animation: personaje-sale 0.4s ease both;
+}
+
+::view-transition-new(personaje-portada) {
+    animation: personaje-entra 0.7s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes portada-sale {
+    to { opacity: 0; }
+}
+
+@keyframes portada-entra {
+    from { opacity: 0; }
+}
+
+@keyframes personaje-sale {
+    to { opacity: 0; transform: translateY(30px) scale(0.92); }
+}
+
+@keyframes personaje-entra {
+    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+}
+
+/* Volteo 3D de la tarjeta al cambiar entre Iniciar sesión y Registrarse (login.js) */
+.login-card.sin-transicion #loginSection,
+.login-card.sin-transicion #registerSection {
+    transition: none !important;
+}
+
+html.volteo::view-transition-group(tarjeta-portada) {
+    animation-duration: 0.7s;
+}
+
+html.volteo::view-transition-image-pair(tarjeta-portada) {
+    perspective: 1400px;
+}
+
+html.volteo::view-transition-old(tarjeta-portada) {
+    animation: tarjeta-voltea-sale 0.35s ease-in both;
+    backface-visibility: hidden;
+}
+
+html.volteo::view-transition-new(tarjeta-portada) {
+    animation: tarjeta-voltea-entra 0.35s 0.35s ease-out both;
+    backface-visibility: hidden;
+}
+
+@keyframes tarjeta-voltea-sale {
+    to { transform: rotateY(-90deg); opacity: 0.6; }
+}
+
+@keyframes tarjeta-voltea-entra {
+    from { transform: rotateY(90deg); opacity: 0.6; }
+}
+
+/* Navegadores sin transiciones de vista: la tarjeta y el personaje entran deslizándose */
+@supports not (view-transition-name: a) {
+    @media (prefers-reduced-motion: no-preference) {
+        .login-dy .login-card {
+            animation: tarjeta-entra 0.7s cubic-bezier(0.22, 1, 0.36, 1) both,
+                glow 4s ease-in-out 0.7s infinite alternate;
+        }
+
+        .login-dy .login-personaje-marco {
+            animation: personaje-entra 0.8s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+    }
+}
+
+@keyframes tarjeta-entra {
+    from { opacity: 0; transform: translateY(40px) scale(0.96); }
+}
+
+/* En el celular la tarjeta entra deslizándose (barato: solo transform y opacidad) */
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .login-dy .login-card {
+        animation: tarjeta-entra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+}
+
+/* Celular: menos efectos pesados para que no se trabe
+   (el brillo que late repinta la tarjeta sin parar y el vidrio esmerilado es costoso) */
+@media (max-width: 900px) {
+    .login-dy .card {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 0 40px rgba(var(--tema-fuerte-rgb, 183, 0, 255), 0.35);
+    }
+
+    .login-dy .login-personaje {
+        animation: none;
+    }
+
+    .login-fondo {
+        animation: none;
+    }
+}

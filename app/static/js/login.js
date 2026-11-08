@@ -1,6 +1,26 @@
+// Cambia entre "Iniciar sesión" y "Registrarse": si el navegador lo permite,
+// la tarjeta se voltea en 3D (login.css, html.volteo); si no, se desliza
 function toggleForms(target) {
+    const card = document.querySelector('.login-card');
+    const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reducir) {
+        mostrarFormulario(target);
+        return;
+    }
+    document.documentElement.classList.add('volteo');
+    card.classList.add('sin-transicion');
+    const transicion = document.startViewTransition(() => mostrarFormulario(target));
+    transicion.finished.finally(() => {
+        document.documentElement.classList.remove('volteo');
+        card.classList.remove('sin-transicion');
+    });
+}
+
+function mostrarFormulario(target) {
     const loginSec = document.getElementById('loginSection');
     const registerSec = document.getElementById('registerSection');
+    // La tarjeta toma la altura solo del formulario que se ve (login.css)
+    loginSec.closest('.login-card').classList.toggle('registrando', target === 'register');
 
     if (target === 'register') {
         // Ocultar Login (Mover a la izquierda)

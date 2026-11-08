@@ -84,3 +84,27 @@ def test_avisos_js_cierra_antes_los_de_exito(app):
     with open(os.path.join(app.static_folder, 'js', 'avisos.js'), encoding='utf-8') as f:
         js = f.read()
     assert 'MS_NORMAL = 4500' in js and 'MS_IMPORTANTE = 8000' in js and "'alert-danger'" in js
+
+
+def test_menu_lateral_con_la_marca_del_login(logged_client):
+    html = logged_client.get('/dashboard').get_data(as_text=True)
+    assert 'class="menu-marca"' in html and 'icono-loto' in html
+    assert 'Habit Tracker<br>&amp; English' in html
+
+
+def test_todos_los_menus_laterales_traen_la_marca():
+    import pathlib
+    for plantilla in pathlib.Path('app/templates').rglob('*.html'):
+        texto = plantilla.read_text(encoding='utf-8')
+        if '<div class="sidebar" id="sidebar">' in texto:
+            assert 'menu/_marca_menu.html' in texto, plantilla
+
+
+def test_diseno_del_login_dentro_de_la_app(client):
+    css = client.get('/static/css/m.css').get_data(as_text=True)
+    diseno = css[css.index('DISEÑO DE LA PORTADA DENTRO DE LA APP'):]
+    # Loto, píldora activa con el degradado del tema y títulos caligráficos
+    assert "url('../img/loto.svg')" in diseno
+    assert 'linear-gradient(90deg, var(--tema-grad-1' in diseno
+    assert "font-family: 'Great Vibes'" in diseno
+    assert 'Great+Vibes' in css
