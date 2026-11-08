@@ -332,6 +332,8 @@ body {
 .adm-ayuda { margin: -4px 0 0; font-size: 0.8rem; }
 
 @media (max-width: 600px) {
+    /* En el celular los contenedores de la página no dejan margen: el panel pone el suyo */
+    .adm { padding-left: 16px; padding-right: 16px; }
     .adm-nav, .adm-accion { flex-direction: column; align-items: flex-start; }
     .adm-form-eliminar .adm-input { width: 100%; }
 }
@@ -355,3 +357,12 @@ body {
 
 /* Pausar y eliminar un hábito, uno al lado del otro */
 .adm-botones { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* Formulario para enviar un reto */
+.adm-form-reto { margin-bottom: 8px; }
+.adm-form-fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.adm-form-reto label { display: flex; flex-direction: column; gap: 6px; }
+.adm-modo-apuesta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; border: 0; }
+.adm-modo-apuesta legend { width: 100%; font-size: 0.85rem; margin-bottom: 2px; }
+.adm-form-reto .adm-modo-apuesta label { flex-direction: row; align-items: center; gap: 6px; color: #e8e8ec; }
+.adm-input:disabled { opacity: 0.4; }

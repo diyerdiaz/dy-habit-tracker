@@ -61,7 +61,7 @@ def login():
                     # pero no puede usar la app hasta cambiarla (ver app/__init__.py)
                     session['debe_cambiar_clave'] = True
                     return redirect(url_for('perfil.actualizar_contrasena'))
-                flash("Login successful!", "success")
+                flash("¡Qué bueno verte de nuevo!", "success")
                 return redirect(url_for('auth.dashboard'))
 
             restantes = IntentoLogin.registrar_fallo(nameUser, ip) if nameUser else MAX_FALLOS

@@ -22,6 +22,7 @@ def actualizar_esquema():
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
         'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},
         'tareas': {'horaRecordatorio': 'VARCHAR(5)', 'recordatorioEnviado': 'BOOLEAN NOT NULL DEFAULT FALSE'},
+        'retos_usuario': {'todoXp': 'BOOLEAN NOT NULL DEFAULT FALSE'},
     }
     inspector = inspect(db.engine)
     for tabla, columnas in columnas_nuevas.items():

@@ -1,0 +1,226 @@
+/* Página "Mis Retos": tarjetas de vidrio con el color del tema */
+.retos-wrapper {
+    width: 95%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 10vh 16px 60px;
+    box-sizing: border-box;
+}
+
+.retos-cabecera { text-align: center; margin-bottom: 28px; }
+.retos-icono {
+    font-size: 3rem;
+    color: #ff5f6d;
+    filter: drop-shadow(0 0 14px rgba(255, 95, 109, 0.5));
+}
+.retos-titulo {
+    color: var(--tema-vivo, #b366ff);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 6px 0;
+}
+.retos-sub { color: rgba(255, 255, 255, 0.75); margin: 0; }
+.retos-sub strong { color: #ffd700; }
+
+.reto-tarjeta, .retos-historial {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+.reto-pendiente { border-color: rgba(255, 215, 0, 0.45); box-shadow: 0 0 24px rgba(255, 215, 0, 0.15); }
+
+.reto-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.reto-nombre { font-size: 1.35rem; font-weight: 700; margin: 0 0 4px; }
+.reto-fechas { color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin: 0; }
+.reto-apuesta {
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(255, 215, 0, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.reto-apuesta span { color: #ffd700; font-size: 1.3rem; font-weight: 700; }
+.reto-descripcion { margin: 14px 0 0; color: rgba(255, 255, 255, 0.85); }
+.reto-aviso { margin: 14px 0 0; color: rgba(255, 255, 255, 0.75); font-size: 0.92rem; }
+
+.reto-botones { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.reto-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+}
+.reto-botones .reto-boton { margin-top: 0; }
+.reto-boton-aceptar { background: linear-gradient(135deg, var(--tema-grad-1, #8a28ff), var(--tema-vivo, #d966ff)); }
+.reto-boton-rechazar { background: transparent; border-color: rgba(255, 255, 255, 0.25); }
+.reto-boton-hecho { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.5); color: #4ade80; }
+.reto-boton:hover { filter: brightness(1.1); }
+
+.reto-progreso { display: flex; align-items: center; gap: 12px; margin-top: 18px; font-size: 0.9rem; }
+.reto-barra { flex: 1; height: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; overflow: hidden; }
+.reto-barra-fill { height: 100%; background: linear-gradient(90deg, var(--tema-grad-1, #8a28ff), #4ade80); }
+
+/* Siete días por fila: cada fila es una semana del reto */
+.reto-dias {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    max-width: 380px;
+    margin-top: 14px;
+}
+.reto-dia {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+.reto-dia small { font-size: 0.6rem; font-weight: 400; opacity: 0.6; }
+.reto-dia.hecho { background: rgba(74, 222, 128, 0.25); color: #4ade80; }
+.reto-dia.hoy { outline: 2px solid var(--tema-vivo, #d966ff); }
+
+.reto-vacio { text-align: center; color: rgba(255, 255, 255, 0.6); }
+
+/* Historial a la izquierda, retos actuales a la derecha */
+.retos-columnas {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+.retos-historial { position: sticky; top: 20px; }
+
+.retos-subtitulo { font-size: 1.1rem; font-weight: 700; margin: 0 0 12px; }
+.historial-cuenta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 8px; }
+.cuenta-ganados { color: #4ade80; }
+.cuenta-perdidos { color: #f87171; }
+.reto-fila {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.reto-fila-icono { font-size: 1.2rem; color: rgba(255, 255, 255, 0.4); margin-top: 2px; }
+.reto-fila-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.reto-fila-texto strong { overflow-wrap: anywhere; }
+.reto-estado { font-size: 0.82rem; color: rgba(255, 255, 255, 0.6); }
+.estado-ganado .reto-fila-icono, .estado-ganado .reto-estado { color: #4ade80; }
+.estado-perdido .reto-fila-icono, .estado-perdido .reto-estado { color: #f87171; }
+
+/* Pantalla al aceptar un reto: el texto se escribe solo (retos.js) */
+.reto-inicio {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    background: radial-gradient(circle at center, rgba(var(--tema-oscuro-rgb, 30, 0, 45), 0.96), rgba(0, 0, 0, 0.97));
+    color: #fff;
+    animation: reto-inicio-entra 0.35s ease both;
+}
+.reto-inicio[hidden] { display: none; }
+.reto-inicio-icono {
+    font-size: 3.5rem;
+    color: #ff5f6d;
+    filter: drop-shadow(0 0 22px rgba(255, 95, 109, 0.7));
+    animation: reto-latido 1s ease-in-out infinite;
+}
+.reto-inicio-linea {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.reto-inicio-frase {
+    color: var(--tema-vivo, #d966ff);
+    font-style: italic;
+    text-transform: none;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+}
+.reto-inicio-linea.escribiendo::after {
+    content: '|';
+    margin-left: 2px;
+    animation: reto-cursor 0.7s steps(1) infinite;
+}
+@keyframes reto-inicio-entra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes reto-latido { 50% { transform: scale(1.12); } }
+@keyframes reto-cursor { 50% { opacity: 0; } }
+
+@media (max-width: 860px) {
+    .retos-columnas { grid-template-columns: 1fr; }
+    /* En el celular primero el reto actual y debajo el historial */
+    .retos-historial { position: static; order: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reto-inicio, .reto-inicio-icono, .reto-inicio-linea.escribiendo::after { animation: none; }
+}
+
+/* Reto "todo o nada": todo el XP en juego */
+.reto-apuesta em {
+    display: block;
+    font-style: normal;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #ff5f6d;
+}
+.reto-todo { background: rgba(255, 95, 109, 0.14); box-shadow: 0 0 18px rgba(255, 95, 109, 0.25); }
+
+/* Historial de 7 en 7: Anterior / Siguiente */
+.historial-paginas {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.historial-pagina { font-size: 0.82rem; color: rgba(255, 255, 255, 0.6); }
+.historial-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.historial-boton:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.historial-paginas .historial-boton:last-child { justify-self: end; }

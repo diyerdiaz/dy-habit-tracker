@@ -714,6 +714,9 @@ body {
     left: -280px;
     width: 280px;
     height: 100vh;
+    /* En el celular 100vh incluye lo que tapan las barras del navegador: con dvh
+       el menú mide solo lo visible y "Cerrar sesión" no queda escondido abajo */
+    height: 100dvh;
     background: rgba(var(--tema-oscuro-rgb, 30, 0, 50), 0.45);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(24px);
@@ -722,7 +725,7 @@ body {
     transition: 0.3s ease-in-out;
     z-index: 999;
     padding-top: 80px;
-    padding-bottom: 24px;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
     /* Con muchas opciones el menú se desplaza por dentro, sin mover la página de atrás */
     overflow-y: auto;
@@ -1027,10 +1030,6 @@ body {
     main .card-body > .container-fluid.p-3 {
         padding-left: 0 !important;
         padding-right: 0 !important;
-    }
-    .flash-message {
-        margin-left: 12px;
-        margin-right: 12px;
     }
     .dashboard-grid {
         width: 100%;
@@ -1454,19 +1453,65 @@ body {
     to   { opacity: 1; transform: none; }
 }
 
+/* Al cerrarse (avisos.js) se desvanece y su espacio se encoge: la página sube sin saltos */
+.flash-message.alert.saliendo {
+    opacity: 0;
+    max-height: 0 !important;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-width: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-height 0.4s ease, padding 0.4s ease, margin 0.4s ease;
+}
+
+/* Celular y tableta: el menú (☰) y la campana están fijos arriba y tapaban el
+   aviso. Aquí el aviso empieza debajo de ellos y ocupa su propio espacio:
+   empuja la página hacia abajo en vez de quedar encima del texto. */
+@media (max-width: 768px) {
+    .avisos {
+        margin: 0 12px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    /* Solo en páginas con el botón del menú: el contenedor ya baja 24px, 24 + 52 = 76px,
+       debajo de los botones. Va como padding porque el margin se juntaba con el del contenedor */
+    body:has(#sidebarToggle) .avisos { padding-top: 52px; }
+    .avisos .flash-message.alert {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+}
+
 /* Íconos del menú lateral (compartido por todas las páginas con sidebar) */
 .sidebar-icon { margin-right: 15px; font-size: 1.2rem; }
 .ico-recuperar { color: #ffcc66; }
 .ico-estadisticas { color: #00e676; }
 .ico-nivel { color: #ffd700; }
 .ico-medallas { color: #ffb347; }
+.ico-retos { color: #ff5f6d; }
 .ico-motivacion { color: #ff6fb5; }
 .ico-metodos { color: #00bac6; }
 .ico-vision { color: #ff8c42; }
 .ico-temas { color: #00e5ff; }
 .ico-perfil { color: var(--tema-vivo, #d966ff); }
 .sidebar-item-toggle { margin-top: 24px; }
-.sidebar-link.sidebar-link-salir { color: #ff6666; border-color: rgba(255, 102, 102, 0.2); }
+.sidebar-link.sidebar-link-salir {
+    color: #ff6666;
+    background: rgba(255, 102, 102, 0.08);
+    border-color: rgba(255, 102, 102, 0.3);
+    font-weight: 600;
+}
+.sidebar-link.sidebar-link-salir:hover {
+    color: #ff8080;
+    background: rgba(255, 102, 102, 0.16);
+    border-color: rgba(255, 102, 102, 0.5);
+    box-shadow: 0 0 15px rgba(255, 102, 102, 0.2);
+}
+/* "Cerrar sesión" un poco separado del resto del menú */
+.sidebar-item:has(.form-logout) { margin-top: 14px; }
 
 
 /* Botón de un formulario que ya se está enviando (envio_unico.js) */

@@ -9,7 +9,10 @@ from app.models.habitos import Habit
 from app.models.users import User
 from app.services.admin import (estadisticas_usuario, usuarios_registrados, resumen, habitos_del_dia,
                                 anotar_habito, pausar_habito, eliminar_habito)
+from app.models.retos import Reto, ABIERTOS
 from app.services.cuentas import borrar_cuenta, error_cambio_usuario, error_cambio_contrasena, MAX_USUARIO
+from app.services.retos import (validar_reto, crear_reto, cancelar as cancelar_reto, retos_para_admin,
+                                MAX_NOMBRE, MAX_DESCRIPCION, MAX_APUESTA)
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -55,7 +58,9 @@ def detalle(id_user):
     user = _usuario_normal(id_user)
     fecha = _fecha_para_anotar(request.args.get('fecha')) or date.today()
     return render_template('admin/detalle.html', e=estadisticas_usuario(user),
-                           fecha=fecha, hoy=date.today(), habitos=habitos_del_dia(user, fecha))
+                           fecha=fecha, hoy=date.today(), habitos=habitos_del_dia(user, fecha),
+                           retos=retos_para_admin(user.idUser), abiertos=ABIERTOS,
+                           max_nombre=MAX_NOMBRE, max_descripcion=MAX_DESCRIPCION, max_apuesta=MAX_APUESTA)
 
 
 @bp.route('/usuarios/<int:id_user>/habitos/<int:id_habit>/anotar', methods=['POST'])
@@ -83,6 +88,9 @@ def pausar_habito_usuario(id_user, id_habit):
     """Pausa o reanuda un hábito del usuario, aunque su plan del mes esté cerrado."""
     user = _usuario_normal(id_user)
     habito = Habit.visibles(user.idUser).filter_by(idHabit=id_habit).first_or_404()
+    if habito.habitState not in ('Activo', 'Pausado'):
+        flash(f'"{habito.habitName}" está {habito.habitState.lower()}: no se puede pausar.', 'warning')
+        return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='habitos'))
     if pausar_habito(habito) == 'Pausado':
         flash(f'"{habito.habitName}" quedó pausado: no le cuenta como pendiente.', 'info')
     else:
@@ -100,6 +108,45 @@ def eliminar_habito_usuario(id_user, id_habit):
     detalle = f' y {quitados} día(s) marcados este mes' if quitados else ''
     flash(f'Se eliminó "{habito.habitName}"{detalle}. Sus meses anteriores siguen en las estadísticas.', 'info')
     return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='habitos'))
+
+
+def _fecha(texto):
+    try:
+        return date.fromisoformat(texto or '')
+    except ValueError:
+        return None
+
+
+@bp.route('/usuarios/<int:id_user>/retos', methods=['POST'])
+@solo_admin
+def crear_reto_usuario(id_user):
+    """Le pone un reto al usuario: le aparece el botón "Retos" para aceptarlo o rechazarlo."""
+    user = _usuario_normal(id_user)
+    nombre = (request.form.get('nombre') or '').strip()
+    descripcion = (request.form.get('descripcion') or '').strip()
+    inicio, fin = _fecha(request.form.get('inicio')), _fecha(request.form.get('fin'))
+    apuesta = request.form.get('apuesta', type=int)
+    todo = request.form.get('modo_apuesta') == 'todo'
+    error = validar_reto(nombre, descripcion, inicio, fin, apuesta, todo=todo)
+    if error:
+        flash(error, 'danger')
+    else:
+        crear_reto(user, nombre, descripcion, inicio, fin, apuesta, todo=todo)
+        flash(f'Reto "{nombre}" enviado a {user.nameUser}: le aparece para aceptarlo o rechazarlo.', 'success')
+    return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='retos'))
+
+
+@bp.route('/usuarios/<int:id_user>/retos/<int:id_reto>/cancelar', methods=['POST'])
+@solo_admin
+def cancelar_reto_usuario(id_user, id_reto):
+    """Cancela un reto que aún no termina: nadie gana ni pierde XP."""
+    user = _usuario_normal(id_user)
+    reto = Reto.query.filter_by(idReto=id_reto, idUser=user.idUser).first_or_404()
+    if cancelar_reto(reto):
+        flash(f'Se canceló "{reto.nombre}". Nadie gana ni pierde XP.', 'info')
+    else:
+        flash(f'"{reto.nombre}" ya terminó: no se puede cancelar.', 'warning')
+    return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='retos'))
 
 
 @bp.route('/usuarios/<int:id_user>/bloquear', methods=['POST'])

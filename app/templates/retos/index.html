@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Mis Retos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/retos.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
+                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
+                <i class="bi bi-list-check" style="margin-right: 15px; font-size: 1.2rem;"></i> Gestión de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
+                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
+                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
+                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
+                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
+                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
+                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
+            </a>
+        </li>
+        {% include 'retos/_item_menu.html' %}
+        <li class="sidebar-item">
+            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
+                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
+                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
+                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
+                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
+            </a>
+        </li>
+        <li class="sidebar-item" style="margin-top: 24px;">
+            <div class="sidebar-toggle">
+                <span class="sidebar-toggle-thumb"></span>
+                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
+                    <i class="bi bi-house-door"></i> Hábitos
+                </a>
+                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option">
+                    <i class="bi bi-translate"></i> Inglés
+                </a>
+            </div>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
+                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+            </button></form>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="retos-wrapper">
+    <header class="retos-cabecera">
+        <i class="bi bi-lightning-charge-fill retos-icono"></i>
+        <h1 class="retos-titulo">Mis Retos</h1>
+        <p class="retos-sub">Tienes <strong>{{ xp }} XP</strong>. Cumple cada día del reto para ganar lo apostado; si un día no lo marcas, lo pierdes.</p>
+    </header>
+
+    <div class="retos-columnas">
+        {# Izquierda: los retos que ya terminaron y si se cumplieron o no #}
+        <aside class="retos-historial" aria-labelledby="tituloHistorial">
+            <h2 class="retos-subtitulo" id="tituloHistorial"><i class="bi bi-clock-history"></i> Historial</h2>
+            {% if historial %}
+            <div class="historial-cuenta">
+                <span class="cuenta-ganados"><i class="bi bi-check-circle-fill"></i> {{ ganados }} cumplidos</span>
+                <span class="cuenta-perdidos"><i class="bi bi-x-circle-fill"></i> {{ perdidos }} no cumplidos</span>
+            </div>
+            {% for h in historial %}
+            {% set reto = h.reto %}
+            <div class="reto-fila estado-{{ reto.estado|lower|replace(' ', '-') }}">
+                <i class="bi {{ 'bi-check-circle-fill' if reto.estado == 'Ganado' else ('bi-x-circle-fill' if reto.estado == 'Perdido' else 'bi-dash-circle') }} reto-fila-icono"></i>
+                <div class="reto-fila-texto">
+                    <strong>{{ reto.nombre }}</strong>
+                    <span class="reto-fechas">{{ reto.fechaInicio.strftime('%d/%m/%Y') }} – {{ reto.fechaFin.strftime('%d/%m/%Y') }} · {{ h.cumplidos }}/{{ h.total }} días</span>
+                    <span class="reto-estado">
+                        {% if reto.estado == 'Ganado' %}Cumplido · +{{ reto.apuesta }} XP
+                        {% elif reto.estado == 'Perdido' %}No cumplido · −{{ reto.apuesta }} XP
+                        {% else %}{{ reto.estado }} · sin XP{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+            {% if paginas > 1 %}
+            <nav class="historial-paginas" aria-label="Páginas del historial">
+                {% if pagina > 1 %}
+                <a href="{{ url_for('retos.index', pagina=pagina - 1) }}" class="historial-boton"><i class="bi bi-chevron-left"></i> Anterior</a>
+                {% else %}<span></span>{% endif %}
+                <span class="historial-pagina">{{ pagina }} de {{ paginas }}</span>
+                {% if pagina < paginas %}
+                <a href="{{ url_for('retos.index', pagina=pagina + 1) }}" class="historial-boton">Siguiente <i class="bi bi-chevron-right"></i></a>
+                {% else %}<span></span>{% endif %}
+            </nav>
+            {% endif %}
+            {% else %}
+            <p class="reto-vacio">Aquí verás los retos que termines y si los cumpliste.</p>
+            {% endif %}
+        </aside>
+
+        <div class="retos-actuales">
+            {% for r in abiertos %}
+            {% set reto = r.reto %}
+            {# Todo o nada sin aceptar todavía: lo que está en juego es todo su XP de hoy #}
+            {% set en_juego = xp if (reto.todoXp and reto.estado == 'Pendiente') else reto.apuesta %}
+            <section class="reto-tarjeta{{ ' reto-pendiente' if reto.estado == 'Pendiente' else '' }}">
+                <div class="reto-encabezado">
+                    <div>
+                        <h2 class="reto-nombre">{{ reto.nombre }}</h2>
+                        <p class="reto-fechas"><i class="bi bi-calendar-range"></i>
+                            {{ reto.fechaInicio.strftime('%d/%m/%Y') }} – {{ reto.fechaFin.strftime('%d/%m/%Y') }} · {{ r.total }} día(s)</p>
+                    </div>
+                    <div class="reto-apuesta{{ ' reto-todo' if reto.todoXp else '' }}">
+                        {% if reto.todoXp %}<em>Todo o nada</em>{% endif %}<span>{{ en_juego }}</span> XP en juego
+                    </div>
+                </div>
+                {% if reto.descripcion %}<p class="reto-descripcion">{{ reto.descripcion }}</p>{% endif %}
+
+                {% if reto.estado == 'Pendiente' %}
+                {% if reto.todoXp %}
+                <p class="reto-aviso">Este reto es <strong>todo o nada</strong>: apuestas <strong>todo tu XP</strong> ({{ xp }} XP ahora).
+                    Si cumples todos los días lo duplicas; si un día no lo cumples, pierdes <strong>esos {{ xp }} XP</strong>.
+                    Si lo rechazas no pierdes nada.</p>
+                {% else %}
+                <p class="reto-aviso">Si aceptas y cumples todos los días ganas <strong>+{{ reto.apuesta }} XP</strong>.
+                    Si un día no lo cumples, pierdes <strong>{{ reto.apuesta }} XP</strong>{% if xp < reto.apuesta %} (te quedarías en 0){% endif %}.
+                    Si lo rechazas no pierdes nada.</p>
+                {% endif %}
+                <div class="reto-botones">
+                    <form method="post" action="{{ url_for('retos.aceptar', id_reto=reto.idReto) }}" data-iniciar-reto="{{ reto.nombre }}"{% if reto.todoXp %} data-todo-xp{% endif %}>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="reto-boton reto-boton-aceptar"><i class="bi bi-check-lg"></i> Aceptar reto</button>
+                    </form>
+                    <form method="post" action="{{ url_for('retos.rechazar', id_reto=reto.idReto) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="reto-boton reto-boton-rechazar"><i class="bi bi-x-lg"></i> Rechazar</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="reto-progreso">
+                    <div class="reto-barra"><div class="reto-barra-fill" style="width: {{ (r.cumplidos / r.total * 100)|round|int }}%"></div></div>
+                    <span>{{ r.cumplidos }}/{{ r.total }} días cumplidos</span>
+                </div>
+                {# Siete días por fila: cada fila es una semana del reto #}
+                <div class="reto-dias">
+                    {% for dia, hecho, es_hoy in r.dias %}
+                    <span class="reto-dia{{ ' hecho' if hecho else '' }}{{ ' hoy' if es_hoy else '' }}" title="{{ dia.strftime('%d/%m/%Y') }}">
+                        <small>{{ ['L', 'M', 'X', 'J', 'V', 'S', 'D'][dia.weekday()] }}</small>{{ dia.day }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% if r.puede_marcar %}
+                <form method="post" action="{{ url_for('retos.cumplir', id_reto=reto.idReto) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if r.hoy_marcado %}
+                    <button type="submit" class="reto-boton reto-boton-hecho"><i class="bi bi-check-circle-fill"></i> Hoy cumplido · quitar</button>
+                    {% else %}
+                    <button type="submit" class="reto-boton reto-boton-aceptar"><i class="bi bi-check-circle"></i> Cumplí hoy</button>
+                    {% endif %}
+                </form>
+                {% elif r.falta_para_empezar %}
+                <p class="reto-aviso">Empieza en {{ r.falta_para_empezar }} día(s). Ese día podrás marcar "Cumplí hoy".</p>
+                {% endif %}
+                {% endif %}
+            </section>
+            {% else %}
+            <p class="reto-vacio reto-vacio-actual">No tienes retos activos ahora.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{# Pantalla al aceptar: el texto se escribe solo (retos.js) y luego se envía el formulario #}
+<div class="reto-inicio" id="retoInicio" role="status" aria-live="polite" hidden>
+    <i class="bi bi-lightning-charge-fill reto-inicio-icono"></i>
+    <p class="reto-inicio-linea" id="retoInicioLinea1"></p>
+    <p class="reto-inicio-linea reto-inicio-frase" id="retoInicioLinea2"></p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/retos.js') }}"></script>
+{% endblock %}
