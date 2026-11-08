@@ -11,7 +11,7 @@ import logging
 from flask import current_app
 
 from app import db
-from app.models.habitos import Habit
+from app.models.habitos import ELIMINADO, Habit
 from app.models.hist_habits import HistHabit
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.tareas import Tarea
@@ -22,6 +22,7 @@ from app.models.vocabulario import Vocabulario
 from app.services.correo import ocultar_email
 from app.services.gamificacion import calcular_racha, registrar_anotacion_admin
 from app.services.level_config import calcular_progreso
+from app.services.plan_habitos import guardar_mes_anterior, pausar_o_reanudar
 
 # Días que se muestran en la tira de actividad del detalle de un usuario
 DIAS_ACTIVIDAD = 30
@@ -94,6 +95,28 @@ def anotar_habito(user, habito, fecha):
         HistHabit.idHabit != habito.idHabit).scalar()
     registrar_anotacion_admin(user.idUser, fecha, registro is None, otros == 0)
     return registro is None
+
+
+def pausar_habito(habito, hoy=None):
+    """El admin pausa o reanuda un hábito del usuario (aunque su plan del mes esté
+    cerrado). Solo los días en pausa dejan de contar. Devuelve el estado nuevo."""
+    estado = pausar_o_reanudar(habito, hoy)
+    db.session.commit()
+    return estado
+
+
+def eliminar_habito(habito, hoy=None):
+    """El admin elimina un hábito que el usuario ya no quiere: sale del mes actual
+    junto con los días que se marcó este mes. Los meses anteriores siguen en las
+    estadísticas y el XP ganado se conserva. Devuelve cuántos días se quitaron."""
+    hoy = hoy or date.today()
+    guardar_mes_anterior(habito, hoy)
+    quitados = HistHabit.query.filter(
+        HistHabit.idHabit == habito.idHabit, HistHabit.fecha >= hoy.replace(day=1)
+    ).delete(synchronize_session=False)
+    habito.habitState = ELIMINADO
+    db.session.commit()
+    return quitados
 
 
 def usuarios_registrados():

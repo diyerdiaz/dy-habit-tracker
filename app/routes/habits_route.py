@@ -9,7 +9,9 @@ from app.models.recuperacion import (
 )
 from app import db
 from app.services.gamificacion import registrar_toggle_habito, registrar_recuperacion
-from app.services.plan_habitos import guardar_mes_anterior
+from app.services.plan_habitos import (
+    guardar_mes_anterior, pausar_o_reanudar, pausa_abierta, pausas_abiertas, cerrar_pausas, pausas_del_usuario,
+)
 from app.services.resumen_mes import resumen_pendiente
 from datetime import date, timedelta
 from sqlalchemy.exc import IntegrityError
@@ -50,6 +52,7 @@ def plan_mes():
                 h.set_dias(request.form.getlist(f'dias_{h.idHabit}'))
             else:
                 h.habitState = 'Pausado'
+        cerrar_pausas(habits, hoy)
         db.session.add(PlanMensual(idUser=current_user.idUser, anio=hoy.year, mes=hoy.month))
         try:
             db.session.commit()
@@ -100,6 +103,7 @@ def register_habit():
         "habits/index.html",
         habits=habits,
         plan=PlanMensual.del_mes(current_user.idUser),
+        pausados_aqui=pausas_abiertas(current_user.idUser),
         mes=nombre_mes(hoy),
         desbloqueo=primer_dia_mes_siguiente(hoy),
     )
@@ -172,6 +176,27 @@ def habit_change_state(habit_id):
         flash(f"Estado del hábito '{habit.habitName}' cambiado a '{new_state}'.", "success")
     return redirect(url_for('habits.register_habit'))
 
+@bp.route('/habit/<int:habit_id>/pausar', methods=['POST'])
+@login_required
+def habit_pausar(habit_id):
+    """Pausar o reanudar se puede aunque el plan del mes esté cerrado: solo los días
+    pausados dejan de contar. Con el plan cerrado solo se reanuda lo que se pausó
+    aquí (reanudar uno que el plan dejó fuera sería agregarlo al plan)."""
+    habit = Habit.visibles(current_user.idUser).filter_by(idHabit=habit_id).first_or_404()
+    if habit.habitState not in ('Activo', 'Pausado'):
+        flash(f"'{habit.habitName}' está {habit.habitState.lower()}: no se puede pausar.", "warning")
+        return redirect(url_for('habits.register_habit'))
+    if habit.habitState == 'Pausado' and not pausa_abierta(habit):
+        bloqueo = _plan_bloqueado()
+        if bloqueo:
+            return bloqueo
+    if pausar_o_reanudar(habit) == 'Pausado':
+        flash(f"'{habit.habitName}' quedó pausado. Los días en pausa no cuentan en tus estadísticas.", "info")
+    else:
+        flash(f"'{habit.habitName}' se reanudó desde hoy.", "success")
+    db.session.commit()
+    return redirect(url_for('habits.register_habit'))
+
 @bp.route('/habit/<int:habit_id>/toggle_today', methods=['POST'])
 @login_required
 def habit_toggle_today(habit_id):
@@ -228,7 +253,7 @@ def _sesiones_libres(habit, hoy):
 
 def _estado_recuperacion(habit, hoy, sesion_hoy):
     hechos = {h.fecha for h in HistHabit.query.filter_by(idHabit=habit.idHabit).all()}
-    perdidos = dias_perdidos(habit, hechos, hoy)
+    perdidos = dias_perdidos(habit, hechos, hoy, pausas_del_usuario(habit.idUser).get(habit.idHabit, ()))
     veces = len(_sesiones_libres(habit, hoy))
     libre = dia_libre(habit, hoy)
     # Hoy solo cuenta como día libre por usar si todavía no se sumó ningún hábito

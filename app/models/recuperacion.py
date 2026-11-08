@@ -46,15 +46,17 @@ def inicio_mes(fecha):
     return fecha.replace(day=1)
 
 
-def dias_perdidos(habit, hechos, hoy=None):
+def dias_perdidos(habit, hechos, hoy=None, pausas=()):
     """Días de este mes (antes de hoy) en que tocaba el hábito y no se hizo.
-    `hechos` es el conjunto de fechas en que el hábito sí se marcó."""
+    `hechos` es el conjunto de fechas en que el hábito sí se marcó y `pausas`
+    los (desde, hasta) en que estuvo pausado: esos días no se perdieron."""
     hoy = hoy or date.today()
     creado = habit.createdAt.date() if habit.createdAt else hoy
     perdidos = []
     cursor = max(inicio_mes(hoy), creado)
     while cursor < hoy:
-        if habit.toca_el(cursor) and cursor not in hechos:
+        pausado = any(desde <= cursor <= hasta for desde, hasta in pausas)
+        if habit.toca_el(cursor) and not pausado and cursor not in hechos:
             perdidos.append(cursor)
         cursor += timedelta(days=1)
     return perdidos

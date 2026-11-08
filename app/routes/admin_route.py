@@ -7,7 +7,8 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.habitos import Habit
 from app.models.users import User
-from app.services.admin import estadisticas_usuario, usuarios_registrados, resumen, habitos_del_dia, anotar_habito
+from app.services.admin import (estadisticas_usuario, usuarios_registrados, resumen, habitos_del_dia,
+                                anotar_habito, pausar_habito, eliminar_habito)
 from app.services.cuentas import borrar_cuenta, error_cambio_usuario, error_cambio_contrasena, MAX_USUARIO
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -74,6 +75,31 @@ def anotar(id_user, id_habit):
     else:
         flash(f'Se quitó "{habito.habitName}" de {user.nameUser} el {dia}.', 'info')
     return redirect(url_for('admin.detalle', id_user=user.idUser, fecha=fecha.isoformat(), _anchor='anotar'))
+
+
+@bp.route('/usuarios/<int:id_user>/habitos/<int:id_habit>/pausar', methods=['POST'])
+@solo_admin
+def pausar_habito_usuario(id_user, id_habit):
+    """Pausa o reanuda un hábito del usuario, aunque su plan del mes esté cerrado."""
+    user = _usuario_normal(id_user)
+    habito = Habit.visibles(user.idUser).filter_by(idHabit=id_habit).first_or_404()
+    if pausar_habito(habito) == 'Pausado':
+        flash(f'"{habito.habitName}" quedó pausado: no le cuenta como pendiente.', 'info')
+    else:
+        flash(f'"{habito.habitName}" se reanudó.', 'success')
+    return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='habitos'))
+
+
+@bp.route('/usuarios/<int:id_user>/habitos/<int:id_habit>/eliminar', methods=['POST'])
+@solo_admin
+def eliminar_habito_usuario(id_user, id_habit):
+    """Elimina un hábito que el usuario no quiere: se va del mes actual con sus días marcados."""
+    user = _usuario_normal(id_user)
+    habito = Habit.visibles(user.idUser).filter_by(idHabit=id_habit).first_or_404()
+    quitados = eliminar_habito(habito)
+    detalle = f' y {quitados} día(s) marcados este mes' if quitados else ''
+    flash(f'Se eliminó "{habito.habitName}"{detalle}. Sus meses anteriores siguen en las estadísticas.', 'info')
+    return redirect(url_for('admin.detalle', id_user=user.idUser, _anchor='habitos'))
 
 
 @bp.route('/usuarios/<int:id_user>/bloquear', methods=['POST'])

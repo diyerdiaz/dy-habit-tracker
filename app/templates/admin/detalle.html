@@ -33,6 +33,31 @@
         <div class="adm-actividad-pie"><span>{{ e.actividad[0][0].strftime('%d/%m') }}</span><span>Hoy</span></div>
     </section>
 
+    <section class="adm-bloque adm-acciones" id="habitos">
+        <h2 class="adm-subtitulo">Hábitos <span class="adm-tenue">· pausar o eliminar los que {{ e.usuario }} ya no quiere</span></h2>
+        {% for h, _, _ in habitos %}
+        <div class="adm-accion">
+            <div>
+                <strong>{{ h.habitName }}</strong>{% if h.habitState == 'Pausado' %} <span class="adm-insignia">Pausado</span>{% endif %}
+                <p class="adm-tenue">{{ h.dias_texto() }} · {{ h.habitCategory }}</p>
+            </div>
+            <div class="adm-botones">
+                <form method="post" action="{{ url_for('admin.pausar_habito_usuario', id_user=e.id, id_habit=h.idHabit) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="adm-boton">{{ 'Reanudar' if h.habitState == 'Pausado' else 'Pausar' }}</button>
+                </form>
+                <form method="post" action="{{ url_for('admin.eliminar_habito_usuario', id_user=e.id, id_habit=h.idHabit) }}"
+                      data-confirmar="¿Eliminar «{{ h.habitName }}»? Se quitan los días que se marcó este mes; los meses anteriores y el XP se conservan.">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="adm-boton adm-boton-peligro">Eliminar</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <p class="adm-tenue">Este usuario todavía no tiene hábitos.</p>
+        {% endfor %}
+    </section>
+
     <section class="adm-bloque adm-acciones" id="anotar">
         <h2 class="adm-subtitulo">Anotar hábitos <span class="adm-tenue">· por si {{ e.usuario }} no pudo marcarlos</span></h2>
         <form method="get" action="{{ url_for('admin.detalle', id_user=e.id) }}#anotar" class="adm-form-fecha">
@@ -81,4 +106,8 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
