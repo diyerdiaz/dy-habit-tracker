@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 44" fill="none" stroke="#000" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+  <!-- Loto de la marca: se usa como máscara (login.css) para pintarlo con el color del personaje -->
+  <path d="M32 4C24 14 24 27 32 35C40 27 40 14 32 4Z"/>
+  <path d="M31 35C21 33 15 23 16 12C23 14 29 22 31 35Z"/>
+  <path d="M33 35C43 33 49 23 48 12C41 14 35 22 33 35Z"/>
+  <path d="M30 36C19 37 8 31 3 21C13 19 25 25 30 36Z"/>
+  <path d="M34 36C45 37 56 31 61 21C51 19 39 25 34 36Z"/>
+  <path d="M12 40Q32 45 52 40"/>
+</svg>

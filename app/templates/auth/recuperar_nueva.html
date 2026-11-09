@@ -4,14 +4,16 @@
 
 {% block tarjeta %}
 <div class="card-header">
+    <span class="icono-loto login-card-loto" aria-hidden="true"></span>
     <h1>Nueva contraseña</h1>
-    <p>Paso 3 de 3 · Cuenta <strong>{{ usuario.nameUser }}</strong></p>
+    <p class="login-subtitulo">Paso 3 de 3 · Cuenta <strong>{{ usuario.nameUser }}</strong></p>
 </div>
 <div class="card-body">
     <form method="post" action="{{ url_for('recuperar.nueva') }}" id="formNueva">
-        <div class="form-group mb-3">
+        <div class="form-group login-campo">
             <label for="nueva_contrasena" class="form-label">Contraseña nueva</label>
             <div class="password-field">
+                <i class="bi bi-lock-fill login-campo-icono" aria-hidden="true"></i>
                 <input type="password" name="nueva_contrasena" id="nueva_contrasena" class="form-control"
                     placeholder="Crea una contraseña segura" maxlength="128"
                     autocomplete="new-password" required autofocus>
@@ -21,9 +23,10 @@
             </div>
             {% with campo='nueva_contrasena' %}{% include 'auth/_requisitos_contrasena.html' %}{% endwith %}
         </div>
-        <div class="form-group mb-4">
+        <div class="form-group login-campo">
             <label for="confirmar_contrasena" class="form-label">Repite la contraseña</label>
             <div class="password-field">
+                <i class="bi bi-shield-lock-fill login-campo-icono" aria-hidden="true"></i>
                 <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="form-control"
                     placeholder="Repite tu contraseña" maxlength="128"
                     autocomplete="new-password" required>
@@ -35,11 +38,9 @@
                 <i class="bi bi-exclamation-circle"></i> Las contraseñas no coinciden.
             </div>
         </div>
-        <div class="d-grid gap-3">
-            <button type="submit" class="btn btn-primary btn-block" id="btnNueva">
-                <i class="bi bi-lock-fill"></i> Guardar contraseña
-            </button>
-        </div>
+        <button type="submit" class="btn btn-primary btn-block w-100" id="btnNueva">
+            <i class="bi bi-lock-fill"></i> Guardar contraseña
+        </button>
     </form>
 </div>
 {% endblock %}

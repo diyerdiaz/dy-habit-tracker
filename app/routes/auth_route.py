@@ -50,6 +50,9 @@ def login():
                 logout_user()
                 _vaciar_sesion()
                 login_user(user)
+                # "Recordarme": la sesión sobrevive a cerrar el navegador (PERMANENT_SESSION_LIFETIME);
+                # sin marcarlo, se cierra al cerrar el navegador
+                session.permanent = bool(request.form.get('recordarme'))
                 # Si después cambia la contraseña, las sesiones con otra versión se cierran
                 session['sesion_version'] = user.sesionVersion or 0
                 # El saludo de bienvenida sale siempre justo después de iniciar sesión

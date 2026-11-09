@@ -1,7 +1,7 @@
 /* =========================
    GOOGLE FONT
 ========================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Kaushan+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Kaushan+Script&family=Great+Vibes&display=swap');
 
 
 /* =========================
@@ -1604,3 +1604,109 @@ body {
     cursor: pointer;
 }
 .form-logout > button.forgot-link { text-align: center; border: none; }
+
+
+/* =====================================================================
+   DISEÑO DE LA PORTADA DENTRO DE LA APP (menú, títulos y tarjetas)
+   Todo con --tema-*: toma el color del personaje con el que se entró
+   ===================================================================== */
+
+/* Loto de la marca: el SVG es una máscara y se pinta con el color del personaje */
+.icono-loto {
+    display: inline-block;
+    width: 44px;
+    aspect-ratio: 64 / 44;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, rgb(var(--tema-claro-rgb, 230, 130, 255)), var(--tema-vivo, #d966ff));
+    -webkit-mask: url('../img/loto.svg') center / contain no-repeat;
+    mask: url('../img/loto.svg') center / contain no-repeat;
+    filter: drop-shadow(0 0 8px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.6));
+}
+
+/* ── Menú lateral ── */
+.sidebar {
+    border-right: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.35);
+    background: linear-gradient(180deg, rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.35), rgba(var(--tema-oscuro-rgb, 30, 0, 50), 0.55));
+}
+
+.menu-marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -8px 24px 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+    color: #fff;
+}
+
+.menu-marca .icono-loto {
+    width: 40px;
+}
+
+.menu-marca-dy {
+    font-family: 'Great Vibes', 'Kaushan Script', cursive;
+    font-size: 2.1rem;
+    line-height: 1;
+}
+
+.menu-marca-nombre {
+    white-space: nowrap;
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.82rem;
+    line-height: 1.25;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar-link {
+    border-radius: 999px;
+}
+
+.sidebar-link:hover {
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+}
+
+/* La página en la que estás: con el degradado del botón del login */
+.sidebar-link.active {
+    background: linear-gradient(90deg, var(--tema-grad-1, #8a28ff), var(--tema-grad-2, #e100ff));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+}
+
+.sidebar-link.active i,
+.sidebar-link.active .sidebar-icon {
+    color: #fff !important;
+}
+
+.hamburger-menu {
+    border-radius: 50%;
+    border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.45);
+}
+
+/* ── Títulos grandes de cada página: letra caligráfica con brillo ── */
+h1 {
+    font-family: 'Great Vibes', 'Kaushan Script', cursive;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-shadow: 0 0 22px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.55);
+}
+
+/* ── Tarjetas: borde del color del tema y una línea de luz arriba ── */
+.analysis-card {
+    position: relative;
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+    border-radius: 32px;
+    background: linear-gradient(160deg, rgba(var(--tema-fondo-rgb, 80, 0, 120), 0.3), rgba(255, 255, 255, 0.02));
+}
+
+.analysis-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 25%;
+    right: 25%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgb(var(--tema-claro-rgb, 230, 130, 255)), transparent);
+    pointer-events: none;
+}

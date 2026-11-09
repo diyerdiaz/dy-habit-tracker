@@ -24,7 +24,7 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "DATABASE_URL=sqlite:////tmp/claude-1000/-home-diyerd-Documentos-GitHub-mi-proyecto-personal/07bd997d-c5f3-4c37-8139-bdba7e83befd/scratchpad/demo/demo.sqlite APP_PORT=5001 venv/bin/python run.py"
+        "DATABASE_URL=sqlite:////tmp/claude-1000/-home-diyerd-Documentos-GitHub-mi-proyecto-personal/cd1becb0-5e50-445e-a090-736ead7163a7/scratchpad/demo/demo.sqlite APP_PORT=5001 venv/bin/python run.py"
       ],
       "port": 5001,
       "url": "http://127.0.0.1:5001"

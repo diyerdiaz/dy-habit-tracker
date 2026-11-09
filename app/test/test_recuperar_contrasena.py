@@ -362,3 +362,11 @@ def test_los_codigos_son_aleatorios(con_correo):
     codigos = {CodigoRecuperacion.crear(con_correo.idUser)[1] for _ in range(30)}
     assert len(codigos) > 25
     assert all(len(c) == 6 and c.isdigit() for c in codigos)
+
+
+def test_recuperar_usa_el_diseno_nuevo_del_login(client):
+    html = client.get('/recuperar/').get_data(as_text=True)
+    assert 'login-dy' in html and 'class="login-topbar"' in html
+    assert 'icono-loto' in html and 'login-personaje-marco' in html
+    assert 'login-btn-secundario' in html and 'login-campo-icono' in html
+    assert 'Great+Vibes' in html
