@@ -57,12 +57,11 @@ def shadowing():
 @bp.route('/shadowing/temporizador')
 @login_required
 def shadowing_temporizador():
-    sesiones = ShadowingSesion.query.filter_by(idUser=current_user.idUser).order_by(ShadowingSesion.fecha.desc()).all()
+    sesiones = ShadowingSesion.query.filter_by(idUser=current_user.idUser).all()
     total_segundos = sum(s.duracionSegundos for s in sesiones)
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     return render_template(
         'ingles/shadowing_temporizador.html',
-        sesiones=sesiones[:10],
         total_sesiones=len(sesiones),
         total_segundos=total_segundos,
         letras_flotantes=letras_flotantes,
