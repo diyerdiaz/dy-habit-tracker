@@ -118,6 +118,20 @@
 </div>
 
 <div class="nivel-wrapper">
+    <!-- ── Botones para cambiar entre "Mi nivel" y "Niveles" ── -->
+    <div class="nivel-tabs" role="tablist">
+        <button type="button" class="nivel-tab activo" role="tab" id="tab-mi-nivel"
+                aria-controls="panel-mi-nivel" aria-selected="true" data-panel="panel-mi-nivel">
+            <i class="bi bi-person-fill-up"></i> Mi nivel
+        </button>
+        <button type="button" class="nivel-tab" role="tab" id="tab-niveles"
+                aria-controls="panel-niveles" aria-selected="false" data-panel="panel-niveles">
+            <i class="bi bi-bar-chart-steps"></i> Niveles
+        </button>
+    </div>
+
+    <!-- ── Panel: nivel en el que voy ── -->
+    <div class="nivel-panel" id="panel-mi-nivel" role="tabpanel" aria-labelledby="tab-mi-nivel">
     <div class="nivel-card">
         <div class="nivel-top-row">
             <div class="nivel-badge{{ ' nivel-badge-max' if data.es_nivel_maximo else '' }}">
@@ -210,7 +224,10 @@
         {% endif %}
     </div>
 
-    <!-- ── Mapa de los 10 Niveles ── -->
+    </div>
+
+    <!-- ── Panel: mapa de los 10 niveles ── -->
+    <div class="nivel-panel" id="panel-niveles" role="tabpanel" aria-labelledby="tab-niveles" hidden>
     <div class="nivel-mapa-card">
         <h2 class="nivel-mapa-titulo">Mapa de Niveles</h2>
         <div class="nivel-mapa-lista">
@@ -240,10 +257,12 @@
             {% endfor %}
         </div>
     </div>
+    </div>
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/nivel.js') }}"></script>
 {% endblock %}
