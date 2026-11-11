@@ -137,13 +137,25 @@
             <option value="{{ n }}" {% if n == palabras|length %}selected{% endif %}>{{ n }} palabra{{ 's' if n != 1 else '' }}</option>
             {% endfor %}
         </select>
+        <label class="vocab-setup-label" for="vocabTiempo"><i class="bi bi-stopwatch"></i> Tiempo mínimo en cada tarjeta</label>
+        <select id="vocabTiempo" class="form-select glass-input">
+            {% for seg in tiempos_tarjeta %}
+            <option value="{{ seg }}" {% if seg == tiempo_por_defecto %}selected{% endif %}>{{ 'Sin mínimo' if seg == 0 else seg ~ ' segundos' }}</option>
+            {% endfor %}
+        </select>
+        <p class="vocab-setup-ayuda">Empieza a contar cuando veas el significado. No podrás calificar ni pasar a la siguiente hasta que se cumpla.</p>
         <button id="vocabIniciarBtn" type="button" class="btn w-100 btn-vocab-accent fw-bold">Iniciar</button>
     </div>
 
     <div id="vocabDeck" style="display: none;">
-        <a href="#" id="vocabCambiarCantidad" class="vocabulario-back vocab-cambiar-cantidad">
-            <i class="bi bi-arrow-left"></i> Cambiar cantidad
-        </a>
+        <div class="vocab-deck-arriba">
+            <a href="#" id="vocabCambiarCantidad" class="vocabulario-back vocab-cambiar-cantidad">
+                <i class="bi bi-arrow-left"></i> Cambiar cantidad
+            </a>
+            <button type="button" id="vocabTerminarBtn" class="vocab-terminar-btn">
+                <i class="bi bi-box-arrow-right"></i> Terminar aquí
+            </button>
+        </div>
 
         <p class="vocab-progress" id="vocabProgress"></p>
 
@@ -161,11 +173,17 @@
                     <button type="button" class="vocab-rating-btn vocab-rating-medium" data-rating="medio">Medio fácil</button>
                     <button type="button" class="vocab-rating-btn vocab-rating-hard" data-rating="dificil">Difícil</button>
                 </div>
+
+                <!-- Cuenta regresiva debajo de los botones: empieza al ver el significado -->
+                <div class="vocab-espera" id="vocabEspera" hidden>
+                    <div class="vocab-espera-barra"><div class="vocab-espera-fill" id="vocabEsperaFill"></div></div>
+                    <p class="vocab-espera-texto" id="vocabEsperaTexto"></p>
+                </div>
             </div>
         </div>
 
         <div class="ingles-card vocab-summary-card" id="vocabSummary" style="display: none;">
-            <h3>¡Sesión completada!</h3>
+            <h3 id="vocabSummaryTitulo">¡Sesión completada!</h3>
             <p class="ingles-desc" id="vocabSummaryText"></p>
             <button type="button" id="vocabReiniciarBtn" class="btn w-100 btn-vocab-accent fw-bold">Aprender más palabras</button>
         </div>

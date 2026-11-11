@@ -117,7 +117,12 @@
 
 .glass-input::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
 .glass-input:focus { border-color: #0d6efd !important; box-shadow: 0 0 10px rgba(13, 110, 253, 0.4) !important; }
-.glass-input option { background: #002347; color: white; }
+/* Lista desplegable (palabras y segundos) con el fondo oscuro de la página y
+   letras claras. color-scheme pide al navegador/celular su lista en modo oscuro,
+   porque muchos dibujan la lista abierta con el estilo del sistema. */
+.glass-input { color-scheme: dark; }
+.glass-input option { background: #002347; color: #fff; }
+.glass-input option:checked { background: #0d6efd; color: #fff; }
 
 .text-vocab-accent {
     color: #4dabff;
@@ -197,9 +202,79 @@
 
 .vocab-cambiar-cantidad {
     display: inline-flex;
-    margin: 0 auto 20px auto;
     justify-content: center;
-    width: 100%;
+}
+
+/* "Cambiar cantidad" a un lado y "Terminar aquí" al otro */
+.vocab-deck-arriba {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.vocab-terminar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-style: italic;
+    cursor: pointer;
+}
+
+.vocab-terminar-btn:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.vocab-setup-label {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.vocab-setup-label + select {
+    margin-top: 8px;
+}
+
+.vocab-setup-ayuda {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+    margin-top: -8px;
+}
+
+/* Cuenta regresiva del tiempo mínimo en la tarjeta */
+.vocab-espera {
+    margin: 16px auto 0;
+    max-width: 320px;
+}
+
+.vocab-espera-barra {
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+}
+
+.vocab-espera-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #0d6efd, #4dabff);
+    transition: width 0.2s linear;
+}
+
+.vocab-espera-texto {
+    margin: 8px 0 0;
+    text-align: center;
+    color: #4dabff;
+    font-size: 0.9rem;
+    font-style: italic;
 }
 
 .vocab-progress {
@@ -259,6 +334,14 @@
 
 .vocab-rating-btn:hover {
     transform: translateY(-3px);
+}
+
+/* Bloqueado mientras corre el tiempo mínimo */
+.vocab-rating-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    filter: grayscale(0.6);
 }
 
 .vocab-rating-easy {

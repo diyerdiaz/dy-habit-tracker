@@ -45,6 +45,11 @@ RANGOS_DOMINIO = [
 # Palabras distintas que debes tener calificadas antes de que el % de dominio cuente de verdad
 MINIMO_CALIFICACIONES_DOMINIO = 10
 
+# Tiempo mínimo (segundos) que hay que quedarse en cada tarjeta antes de poder
+# calificarla y pasar a la siguiente. 0 = sin mínimo.
+TIEMPOS_TARJETA = [0, 5, 10, 15, 20, 30, 45, 60]
+TIEMPO_TARJETA_POR_DEFECTO = 10
+
 def calcular_rango(valor, tiers):
     rango_actual = tiers[0]
     siguiente = None
