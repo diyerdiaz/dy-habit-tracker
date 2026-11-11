@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
-from app.services.medallas import obtener_metricas, evaluar_medallas, CATEGORIAS, RANGOS
+from app.services.medallas import obtener_metricas, evaluar_medallas, anunciar_nuevas, CATEGORIAS, RANGOS
 from app.services.level_config import NIVELES
 
 bp = Blueprint('medallas', __name__, url_prefix='/medallas')
@@ -13,6 +13,8 @@ def index():
     nivel = metricas['nivel']
     lista = evaluar_medallas(metricas)
     desbloqueadas = sum(1 for m in lista if m['desbloqueada'])
+    nuevas = anunciar_nuevas(current_user.idUser, lista)
+    ids_nuevas = {m['id'] for m in nuevas}
 
     # La medalla más cercana a conseguirse entre las que ya permite tu nivel
     pendientes = [m for m in lista if not m['desbloqueada'] and not m['falta_nivel']]
@@ -40,6 +42,8 @@ def index():
     return render_template(
         'medallas/index.html',
         secciones=secciones,
+        nuevas=nuevas,
+        ids_nuevas=ids_nuevas,
         categorias=CATEGORIAS,
         desbloqueadas=desbloqueadas,
         total=len(lista),

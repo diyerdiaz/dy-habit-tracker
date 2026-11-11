@@ -15,6 +15,7 @@ from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.ruleta_castigo import Castigo
 from app.models.metodo_estudio import MetodoEstudio, KanbanTarjeta, Apunte
+from app.models.medalla_vista import MedallaVista
 from app.services.estadisticas import meses_disponibles, estadisticas_del_mes
 from app.services.gamificacion import get_or_create_progress, sincronizar_racha
 from app.services.level_config import calcular_progreso
@@ -438,3 +439,14 @@ def evaluar_medallas(metricas):
             'pct': min(100, round(actual / m['meta'] * 100)),
         })
     return resultado
+
+
+def anunciar_nuevas(idUser, lista):
+    """Medallas ganadas que el usuario aún no había visto. Las marca como vistas
+    para que el anuncio salga una sola vez."""
+    vistas = {v.idMedalla for v in MedallaVista.query.filter_by(idUser=idUser)}
+    nuevas = [m for m in lista if m['desbloqueada'] and m['id'] not in vistas]
+    if nuevas:
+        db.session.add_all(MedallaVista(idUser=idUser, idMedalla=m['id']) for m in nuevas)
+        db.session.commit()
+    return nuevas
