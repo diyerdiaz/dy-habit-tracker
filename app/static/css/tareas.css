@@ -304,6 +304,86 @@
     font-weight: 600;
 }
 
+/* Cuadros del día: hechas, pendientes, no hechas y total */
+.tareas-hist-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.tareas-hist-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 6px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.tareas-hist-stat i {
+    font-size: 1.2rem;
+}
+
+.tareas-hist-stat strong {
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.tareas-hist-stat span {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.78rem;
+    font-style: italic;
+}
+
+.stat-hechas { border-color: rgba(0, 255, 171, 0.35); }
+.stat-hechas i { color: #00ffab; }
+.stat-pendientes { border-color: rgba(255, 193, 7, 0.35); }
+.stat-pendientes i { color: #ffc107; }
+.stat-no-hechas { border-color: rgba(255, 102, 102, 0.35); }
+.stat-no-hechas i { color: #ff6666; }
+.stat-total { border-color: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.4); }
+.stat-total i { color: var(--tema-vivo, #d966ff); }
+
+@media (max-width: 480px) {
+    .tareas-hist-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Resumen General arriba del filtro por día del historial */
+.tareas-hist-general {
+    width: 100%;
+    margin-bottom: 18px;
+    padding: 16px 18px 2px;
+    border-radius: 18px;
+    background: rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.08);
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+}
+
+.tareas-hist-general-titulo {
+    color: #fff;
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 700;
+    margin: 0 0 12px;
+}
+
+.tareas-hist-general-titulo i {
+    color: var(--tema-vivo, #d966ff);
+    margin-right: 6px;
+}
+
+.tareas-hist-vacio {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+}
+
 .tareas-hist-items {
     list-style: none;
     margin: 0;
@@ -551,11 +631,33 @@
     100% { box-shadow: 0 0 0 14px rgba(var(--tema-vivo-rgb, 217, 102, 255), 0); }
 }
 
-/* Con el historial abierto solo se ve el historial: nada de fechas ni calendario */
+/* Con el historial abierto solo se ve el día elegido: nada de agregar,
+   fechas, calendario ni las listas de hoy y mañana */
+.tareas-wrapper.viendo-historial #addTaskForm,
 .tareas-wrapper.viendo-historial #fechaSelector,
 .tareas-wrapper.viendo-historial #calendarioPanel,
-.tareas-wrapper.viendo-historial #proximasPanel {
+.tareas-wrapper.viendo-historial #tareasList,
+.tareas-wrapper.viendo-historial #tareasEmpty,
+.tareas-wrapper.viendo-historial #proximasPanel,
+.tareas-wrapper.viendo-historial #mananaEmpty,
+.tareas-wrapper.viendo-historial #otraFechaPanel {
     display: none !important;
+}
+
+/* Cada fecha elegida (Hoy, Mañana u otro día del calendario) muestra solo
+   sus tareas: data-vista lo pone tareas.js al elegir la fecha */
+.tareas-wrapper:not([data-vista="hoy"]) #tareasList,
+.tareas-wrapper:not([data-vista="hoy"]) #tareasEmpty,
+.tareas-wrapper:not([data-vista="manana"]) #proximasPanel,
+.tareas-wrapper:not([data-vista="manana"]) #mananaEmpty,
+.tareas-wrapper:not([data-vista="otra"]) #otraFechaPanel {
+    display: none !important;
+}
+
+/* Botón "+" mientras se guarda la tarea (evita el doble toque) */
+.tareas-add-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 /* ── Tarea: texto, hora del recordatorio y botones (campana, lápiz, basura) ── */

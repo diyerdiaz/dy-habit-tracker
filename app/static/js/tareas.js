@@ -80,6 +80,27 @@ function pintarCalendario() {
     calAyuda.textContent = `Agregando tareas para ${textoFecha(fechaElegida)}. Escribe la tarea arriba.`;
 }
 
+// ── Tareas de otro día (elegido en el calendario) ──
+const otraFechaGrupos = document.getElementById('otraFechaGrupos');
+const otraFechaTitulo = document.getElementById('otraFechaTitulo');
+const otraFechaEmpty = document.getElementById('otraFechaEmpty');
+
+function grupoDeFecha(iso) {
+    return otraFechaGrupos.querySelector(`.tareas-proximas-dia[data-fecha="${iso}"]`);
+}
+
+// Muestra solo el grupo del día elegido, o el aviso si ese día no tiene tareas
+function mostrarOtraFecha() {
+    otraFechaTitulo.textContent = `Tareas del ${textoFecha(fechaElegida)}`;
+    let hay = false;
+    otraFechaGrupos.querySelectorAll('.tareas-proximas-dia').forEach(grupo => {
+        const esEste = grupo.dataset.fecha === fechaElegida && grupo.querySelector('.tarea-item') !== null;
+        grupo.hidden = !esEste;
+        if (esEste) hay = true;
+    });
+    otraFechaEmpty.hidden = hay;
+}
+
 function elegirFecha(iso) {
     fechaElegida = iso;
     const chip = fechaSelector.querySelector(`button.tareas-fecha-chip[data-fecha="${iso}"]`);
@@ -90,14 +111,42 @@ function elegirFecha(iso) {
         const [a, m, d] = iso.split('-');
         fechaOtraTexto.textContent = `${d}/${m}/${a}`;
     }
+    // Cada fecha muestra solo sus tareas: hoy, mañana o el día del calendario
+    const vista = iso === HOY ? 'hoy' : (iso === MANANA ? 'manana' : 'otra');
+    document.querySelector('.tareas-wrapper').dataset.vista = vista;
+    if (vista === 'otra') mostrarOtraFecha();
     pintarCalendario();
     newTaskInput.focus();
+}
+
+// ── Resumen General (en el historial, arriba del filtro por día) ──
+// Días pasados (vienen del servidor y ya no cambian) + hoy y las programadas
+// tal como están ahora en pantalla. Se recalcula al agregar, marcar o borrar.
+const histGeneral = document.getElementById('histGeneral');
+
+function refrescarGeneral() {
+    if (!histGeneral) return;
+    const hoyItems = [...tareasList.querySelectorAll('.tarea-item')];
+    const hoyHechas = hoyItems.filter(it => it.classList.contains('done')).length;
+    const futuras = Object.entries(conteos)
+        .filter(([iso]) => iso > HOY)
+        .reduce((suma, [, n]) => suma + n, 0);
+    const pasadasHechas = parseInt(histGeneral.dataset.pasadasHechas, 10) || 0;
+    const noHechas = parseInt(histGeneral.dataset.pasadasNoHechas, 10) || 0;
+    const datos = {
+        completadas: pasadasHechas + hoyHechas,
+        pendientes: (hoyItems.length - hoyHechas) + futuras,
+        no_hechas: noHechas,
+        total: pasadasHechas + noHechas + hoyItems.length + futuras,
+    };
+    histGeneral.querySelectorAll('[data-stat]').forEach(el => { el.textContent = datos[el.dataset.stat]; });
 }
 
 function sumarConteo(iso, cambio) {
     conteos[iso] = Math.max(0, (conteos[iso] || 0) + cambio);
     if (!conteos[iso]) delete conteos[iso];
     pintarCalendario();
+    refrescarGeneral();
 }
 
 fechaSelector.querySelectorAll('button.tareas-fecha-chip[data-fecha]').forEach(chip => {
@@ -265,8 +314,11 @@ function abrirRecordatorio(item) {
 }
 
 // La lista de "Tareas de mañana" se oculta cuando queda vacía
+const mananaEmpty = document.getElementById('mananaEmpty');
 function actualizarProximas() {
-    proximasPanel.hidden = !mananaLista.querySelector('.tarea-item');
+    const hay = mananaLista.querySelector('.tarea-item') !== null;
+    proximasPanel.hidden = !hay;
+    mananaEmpty.hidden = hay;
 }
 
 function attachTareaHandlers(item) {
@@ -283,6 +335,7 @@ function attachTareaHandlers(item) {
             .then(data => {
                 if (!data.success) { avisar(data.error || 'No se pudo actualizar la tarea.', 'error'); return; }
                 item.classList.toggle('done', data.completada);
+                refrescarGeneral();
             })
             .catch(() => alert('No se pudo actualizar la tarea.'));
     });
@@ -309,6 +362,8 @@ function attachTareaHandlers(item) {
                 item.remove();
                 updateEmptyState();
                 actualizarProximas();
+                mostrarOtraFecha();
+                refrescarGeneral();
             })
             .catch(() => alert('No se pudo eliminar la tarea.'));
     });
@@ -316,10 +371,19 @@ function attachTareaHandlers(item) {
 
 document.querySelectorAll('.tarea-item').forEach(attachTareaHandlers);
 
+// Mientras se guarda una tarea el "+" queda bloqueado: si se toca dos veces
+// (el servidor tarda) no se crea la tarea repetida
+const addBtn = addForm.querySelector('.tareas-add-btn');
+let agregando = false;
+
 addForm.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (agregando) return;
     const descripcion = newTaskInput.value.trim();
     if (!descripcion) return;
+
+    agregando = true;
+    addBtn.disabled = true;
 
     fetch('/tareas/add', {
         method: 'POST',
@@ -332,6 +396,11 @@ addForm.addEventListener('submit', function (e) {
                 alert(data.error || 'No se pudo agregar la tarea.');
                 return;
             }
+            newTaskInput.value = '';
+            newTaskInput.focus();
+            // El servidor devolvió una tarea que ya está en pantalla: no se repite
+            if (document.querySelector(`.tarea-item[data-id="${data.id}"]`)) return;
+
             const item = crearItem(data.id, data.descripcion, data.fecha);
             sumarConteo(data.fecha, 1);
             if (data.esHoy) {
@@ -339,26 +408,65 @@ addForm.addEventListener('submit', function (e) {
                 updateEmptyState();
             } else if (data.fecha === MANANA) {
                 mananaLista.appendChild(item);
-                proximasPanel.hidden = false;
+                actualizarProximas();
                 const grupo = mananaLista.parentElement;
                 grupo.classList.remove('nuevo');
                 void grupo.offsetWidth;
                 grupo.classList.add('nuevo');
             } else {
-                // Días más lejanos: no se listan, quedan marcados en el calendario
+                // Otro día: va a su grupo, que se ve mientras ese día esté elegido
+                let grupo = grupoDeFecha(data.fecha);
+                if (!grupo) {
+                    grupo = document.createElement('div');
+                    grupo.className = 'tareas-proximas-dia';
+                    grupo.dataset.fecha = data.fecha;
+                    grupo.innerHTML = '<div class="tareas-card"></div>';
+                    otraFechaGrupos.appendChild(grupo);
+                }
+                grupo.querySelector('.tareas-card').appendChild(item);
+                mostrarOtraFecha();
                 calAyuda.textContent = `✓ Tarea agregada para ${textoFecha(data.fecha)}. Puedes escribir otra.`;
             }
-
-            newTaskInput.value = '';
-            newTaskInput.focus();
+            refrescarGeneral();
         })
-        .catch(() => alert('No se pudo agregar la tarea.'));
+        .catch(() => alert('No se pudo agregar la tarea.'))
+        .finally(() => {
+            agregando = false;
+            addBtn.disabled = false;
+        });
 });
 
 // ── Ver Historial ──
 const toggleHistBtn = document.getElementById('toggleHistBtn');
 const historialPanel = document.getElementById('historialPanel');
 const historialSelect = document.getElementById('historialSelect');
+
+// "Hoy" en el historial se arma con la lista de hoy tal como está en pantalla,
+// así cuenta las tareas agregadas, marcadas o borradas sin recargar
+const histHoy = document.getElementById('histHoy');
+
+function refrescarHistorialHoy() {
+    if (!histHoy) return;
+    const items = [...tareasList.querySelectorAll('.tarea-item')];
+    const hechas = items.filter(it => it.classList.contains('done')).length;
+    const datos = { completadas: hechas, pendientes: items.length - hechas, no_hechas: 0, total: items.length };
+    histHoy.querySelectorAll('[data-stat]').forEach(el => { el.textContent = datos[el.dataset.stat]; });
+
+    const lista = histHoy.querySelector('.tareas-hist-items');
+    lista.innerHTML = '';
+    items.forEach(it => {
+        const hecha = it.classList.contains('done');
+        const li = document.createElement('li');
+        if (hecha) li.className = 'done';
+        li.innerHTML = `<i class="bi ${hecha ? 'bi-check-circle-fill' : 'bi-circle'}"></i> <span></span>`;
+        li.querySelector('span').textContent = it.querySelector('.tarea-text').textContent;
+        lista.appendChild(li);
+    });
+    histHoy.querySelector('.tareas-hist-vacio').hidden = items.length > 0;
+
+    const opcion = historialSelect && historialSelect.querySelector(`option[value="${histHoy.dataset.fecha}"]`);
+    if (opcion) opcion.textContent = `${opcion.dataset.label} · ${hechas}/${items.length} completadas`;
+}
 
 if (toggleHistBtn && historialPanel) {
     toggleHistBtn.addEventListener('click', () => {
@@ -368,6 +476,8 @@ if (toggleHistBtn && historialPanel) {
             ? '<i class="bi bi-eye-slash"></i> Ocultar Historial'
             : '<i class="bi bi-clock-history"></i> Ver Historial';
         if (abierto) {
+            refrescarHistorialHoy();
+            refrescarGeneral();
             historialPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     });

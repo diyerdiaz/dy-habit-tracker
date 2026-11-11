@@ -118,7 +118,7 @@
 </div>
 
 <!-- Contenedor Principal -->
-<div class="tareas-wrapper">
+<div class="tareas-wrapper" data-vista="hoy">
 
     <div class="text-center mb-4" style="text-align: center; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto;">
         <h1 class="tareas-title">Tareas del Día</h1>
@@ -145,38 +145,42 @@
     <div class="tareas-hist-panel" id="historialPanel">
         <h2 class="tareas-hist-title">Historial de Tareas</h2>
 
-        {% if historial_dias %}
+        <!-- Resumen general: todas las tareas (días pasados, hoy y programadas) -->
+        <div class="tareas-hist-general" id="histGeneral"
+             data-pasadas-hechas="{{ general.pasadas_hechas }}" data-pasadas-no-hechas="{{ general.no_hechas }}">
+            <h3 class="tareas-hist-general-titulo"><i class="bi bi-bar-chart-fill"></i> General</h3>
+            {% with r = general %}{% include 'tareas/_cuadros.html' %}{% endwith %}
+        </div>
+
         <div class="tareas-hist-filter-row">
             <label for="historialSelect"><i class="bi bi-funnel-fill"></i> Filtrar por día</label>
             <select id="historialSelect" class="tareas-hist-select">
                 {% for dia in historial_dias %}
-                <option value="{{ dia.label }}">{{ dia.label }} &middot; {{ dia.completadas }}/{{ dia.total }} completadas</option>
+                <option value="{{ dia.fecha }}" data-label="{{ dia.label }}">{{ dia.label }} &middot; {{ dia.completadas }}/{{ dia.total }} completadas</option>
                 {% endfor %}
             </select>
         </div>
 
         {% for dia in historial_dias %}
-        <div class="tareas-hist-day" data-fecha="{{ dia.label }}"{% if not loop.first %} style="display:none;"{% endif %}>
+        <div class="tareas-hist-day" data-fecha="{{ dia.fecha }}"{% if dia.es_hoy %} id="histHoy"{% endif %}{% if not loop.first %} style="display:none;"{% endif %}>
             <div class="tareas-hist-day-header">
                 <span class="tareas-hist-date">{{ dia.label }}</span>
-                <span class="tareas-hist-count">{{ dia.completadas }} / {{ dia.total }} completadas</span>
+                <span class="tareas-hist-count"><span data-stat="completadas">{{ dia.completadas }}</span> / <span data-stat="total">{{ dia.total }}</span> completadas</span>
             </div>
+
+            {% with r = dia %}{% include 'tareas/_cuadros.html' %}{% endwith %}
+
             <ul class="tareas-hist-items">
                 {% for t in dia.tareas %}
                 <li class="{{ 'done' if t.completada else '' }}">
                     <i class="bi {{ 'bi-check-circle-fill' if t.completada else 'bi-circle' }}"></i>
-                    {{ t.descripcion }}
+                    <span>{{ t.descripcion }}</span>
                 </li>
                 {% endfor %}
             </ul>
+            <p class="tareas-hist-vacio"{% if dia.tareas %} hidden{% endif %}>No hay tareas este día.</p>
         </div>
         {% endfor %}
-        {% else %}
-        <div class="tareas-empty">
-            <i class="bi bi-calendar3"></i>
-            <span>Aún no tienes historial de días anteriores.</span>
-        </div>
-        {% endif %}
     </div>
 
     <div class="tareas-fecha-row" id="fechaSelector" data-hoy="{{ hoy }}" data-manana="{{ manana }}" data-maxima="{{ fecha_maxima }}">
@@ -210,6 +214,12 @@
         <span>No tienes tareas para hoy. ¡Agrega una!</span>
     </div>
 
+    <!-- Sin tareas para mañana (solo se ve con "Mañana" elegido) -->
+    <div class="tareas-empty" id="mananaEmpty"{% if tareas_manana %} hidden{% endif %}>
+        <i class="bi bi-calendar-event"></i>
+        <span>No tienes tareas para mañana. ¡Agrega una!</span>
+    </div>
+
     <div class="tareas-proximas" id="proximasPanel"{% if not tareas_manana %} hidden{% endif %}>
         <h2 class="tareas-proximas-title"><i class="bi bi-calendar-event"></i> Tareas de mañana</h2>
         <div class="tareas-proximas-dia" data-fecha="{{ manana }}">
@@ -218,6 +228,26 @@
                 {% include 'tareas/_tarea_item.html' %}
                 {% endfor %}
             </div>
+        </div>
+    </div>
+
+    <!-- Otro día elegido en el calendario: solo se ve el grupo de ese día -->
+    <div class="tareas-proximas" id="otraFechaPanel">
+        <h2 class="tareas-proximas-title"><i class="bi bi-calendar3"></i> <span id="otraFechaTitulo">Tareas de ese día</span></h2>
+        <div id="otraFechaGrupos">
+            {% for fecha, items in otras_por_dia.items() %}
+            <div class="tareas-proximas-dia" data-fecha="{{ fecha }}" hidden>
+                <div class="tareas-card">
+                    {% for tarea in items %}
+                    {% include 'tareas/_tarea_item.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="tareas-empty" id="otraFechaEmpty">
+            <i class="bi bi-calendar-x"></i>
+            <span>No tienes tareas para este día. ¡Agrega una!</span>
         </div>
     </div>
 </div>

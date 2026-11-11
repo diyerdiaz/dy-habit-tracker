@@ -1,0 +1,23 @@
+{# Cuadros de hechas, pendientes, no hechas y total. Recibe r (dict con esas cifras). tareas.js los actualiza por data-stat. #}
+<div class="tareas-hist-stats">
+    <div class="tareas-hist-stat stat-hechas">
+        <i class="bi bi-check-circle-fill"></i>
+        <strong data-stat="completadas">{{ r.completadas }}</strong>
+        <span>Hechas</span>
+    </div>
+    <div class="tareas-hist-stat stat-pendientes">
+        <i class="bi bi-hourglass-split"></i>
+        <strong data-stat="pendientes">{{ r.pendientes }}</strong>
+        <span>Pendientes</span>
+    </div>
+    <div class="tareas-hist-stat stat-no-hechas">
+        <i class="bi bi-x-circle-fill"></i>
+        <strong data-stat="no_hechas">{{ r.no_hechas }}</strong>
+        <span>No hechas</span>
+    </div>
+    <div class="tareas-hist-stat stat-total">
+        <i class="bi bi-list-check"></i>
+        <strong data-stat="total">{{ r.total }}</strong>
+        <span>Total</span>
+    </div>
+</div>
