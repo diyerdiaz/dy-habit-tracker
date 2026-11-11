@@ -137,30 +137,55 @@
         </div>
     </div>
 
-    <!-- Selector de modo: Cronómetro o Agregar Tiempo -->
+    <!-- Selector de modo: Cronómetro, Cuenta regresiva o Agregar Tiempo -->
     <div class="shadow-mode-toggle fade-in-section" id="shadowModeToggle">
         <span class="shadow-mode-thumb"></span>
         <button type="button" class="shadow-mode-option active-side" data-mode="timer">
-            <i class="bi bi-hourglass-split"></i> Cronómetro
+            <i class="bi bi-stopwatch"></i> Cronómetro
+        </button>
+        <button type="button" class="shadow-mode-option" data-mode="regresiva">
+            <i class="bi bi-alarm"></i> Regresiva
         </button>
         <button type="button" class="shadow-mode-option" data-mode="manual">
-            <i class="bi bi-pencil-square"></i> Agregar Tiempo
+            <i class="bi bi-pencil-square"></i> Agregar
         </button>
     </div>
 
-    <!-- Temporizador -->
+    <!-- Temporizador (cronómetro y cuenta regresiva comparten el reloj) -->
     <div class="shadow-timer-card fade-in-section" id="shadowTimerCard">
-        <div class="shadow-hourglass paused" id="shadowHourglass">
-            <div class="shadow-glass-top">
-                <div class="shadow-sand-top"></div>
+        <!-- Duración de la cuenta regresiva: solo se ve en ese modo y sin correr -->
+        <div class="shadow-cuenta-config" id="shadowCuentaConfig" hidden>
+            <p class="shadow-cuenta-titulo">¿Cuántos minutos vas a practicar?</p>
+            <div class="shadow-cuenta-presets">
+                {% for m in [5, 10, 15, 20, 30] %}
+                <button type="button" class="shadow-cuenta-chip" data-minutos="{{ m }}">{{ m }} min</button>
+                {% endfor %}
             </div>
-            <div class="shadow-glass-neck"></div>
-            <div class="shadow-glass-bottom">
-                <div class="shadow-sand-bottom"></div>
-            </div>
+            <label class="shadow-cuenta-otro">
+                Otro:
+                <input type="number" id="shadowCuentaMinutos" min="1" max="180" value="20"
+                       class="form-control glass-input" inputmode="numeric">
+                min
+            </label>
         </div>
 
-        <div class="shadow-timer-display" id="shadowTimerDisplay">00:00</div>
+        <!-- Aviso al terminar la cuenta regresiva -->
+        <div class="shadow-alarma-aviso" id="shadowAlarmaAviso" hidden>
+            <i class="bi bi-bell-fill"></i>
+            <p id="shadowAlarmaTexto">¡Tiempo cumplido!</p>
+            <button type="button" id="shadowAlarmaBtn" class="btn btn-vocab-accent shadow-timer-btn">
+                <i class="bi bi-bell-slash-fill"></i> Detener alarma
+            </button>
+        </div>
+
+        <!-- Reloj circular: el anillo da una vuelta completa cada minuto -->
+        <div class="shadow-reloj paused" id="shadowReloj">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="shadow-reloj-fondo" cx="60" cy="60" r="52"/>
+                <circle class="shadow-reloj-avance" id="shadowRelojAvance" cx="60" cy="60" r="52"/>
+            </svg>
+            <div class="shadow-timer-display" id="shadowTimerDisplay">00:00</div>
+        </div>
 
         <div class="shadow-timer-buttons">
             <button type="button" id="shadowStartBtn" class="btn btn-vocab-accent shadow-timer-btn">
@@ -189,27 +214,6 @@
         <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Registrar Tiempo</button>
     </form>
 
-    {% if sesiones %}
-    <p class="vocab-rank-subtitle fade-in-section">Últimas sesiones</p>
-    <div class="vocab-history-table-wrapper fade-in-section">
-        <table class="vocab-history-table">
-            <thead>
-                <tr>
-                    <th>Duración</th>
-                    <th>Fecha</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in sesiones %}
-                <tr>
-                    <td>{{ (s.duracionSegundos // 60) }}m {{ (s.duracionSegundos % 60) }}s</td>
-                    <td>{{ s.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 

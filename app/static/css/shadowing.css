@@ -24,7 +24,7 @@
 .shadow-mode-toggle {
     position: relative;
     display: flex;
-    max-width: 360px;
+    max-width: 420px;
     margin: 0 auto 30px auto;
     height: 50px;
     padding: 4px;
@@ -38,7 +38,7 @@
     position: absolute;
     top: 4px;
     left: 4px;
-    width: calc(50% - 4px);
+    width: calc((100% - 8px) / 3);
     height: calc(100% - 8px);
     border-radius: 21px;
     background: rgba(255, 255, 255, 0.22);
@@ -47,8 +47,22 @@
     z-index: 1;
 }
 
-.shadow-mode-toggle.mode-manual .shadow-mode-thumb {
+.shadow-mode-toggle.mode-regresiva .shadow-mode-thumb {
     transform: translateX(100%);
+}
+
+.shadow-mode-toggle.mode-manual .shadow-mode-thumb {
+    transform: translateX(200%);
+}
+
+/* Mientras corre el reloj no se puede cambiar de modo */
+.shadow-mode-toggle.bloqueado .shadow-mode-option {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+@media (max-width: 400px) {
+    .shadow-mode-option { font-size: 0.8rem; gap: 4px; }
 }
 
 .shadow-mode-option {
@@ -72,80 +86,55 @@
     color: #fff;
 }
 
-/* ── Reloj de arena animado ── */
-.shadow-hourglass {
-    width: 90px;
-    margin: 0 auto 20px auto;
-}
-
-.shadow-glass-top,
-.shadow-glass-bottom {
+/* ── Reloj circular: el anillo se llena una vez por minuto ── */
+.shadow-reloj {
     position: relative;
-    width: 90px;
-    height: 75px;
-    border: 3px solid #4dabff;
-    overflow: hidden;
+    width: 220px;
+    max-width: 70vw;
+    aspect-ratio: 1;
+    margin: 0 auto 25px auto;
 }
 
-.shadow-glass-top {
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
-    border-bottom: none;
-}
-
-.shadow-glass-bottom {
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
-    border-top: none;
-}
-
-.shadow-glass-neck {
-    width: 8px;
-    height: 6px;
-    background: #4dabff;
-    margin: 0 auto;
-}
-
-.shadow-sand-top,
-.shadow-sand-bottom {
-    position: absolute;
-    left: 0;
-    right: 0;
-    background: linear-gradient(180deg, #4dabff, #0d6efd);
-}
-
-.shadow-sand-top {
-    bottom: 0;
+.shadow-reloj svg {
+    width: 100%;
     height: 100%;
-    animation: shadowSandEmpty 4s linear infinite;
+    transform: rotate(-90deg);
 }
 
-.shadow-sand-bottom {
-    bottom: 0;
-    height: 0%;
-    animation: shadowSandFill 4s linear infinite;
+.shadow-reloj-fondo {
+    fill: none;
+    stroke: rgba(77, 171, 255, 0.12);
+    stroke-width: 8;
 }
 
-.shadow-hourglass.paused .shadow-sand-top,
-.shadow-hourglass.paused .shadow-sand-bottom {
-    animation-play-state: paused;
+.shadow-reloj-avance {
+    fill: none;
+    stroke: #4dabff;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 326.73;
+    stroke-dashoffset: 326.73;
+    filter: drop-shadow(0 0 6px #4dabff);
+    transition: stroke-dashoffset 1s linear;
 }
 
-@keyframes shadowSandEmpty {
-    0% { height: 100%; }
-    100% { height: 0%; }
-}
-
-@keyframes shadowSandFill {
-    0% { height: 0%; }
-    100% { height: 100%; }
+/* En pausa el anillo deja de brillar */
+.shadow-reloj.paused .shadow-reloj-avance {
+    filter: none;
+    opacity: 0.7;
 }
 
 .shadow-timer-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 3rem;
     font-style: italic;
     font-weight: 700;
     color: #fff;
     text-shadow: 0 0 20px rgba(13, 110, 253, 0.5);
-    margin-bottom: 25px;
     font-variant-numeric: tabular-nums;
 }
 
@@ -203,4 +192,101 @@
 
 .shadow-manual-inputs > div {
     flex: 1;
+}
+
+/* ── Cuenta regresiva ── */
+.shadow-cuenta-config {
+    margin-bottom: 22px;
+}
+
+.shadow-cuenta-titulo {
+    color: rgba(255, 255, 255, 0.75);
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+.shadow-cuenta-presets {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.shadow-cuenta-chip {
+    border: 1px solid rgba(77, 171, 255, 0.45);
+    background: rgba(13, 110, 253, 0.12);
+    color: #fff;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.shadow-cuenta-chip.activo {
+    background: #0d6efd;
+    box-shadow: 0 0 12px rgba(77, 171, 255, 0.6);
+}
+
+.shadow-cuenta-otro {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.shadow-cuenta-otro input {
+    width: 100px;
+    padding: 6px 8px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Sin las flechas de subir/bajar: tapaban el número */
+.shadow-cuenta-otro input::-webkit-outer-spin-button,
+.shadow-cuenta-otro input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Aviso de alarma */
+.shadow-alarma-aviso {
+    margin-bottom: 22px;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    color: #fff;
+}
+
+.shadow-alarma-aviso > i {
+    font-size: 2rem;
+    color: #ffc107;
+    display: inline-block;
+    animation: shadowCampana 0.6s ease-in-out infinite;
+}
+
+.shadow-alarma-aviso p {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 8px 0 12px;
+}
+
+@keyframes shadowCampana {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+}
+
+/* Reloj en cuenta regresiva terminado */
+.shadow-reloj.terminado .shadow-reloj-avance {
+    stroke: #ffc107;
+}
+
+.shadow-reloj.terminado .shadow-timer-display {
+    color: #ffc107;
 }

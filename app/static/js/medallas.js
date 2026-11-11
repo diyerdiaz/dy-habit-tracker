@@ -7,6 +7,7 @@ document.querySelectorAll('.medallas-filtro').forEach(function (btn) {
         document.querySelectorAll('.medalla-card').forEach(function (card) {
             var mostrar = filtro === 'todas'
                 || (filtro === 'ganadas' && card.dataset.ganada === 'si')
+                || (filtro === 'nuevas' && card.dataset.nueva === 'si')
                 || card.dataset.categoria === filtro;
             card.hidden = !mostrar;
             if (mostrar) visibles++;
@@ -18,3 +19,4 @@ document.querySelectorAll('.medallas-filtro').forEach(function (btn) {
         document.getElementById('medallasVacio').hidden = visibles > 0;
     });
 });
+

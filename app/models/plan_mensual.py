@@ -37,3 +37,19 @@ def primer_dia_mes_siguiente(fecha):
     if fecha.month == 12:
         return date(fecha.year + 1, 1, 1)
     return date(fecha.year, fecha.month + 1, 1)
+
+
+class PlanEnviado(db.Model):
+    """Recuerda a quién ya le llegó por correo la imagen del plan de un mes
+    (sale una sola vez por mes; si falla, se reintenta hasta que salga)."""
+    __tablename__ = 'planes_enviados'
+
+    idEnvio = db.Column(db.Integer, primary_key=True)
+    idUser = db.Column(db.Integer, db.ForeignKey('users.idUser'), nullable=False)
+    anio = db.Column(db.Integer, nullable=False)
+    mes = db.Column(db.Integer, nullable=False)
+    createdAt = db.Column(db.DateTime, default=datetime.now)
+
+    __table_args__ = (
+        db.UniqueConstraint('idUser', 'anio', 'mes', name='uq_plan_enviado_user_mes'),
+    )

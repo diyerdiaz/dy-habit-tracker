@@ -1,4 +1,6 @@
 """Sección Inglés (shadowing y vocabulario): blueprint propio en ingles_route.py."""
+import os
+
 import pytest
 from flask import url_for
 
@@ -9,6 +11,7 @@ from app.services.palabras_aleatorias import (
     palabras_aleatorias, normalizar_cantidad, total_vocabulario, MAXIMO_PALABRAS,
 )
 from app.models.vocabulario import Vocabulario
+from app.models.shadowing_sesion import ShadowingSesion
 from app import db
 
 PAGINAS = [
@@ -191,3 +194,52 @@ def test_palabras_aleatorias_no_se_repiten_y_vienen_del_vocabulario(user, other_
 def test_palabras_aleatorias_sin_vocabulario_devuelve_vacio(user):
     assert palabras_aleatorias(user.idUser, 5) == []
     assert total_vocabulario(user.idUser) == 0
+
+
+def test_temporizador_de_shadowing_es_circular(logged_client):
+    html = logged_client.get("/menu/ingles/shadowing/temporizador").get_data(as_text=True)
+    assert 'id="shadowReloj"' in html
+    assert 'id="shadowRelojAvance"' in html
+    assert 'id="shadowTimerDisplay"' in html
+    # El reloj de arena anterior ya no se usa
+    assert "shadow-hourglass" not in html
+
+
+def test_temporizador_tiene_cuenta_regresiva(logged_client):
+    html = logged_client.get("/menu/ingles/shadowing/temporizador").get_data(as_text=True)
+    assert 'data-mode="regresiva"' in html
+    assert 'id="shadowCuentaMinutos"' in html
+    for minutos in (5, 10, 15, 20, 30):
+        assert f'data-minutos="{minutos}"' in html
+    # Aviso con el botón para apagar la alarma, oculto hasta que termine
+    assert 'id="shadowAlarmaAviso" hidden' in html
+    assert 'id="shadowAlarmaBtn"' in html
+
+
+def test_cuenta_regresiva_completa_se_guarda(logged_client, user):
+    # 20 minutos de cuenta regresiva terminada: el JS guarda 1200 segundos
+    respuesta = logged_client.post("/menu/ingles/shadowing/guardar", json={"segundos": 20 * 60})
+    assert respuesta.status_code == 200
+    sesion = ShadowingSesion.query.filter_by(idUser=user.idUser).one()
+    assert sesion.duracionSegundos == 1200
+    html = logged_client.get("/menu/ingles/shadowing/temporizador").get_data(as_text=True)
+    assert "20m 0s" in html
+
+
+def test_campo_otro_minutos_sin_flechas(app):
+    # Las flechas del input number tapaban el número en "Otro"
+    ruta = os.path.join(app.static_folder, "css", "shadowing.css")
+    with open(ruta, encoding="utf-8") as f:
+        css = f.read()
+    assert ".shadow-cuenta-otro input::-webkit-inner-spin-button" in css
+    assert "appearance: textfield" in css
+
+
+def test_temporizador_no_muestra_ultimas_sesiones(logged_client, user):
+    db.session.add(ShadowingSesion(idUser=user.idUser, duracionSegundos=125))
+    db.session.commit()
+    html = logged_client.get("/menu/ingles/shadowing/temporizador").get_data(as_text=True)
+    assert "Últimas sesiones" not in html
+    assert "vocab-history-table" not in html
+    # Los totales de arriba siguen contando la sesión
+    assert "2m 5s" in html

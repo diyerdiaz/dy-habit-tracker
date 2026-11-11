@@ -1,0 +1,19 @@
+{# Aviso obligatorio "¡Ganaste una medalla!": lo llena y lo muestra js/medallas_aviso.js.
+   Solo se cierra con su botón; cada medalla sale una única vez. #}
+<div class="medalla-aviso-fondo" id="medallaAviso" role="dialog" aria-modal="true"
+     aria-labelledby="medallaAvisoNombre" hidden
+     data-url-sin-ver="{{ url_for('medallas.sin_ver') }}"
+     data-url-vista="{{ url_for('medallas.vista', id_medalla='__ID__') }}">
+    <div class="medalla-aviso">
+        <p class="medalla-aviso-encabezado"><i class="bi bi-trophy-fill"></i> ¡Ganaste una medalla!</p>
+        <div class="medalla-aviso-icono"><i class="bi" id="medallaAvisoIcono"></i></div>
+        <span class="medalla-aviso-rareza" id="medallaAvisoRareza"></span>
+        <h2 class="medalla-aviso-nombre" id="medallaAvisoNombre"></h2>
+        <p class="medalla-aviso-descripcion" id="medallaAvisoDescripcion"></p>
+        <p class="medalla-aviso-frase" id="medallaAvisoFrase"></p>
+        <p class="medalla-aviso-quedan" id="medallaAvisoQuedan" hidden></p>
+        <div class="medalla-aviso-botones">
+            <button type="button" class="medalla-aviso-btn" id="medallaAvisoOk">¡Genial!</button>
+        </div>
+    </div>
+</div>

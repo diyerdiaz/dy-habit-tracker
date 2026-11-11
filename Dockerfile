@@ -17,10 +17,11 @@ RUN pip install -r requirements.txt
 
 # Respaldo continuo: Litestream (base de datos) y rclone (archivos subidos).
 # Ver litestream.yml y docker-entrypoint.sh; sin RESPALDO_BUCKET no se usan.
+# fonts-dejavu-core: fuente con tildes para la imagen del plan del mes (services/imagen_plan.py).
 # El binario de Litestream se verifica con su checksum oficial antes de instalarlo.
 ARG LITESTREAM_VERSION=0.5.17
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends rclone ca-certificates \
+    && apt-get install -y --no-install-recommends rclone ca-certificates fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/* \
     && case "$(dpkg --print-architecture)" in \
          amd64) ARQ=x86_64; SHA=cfb371176d164437ae869f8351cfde49bd1804ae71c61923f75c9cba9c9c006d ;; \

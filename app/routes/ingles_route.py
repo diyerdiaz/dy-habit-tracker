@@ -7,6 +7,7 @@ from app import db
 from app.services.ingles import (
     get_letras_flotantes, calcular_rango,
     RANGOS_VOCABULARIO, RANGOS_DOMINIO, MINIMO_CALIFICACIONES_DOMINIO,
+    TIEMPOS_TARJETA, TIEMPO_TARJETA_POR_DEFECTO,
 )
 from app.services.palabras_aleatorias import (
     palabras_aleatorias as elegir_palabras_aleatorias, normalizar_cantidad, total_vocabulario,
@@ -56,12 +57,11 @@ def shadowing():
 @bp.route('/shadowing/temporizador')
 @login_required
 def shadowing_temporizador():
-    sesiones = ShadowingSesion.query.filter_by(idUser=current_user.idUser).order_by(ShadowingSesion.fecha.desc()).all()
+    sesiones = ShadowingSesion.query.filter_by(idUser=current_user.idUser).all()
     total_segundos = sum(s.duracionSegundos for s in sesiones)
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     return render_template(
         'ingles/shadowing_temporizador.html',
-        sesiones=sesiones[:10],
         total_sesiones=len(sesiones),
         total_segundos=total_segundos,
         letras_flotantes=letras_flotantes,
@@ -428,8 +428,9 @@ def vocabulario_aprender():
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     palabras = Vocabulario.query.filter_by(idUser=current_user.idUser).order_by(Vocabulario.createdAt.desc()).all()
 
-    # Última calificación y cuántas veces ha aparecido cada palabra (para armar rondas
-    # donde ninguna palabra se repite hasta que todas hayan salido la misma cantidad de veces)
+    # Última calificación y cuántas veces ha aparecido cada palabra: las marcadas
+    # "Difícil" van primero en la siguiente ronda y el resto va por turnos (ninguna
+    # se repite hasta que todas hayan salido la misma cantidad de veces)
     registros_usuario = VocabularioRegistro.query.filter_by(idUser=current_user.idUser).order_by(VocabularioRegistro.fecha.desc()).all()
     conteo_por_palabra = defaultdict(int)
     ultima_calificacion_por_palabra = {}
@@ -450,9 +451,13 @@ def vocabulario_aprender():
         item = p.to_dict()
         item['peso'] = peso
         item['vecesMostrada'] = conteo_por_palabra.get(p.idVocab, 0)
+        # Las que quedaron en "Difícil" salen primero en la siguiente ronda
+        item['ultimaCalificacion'] = calificacion
         palabras_data.append(item)
 
-    return render_template('ingles/vocabulario_aprender.html', palabras=palabras, palabras_data=palabras_data, letras_flotantes=letras_flotantes)
+    return render_template('ingles/vocabulario_aprender.html', palabras=palabras, palabras_data=palabras_data,
+                           letras_flotantes=letras_flotantes, tiempos_tarjeta=TIEMPOS_TARJETA,
+                           tiempo_por_defecto=TIEMPO_TARJETA_POR_DEFECTO)
 
 
 @bp.route('/vocabulario/rango')

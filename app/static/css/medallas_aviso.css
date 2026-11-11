@@ -1,0 +1,128 @@
+/* ── Aviso de medalla ganada (sale en cualquier pantalla, una por una) ── */
+.medalla-aviso-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    animation: medalla-aviso-aparece 0.3s ease;
+}
+
+.medalla-aviso-fondo[hidden] {
+    display: none;
+}
+
+.medalla-aviso {
+    --color: #ffd700;
+    --brillo: rgba(255, 215, 0, 0.35);
+    width: 100%;
+    max-width: 380px;
+    padding: 26px 22px 22px;
+    border-radius: 22px;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(160deg, rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35), rgba(20, 10, 35, 0.96));
+    border: 1px solid var(--color);
+    box-shadow: 0 0 40px var(--brillo);
+    animation: medalla-aviso-salta 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.medalla-aviso.rareza-bronce   { --color: #cd7f32; --brillo: rgba(205, 127, 50, 0.4); }
+.medalla-aviso.rareza-plata    { --color: #c0c8d8; --brillo: rgba(192, 200, 216, 0.4); }
+.medalla-aviso.rareza-oro      { --color: #ffd700; --brillo: rgba(255, 215, 0, 0.4); }
+.medalla-aviso.rareza-diamante { --color: #5ce1ff; --brillo: rgba(92, 225, 255, 0.45); }
+.medalla-aviso.rareza-mitica   { --color: #ff4d6d; --brillo: rgba(255, 77, 109, 0.5); }
+
+.medalla-aviso-encabezado {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: #ffd700;
+    margin-bottom: 14px;
+}
+
+.medalla-aviso-icono {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.6rem;
+    color: var(--color);
+    border: 3px solid var(--color);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 24px var(--brillo);
+}
+
+.medalla-aviso-rareza {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color);
+}
+
+.medalla-aviso-nombre {
+    font-size: 1.45rem;
+    font-weight: 800;
+    margin: 4px 0 6px;
+}
+
+.medalla-aviso-descripcion {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 6px;
+}
+
+.medalla-aviso-frase {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.medalla-aviso-quedan {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin-top: 6px;
+}
+
+.medalla-aviso-botones {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.medalla-aviso-btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: none;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    color: #1a0f2e;
+    background: linear-gradient(90deg, #ffd700, #ffb347);
+}
+
+/* Mientras hay un aviso, la página de atrás no se mueve */
+body.medalla-aviso-abierto {
+    overflow: hidden;
+}
+
+@keyframes medalla-aviso-aparece {
+    from { opacity: 0; }
+}
+
+@keyframes medalla-aviso-salta {
+    from { transform: scale(0.8); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .medalla-aviso-fondo, .medalla-aviso { animation: none; }
+}

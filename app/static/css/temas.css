@@ -327,16 +327,61 @@
 .temas-vacio { text-align: center; color: rgba(255, 255, 255, 0.6); }
 
 /* ── Ya explicados ── */
-.temas-estudiados summary {
-    font-family: 'Kaushan Script', 'Poppins', cursive;
-    cursor: pointer;
-    list-style: none;
-    margin: 0;
+/* ── Botones "Ya explicados" / "Últimas explicaciones" ── */
+.temas-pestanas {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
-.temas-estudiados summary::-webkit-details-marker { display: none; }
-.temas-estudiados summary::after { content: ' ▾'; color: rgba(255, 255, 255, 0.5); font-size: 1rem; }
-.temas-estudiados[open] summary::after { content: ' ▴'; }
+.temas-pestana {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(var(--tema-vivo-rgb, 217, 102, 255), 0.3);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.temas-pestana:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.temas-pestana.activa {
+    color: #fff;
+    border-color: var(--tema-vivo, #d966ff);
+    background: rgba(var(--tema-grad-1-rgb, 138, 40, 255), 0.35);
+}
+
+.temas-panel[hidden] {
+    display: none;
+}
+
+/* Anterior · Página X de Y · Siguiente */
+.temas-paginacion {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.temas-paginacion > a:first-child { justify-self: start; }
+.temas-paginacion > a:last-child { justify-self: end; }
+
+.temas-paginacion-texto {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
 
 .temas-ayuda { color: rgba(255, 255, 255, 0.55); font-size: 0.9rem; margin: 10px 0 12px; }
 .temas-item-estudiado .temas-item-titulo { color: rgba(255, 255, 255, 0.7); }
@@ -393,5 +438,6 @@
 @media (max-width: 576px) {
     .temas-agregar { flex-direction: column; align-items: stretch; }
     .temas-historial li { grid-template-columns: 1fr auto; }
+    .temas-pestanas { flex-direction: column; }
     .temas-hist-fecha { display: none; }
 }

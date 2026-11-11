@@ -9,6 +9,10 @@ from app.models.temas import (
 
 bp = Blueprint('temas', __name__, url_prefix='/temas')
 
+# "Ya explicados" y "Últimas explicaciones" se ven por páginas de 6
+POR_PAGINA = 6
+VISTAS_REGISTRO = ('explicados', 'historial')
+
 
 def _tema_del_usuario(tema_id):
     return TemaExplicar.query.filter_by(idTema=tema_id, idUser=current_user.idUser).first_or_404()
@@ -23,22 +27,42 @@ def _temas_pendientes():
     return [t for t in _temas_del_usuario() if not t.estudiado]
 
 
+def _pagina(consulta, argumento):
+    """Página pedida en ?<argumento>=N (6 por página). Si se pide una que ya no
+    existe (por ejemplo, después de borrar), se muestra la última."""
+    numero = request.args.get(argumento, 1, type=int)
+    pagina = consulta.paginate(page=max(numero, 1), per_page=POR_PAGINA, error_out=False)
+    if pagina.pages and pagina.page > pagina.pages:
+        pagina = consulta.paginate(page=pagina.pages, per_page=POR_PAGINA, error_out=False)
+    return pagina
+
+
 @bp.route('/')
 @login_required
 def index():
-    todos = _temas_del_usuario()
-    temas = [t for t in todos if not t.estudiado]
-    estudiados = sorted((t for t in todos if t.estudiado), key=lambda t: t.fechaEstudiado or t.createdAt, reverse=True)
-    sesiones = (SesionExplicacion.query.filter_by(idUser=current_user.idUser)
-                .order_by(SesionExplicacion.fecha.desc()).limit(8).all())
+    temas = _temas_pendientes()
+    explicados = _pagina(
+        TemaExplicar.query.filter_by(idUser=current_user.idUser, estudiado=True)
+        .order_by(TemaExplicar.fechaEstudiado.desc(), TemaExplicar.idTema.desc()),
+        'pag_explicados',
+    )
+    historial = _pagina(
+        SesionExplicacion.query.filter_by(idUser=current_user.idUser)
+        .order_by(SesionExplicacion.fecha.desc(), SesionExplicacion.idSesion.desc()),
+        'pag_historial',
+    )
+    vista = request.args.get('vista')
+    if vista not in VISTAS_REGISTRO:
+        vista = 'explicados'
     total_sesiones, total_segundos = (db.session.query(
         func.count(SesionExplicacion.idSesion), func.coalesce(func.sum(SesionExplicacion.segundosHablados), 0))
         .filter(SesionExplicacion.idUser == current_user.idUser).one())
     return render_template(
         'temas/index.html',
         temas=temas,
-        estudiados=estudiados,
-        sesiones=sesiones,
+        explicados=explicados,
+        historial=historial,
+        vista=vista,
         total_sesiones=total_sesiones,
         total_minutos=round(total_segundos / 60),
         tiempos=TIEMPOS_MINUTOS,

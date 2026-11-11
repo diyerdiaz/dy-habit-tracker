@@ -1,0 +1,13 @@
+¡Hola, {{ user.nameUser }}!
+
+Este es tu plan de hábitos de {{ mes }} {{ anio }} ({{ total }} {{ 'hábito' if total == 1 else 'hábitos' }}).
+Va adjunto como imagen: guárdala en tu celular para verla aunque no tengas internet.
+
+Qué te toca cada día:
+{% for dia, habitos in dias %}
+{{ dia }}: {{ habitos | join(', ') if habitos else 'Descanso' }}
+{%- endfor %}
+{% if url_check %}
+Marcar los hábitos de hoy: {{ url_check }}
+{% endif %}
+Recibes este correo porque tienes un recordatorio activo. Sale una vez, al empezar cada mes, cuando confirmas tu plan.

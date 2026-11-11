@@ -1,4 +1,5 @@
-"""Envío de correos (SMTP) con los hábitos y tareas pendientes del día.
+"""Envío de correos (SMTP) con los hábitos y tareas pendientes del día, el
+resumen del mes que terminó y la imagen del plan del mes que empieza.
 
 El comando `flask --app run enviar-recordatorios` revisa los recordatorios cuya
 hora ya llegó (los del perfil y los de cada tarea) y envía el correo. Hay que ejecutarlo periódicamente (cron cada
@@ -20,6 +21,8 @@ from app.models.hist_habits import HistHabit
 from app.services.personajes_login import PERSONAJES, elegir_personaje
 from app.models.recordatorios import Recordatorio, EnvioPrueba
 from app.models.resumen_mensual import ResumenEnviado
+from app.models.plan_mensual import PlanMensual, PlanEnviado, MESES as MESES_PLAN
+from app.services.imagen_plan import imagen_plan_png, plan_por_dia
 from app.services.resumen_mes import mes_anterior, resumen_del_mes
 from app.models.codigos_recuperacion import CodigoRecuperacion, MINUTOS_VALIDEZ
 from app.models.users import User
@@ -32,6 +35,7 @@ logger = logging.getLogger(__name__)
 VENTANA_MINUTOS = 60
 
 # Hora del primer día del mes desde la que sale el resumen del mes anterior
+# (y la imagen del plan del mes que empieza)
 HORA_RESUMEN = 6
 
 # Límites del botón "Enviarme un correo de prueba" del perfil
@@ -54,9 +58,10 @@ def habitos_pendientes(idUser, fecha=None):
     return [h for h in habitos if h.toca_el(fecha) and h.idHabit not in hechos]
 
 
-def enviar_correo(destino, asunto, texto, html=None, imagenes=None):
+def enviar_correo(destino, asunto, texto, html=None, imagenes=None, adjuntos=None):
     """Envía un correo. Devuelve False si el correo no está configurado.
     `imagenes`: {cid: (bytes, subtipo)} que el HTML usa como src="cid:<cid>".
+    `adjuntos`: [(nombre_archivo, bytes, maintype, subtype)] para descargar.
     Si el servidor SMTP falla, lanza la excepción (smtplib.SMTPException / OSError)."""
     cfg = current_app.config
     if not cfg.get('MAIL_ENABLED'):
@@ -72,6 +77,8 @@ def enviar_correo(destino, asunto, texto, html=None, imagenes=None):
         for cid, (datos, subtipo) in (imagenes or {}).items():
             # Imagen incrustada en el correo: se ve aunque la app no esté publicada
             parte_html.add_related(datos, maintype='image', subtype=subtipo, cid=f'<{cid}>')
+    for nombre, datos, tipo, subtipo in adjuntos or []:
+        mensaje.add_attachment(datos, maintype=tipo, subtype=subtipo, filename=nombre)
 
     if cfg['MAIL_PORT'] == 465:
         servidor = smtplib.SMTP_SSL(cfg['MAIL_SERVER'], cfg['MAIL_PORT'], timeout=20)
@@ -291,7 +298,8 @@ def enviar_recordatorios(ahora=None):
             continue
         rec.ultimoEnvio = ahora.date()
         db.session.commit()
-    return enviados + enviar_recordatorios_tareas(ahora) + enviar_resumenes_mes(ahora)
+    return (enviados + enviar_recordatorios_tareas(ahora) + enviar_resumenes_mes(ahora)
+            + enviar_planes_mes(ahora))
 
 
 def enviar_resumenes_mes(ahora=None):
@@ -312,6 +320,75 @@ def enviar_resumenes_mes(ahora=None):
         except (smtplib.SMTPException, OSError):
             # Queda sin marcar: se reintenta en la próxima ejecución
             logger.exception("No se pudo enviar el resumen del mes al usuario %s", user.idUser)
+    return enviados
+
+
+def habitos_del_plan(idUser):
+    """Hábitos activos del plan con sus días: [(nombre, [días 0-6]), ...].
+    Los pausados no van (no tocan mientras estén pausados)."""
+    habitos = Habit.query.filter_by(idUser=idUser, habitState='Activo').order_by(Habit.habitName).all()
+    return [(h.habitName, h.dias_lista()) for h in habitos]
+
+
+def enviar_plan_mes(user, fecha=None, personaje=None):
+    """Envía una sola vez por mes la imagen del plan (qué hábitos tocan cada día
+    de la semana), para tenerla sin internet. Solo cuando el plan del mes ya
+    está confirmado y tiene hábitos. Devuelve True si se envió."""
+    if not user.email:
+        return False
+    fecha = fecha or date.today()
+    anio, mes = fecha.year, fecha.month
+    if PlanEnviado.query.filter_by(idUser=user.idUser, anio=anio, mes=mes).first():
+        return False
+    if not PlanMensual.del_mes(user.idUser, fecha):
+        return False  # aún no confirma el plan: sale cuando lo confirme
+    habitos = habitos_del_plan(user.idUser)
+    if not habitos:
+        return False
+    if personaje is None:
+        personaje = elegir_personaje()
+    nombre_mes = MESES_PLAN[mes - 1]
+    # La imagen lleva el mismo personaje del correo, con los colores de su tema
+    imagen = imagen_plan_png(user.nameUser, habitos, anio, mes, personaje, imagen_personaje(personaje))
+    app_url = (current_app.config.get('APP_URL') or '').rstrip('/')
+    datos = dict(
+        user=user, mes=nombre_mes, anio=anio, dias=plan_por_dia(habitos), total=len(habitos),
+        personaje=PERSONAJES[personaje], tema=PERSONAJES[personaje]['tema'],
+        url_check=f'{app_url}/habitos/check' if app_url else None,
+    )
+    enviado = enviar_correo(
+        user.email,
+        f"🗓️ Tu plan de hábitos de {nombre_mes}",
+        _render('correos/plan_mes.txt', **datos),
+        _render('correos/plan_mes.html', **datos),
+        imagenes={'personaje': (imagen_personaje(personaje), 'jpeg'), 'plan': (imagen, 'png')},
+        adjuntos=[(f'plan-{nombre_mes}-{anio}.png', imagen, 'image', 'png')],
+    )
+    if enviado:
+        db.session.add(PlanEnviado(idUser=user.idUser, anio=anio, mes=mes))
+        db.session.commit()
+    return enviado
+
+
+def enviar_planes_mes(ahora=None):
+    """Desde las HORA_RESUMEN del primer día del mes revisa quién no ha recibido
+    la imagen del plan y se la envía. Si no salió (falló el correo o el plan
+    se confirmó después), sale en la próxima ejecución, cualquier día del mes.
+    Solo a quien pidió correos (tiene un recordatorio). Devuelve cuántos salieron."""
+    ahora = ahora or datetime.now()
+    if ahora.day == 1 and ahora.hour < HORA_RESUMEN:
+        return 0
+    usuarios = (User.query.join(Recordatorio, Recordatorio.idUser == User.idUser)
+                .filter(User.email.isnot(None), User.email != '', User.bloqueado.is_(False))
+                .distinct().all())
+    enviados = 0
+    for user in usuarios:
+        try:
+            if enviar_plan_mes(user, ahora.date()):
+                enviados += 1
+        except (smtplib.SMTPException, OSError):
+            # Queda sin marcar: se reintenta en la próxima ejecución
+            logger.exception("No se pudo enviar el plan del mes al usuario %s", user.idUser)
     return enviados
 
 

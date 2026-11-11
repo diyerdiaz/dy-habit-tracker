@@ -163,6 +163,11 @@
         <button type="button" class="medallas-filtro" data-filtro="ganadas">
             <i class="bi bi-unlock-fill"></i> Ganadas
         </button>
+        {% if nuevas %}
+        <button type="button" class="medallas-filtro" data-filtro="nuevas">
+            <i class="bi bi-gift-fill"></i> Nuevas ({{ nuevas|length }})
+        </button>
+        {% endif %}
     </div>
 
     <!-- ── Secciones: básicas y rangos por nivel ── -->
@@ -186,8 +191,10 @@
         </header>
         <div class="medallas-grid">
             {% for m in sec.medallas %}
-            <div class="medalla-card rareza-{{ m.rareza }}{{ ' desbloqueada' if m.desbloqueada else ' bloqueada' }}"
-                 data-categoria="{{ m.categoria }}" data-ganada="{{ 'si' if m.desbloqueada else 'no' }}">
+            <div class="medalla-card rareza-{{ m.rareza }}{{ ' desbloqueada' if m.desbloqueada else ' bloqueada' }}{{ ' nueva' if m.id in ids_nuevas else '' }}"
+                 data-categoria="{{ m.categoria }}" data-ganada="{{ 'si' if m.desbloqueada else 'no' }}"
+                 data-nueva="{{ 'si' if m.id in ids_nuevas else 'no' }}">
+                {% if m.id in ids_nuevas %}<span class="medalla-nueva"><i class="bi bi-stars"></i> ¡Nueva!</span>{% endif %}
                 <span class="medalla-rareza">{{ 'Mítica' if m.rareza == 'mitica' else m.rareza|capitalize }}</span>
                 <div class="medalla-icono">
                     <i class="bi {{ m.icono }}"></i>

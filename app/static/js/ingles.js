@@ -33,3 +33,19 @@ const inglesScrollObserver = new IntersectionObserver((entries) => {
 });
 
 inglesFadeSections.forEach((section) => inglesScrollObserver.observe(section));
+
+// Calendarios de vocabulario y shadowing: en pantallas angostas se deslizan de
+// lado; al abrir, se colocan en el día de hoy (el último día que no es futuro).
+// Al deslizar se cierra el detalle del día, que quedaría mal ubicado.
+document.querySelectorAll('.vocab-cal-scroll').forEach((scroll) => {
+    const dias = scroll.querySelectorAll('.vocab-cal-day:not(.is-future)');
+    const hoy = dias[dias.length - 1];
+    if (hoy && scroll.scrollWidth > scroll.clientWidth) {
+        const izquierda = hoy.getBoundingClientRect().left - scroll.getBoundingClientRect().left + scroll.scrollLeft;
+        scroll.scrollLeft = Math.max(0, izquierda - scroll.clientWidth + hoy.offsetWidth * 4);
+    }
+    scroll.addEventListener('scroll', () => {
+        const popup = scroll.parentElement.querySelector('.vocab-day-popup');
+        if (popup) popup.classList.remove('visible');
+    }, { passive: true });
+});

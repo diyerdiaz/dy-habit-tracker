@@ -437,3 +437,21 @@
         align-items: flex-start;
     }
 }
+
+/* Etiqueta "¡Nueva!" en las tarjetas recién ganadas */
+.medalla-card.nueva {
+    box-shadow: 0 0 22px rgba(255, 215, 0, 0.45);
+}
+
+.medalla-nueva {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #1a0f2e;
+    background: #ffd700;
+}
+
