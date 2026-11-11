@@ -1,4 +1,5 @@
 // Muestra la tarjeta con la frase del día una sola vez al día en cada dispositivo.
+// Al cerrarla avisa con el evento "frase-dia-cerrada" (el aviso de medallas lo espera).
 (function () {
     const CLAVE = 'frase-dia-vista';
     const tarjeta = document.getElementById('fraseDia');
@@ -15,7 +16,9 @@
     if (vista === fecha) return;
 
     const cerrar = function () {
+        if (tarjeta.hidden) return;
         tarjeta.hidden = true;
+        document.dispatchEvent(new CustomEvent('frase-dia-cerrada'));
         document.removeEventListener('keydown', alTeclear);
         try {
             localStorage.setItem(CLAVE, fecha);

@@ -20,33 +20,3 @@ document.querySelectorAll('.medallas-filtro').forEach(function (btn) {
     });
 });
 
-
-// Anuncio de medallas nuevas: "Ver" filtra por las nuevas; "Cerrar", Escape o
-// tocar fuera lo cierran.
-(function () {
-    var anuncio = document.getElementById('medallasAnuncio');
-    if (!anuncio) return;
-
-    function cerrar() {
-        anuncio.remove();
-        document.removeEventListener('keydown', alTeclear);
-    }
-    function alTeclear(e) {
-        if (e.key === 'Escape') cerrar();
-    }
-
-    document.getElementById('medallasAnuncioCerrar').addEventListener('click', cerrar);
-    document.getElementById('medallasAnuncioVer').addEventListener('click', function () {
-        cerrar();
-        var filtro = document.querySelector('.medallas-filtro[data-filtro="nuevas"]');
-        if (filtro) {
-            filtro.click();
-            filtro.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    });
-    anuncio.addEventListener('click', function (e) {
-        if (e.target === anuncio) cerrar();
-    });
-    document.addEventListener('keydown', alTeclear);
-    document.getElementById('medallasAnuncioVer').focus();
-})();

@@ -15,7 +15,7 @@ from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app.models.ruleta_castigo import Castigo
 from app.models.metodo_estudio import MetodoEstudio, KanbanTarjeta, Apunte
-from app.models.medalla_vista import MedallaVista
+from app.models.medalla_anunciada import MedallaAnunciada
 from app.services.estadisticas import meses_disponibles, estadisticas_del_mes
 from app.services.gamificacion import get_or_create_progress, sincronizar_racha
 from app.services.level_config import calcular_progreso
@@ -441,12 +441,27 @@ def evaluar_medallas(metricas):
     return resultado
 
 
-def anunciar_nuevas(idUser, lista):
-    """Medallas ganadas que el usuario aún no había visto. Las marca como vistas
-    para que el anuncio salga una sola vez."""
-    vistas = {v.idMedalla for v in MedallaVista.query.filter_by(idUser=idUser)}
-    nuevas = [m for m in lista if m['desbloqueada'] and m['id'] not in vistas]
-    if nuevas:
-        db.session.add_all(MedallaVista(idUser=idUser, idMedalla=m['id']) for m in nuevas)
+def ids_anunciadas(idUser):
+    """Ids de las medallas cuyo aviso el usuario ya aceptó."""
+    return {a.idMedalla for a in MedallaAnunciada.query.filter_by(idUser=idUser)}
+
+
+def medallas_sin_ver(idUser, lista=None):
+    """Medallas ganadas cuyo aviso todavía no ha salido (no las marca)."""
+    if lista is None:
+        lista = evaluar_medallas(obtener_metricas(idUser))
+    anunciadas = ids_anunciadas(idUser)
+    return [m for m in lista if m['desbloqueada'] and m['id'] not in anunciadas]
+
+
+def marcar_vista(idUser, idMedalla):
+    """Guarda que el usuario aceptó el aviso de esa medalla, para que no vuelva a
+    salir. False si no existe o todavía no está ganada."""
+    ganada = any(m['id'] == idMedalla and m['desbloqueada']
+                 for m in evaluar_medallas(obtener_metricas(idUser)))
+    if not ganada:
+        return False
+    if not db.session.get(MedallaAnunciada, (idUser, idMedalla)):
+        db.session.add(MedallaAnunciada(idUser=idUser, idMedalla=idMedalla))
         db.session.commit()
-    return nuevas
+    return True

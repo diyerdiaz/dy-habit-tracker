@@ -118,36 +118,6 @@
 </div>
 
 <div class="medallas-wrapper">
-    {% if nuevas %}
-    <!-- ── Anuncio: medallas ganadas desde la última visita ── -->
-    <div class="medallas-anuncio-fondo" id="medallasAnuncio" role="dialog" aria-modal="true" aria-labelledby="medallasAnuncioTitulo">
-        <div class="medallas-anuncio">
-            <div class="medallas-anuncio-icono"><i class="bi bi-gift-fill"></i></div>
-            <h2 class="medallas-anuncio-titulo" id="medallasAnuncioTitulo">
-                ¡Ganaste {{ nuevas|length }} {{ 'medalla nueva' if nuevas|length == 1 else 'medallas nuevas' }}!
-            </h2>
-            <p class="medallas-anuncio-texto">Esto es lo que había en tu cofre:</p>
-            <ul class="medallas-anuncio-lista">
-                {% for m in nuevas %}
-                <li class="medallas-anuncio-item rareza-{{ m.rareza }}">
-                    <i class="bi {{ m.icono }}"></i>
-                    <div>
-                        <strong>{{ m.nombre }}</strong>
-                        <span>{{ m.descripcion }}</span>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            <div class="medallas-anuncio-botones">
-                <button type="button" class="medallas-anuncio-btn" id="medallasAnuncioVer">
-                    <i class="bi bi-eye-fill"></i> Ver mis medallas nuevas
-                </button>
-                <button type="button" class="medallas-anuncio-btn secundario" id="medallasAnuncioCerrar">Cerrar</button>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
     <!-- ── Resumen ── -->
     <div class="medallas-resumen">
         <div class="medallas-resumen-icono"><i class="bi bi-trophy-fill"></i></div>
