@@ -123,7 +123,7 @@
 
     <div class="temas-resumen">
         <div class="temas-stat"><span>{{ temas | length }}</span> por explicar</div>
-        <div class="temas-stat"><span>{{ estudiados | length }}</span> {{ 'explicado' if estudiados | length == 1 else 'explicados' }}</div>
+        <div class="temas-stat"><span>{{ explicados.total }}</span> {{ 'explicado' if explicados.total == 1 else 'explicados' }}</div>
         <div class="temas-stat"><span>{{ total_sesiones }}</span> {{ 'explicación' if total_sesiones == 1 else 'explicaciones' }}</div>
         <div class="temas-stat"><span>{{ total_minutos }}</span> min hablados</div>
     </div>
@@ -144,7 +144,7 @@
         <div class="temas-pantalla" id="pantalla">
             <div class="temas-espera" id="espera">
                 <i class="bi bi-question-diamond"></i>
-                <p>{% if temas %}Pulsa el botón y te saldrá un tema{% elif estudiados %}¡Ya explicaste todos tus temas! Agrega más aquí abajo{% else %}Primero agrega tus temas aquí abajo{% endif %}</p>
+                <p>{% if temas %}Pulsa el botón y te saldrá un tema{% elif explicados.total %}¡Ya explicaste todos tus temas! Agrega más aquí abajo{% else %}Primero agrega tus temas aquí abajo{% endif %}</p>
             </div>
 
             <div class="temas-resultado" id="resultado" hidden>
@@ -211,14 +211,45 @@
         {% endif %}
     </section>
 
-    <!-- ── Temas ya explicados ── -->
-    {% if estudiados %}
-    <section class="temas-seccion">
-        <details class="temas-estudiados">
-            <summary class="temas-seccion-titulo"><i class="bi bi-check2-all"></i> Ya explicados ({{ estudiados | length }})</summary>
+    <!-- ── Registro: "Ya explicados" y "Últimas explicaciones", 6 por página ── -->
+    {% macro paginacion(pagina, argumento, vista_panel) %}
+    {% if pagina.pages > 1 %}
+    {% set otros = {'vista': vista_panel, 'pag_explicados': explicados.page, 'pag_historial': historial.page} %}
+    <nav class="temas-paginacion" aria-label="Páginas">
+        {% if pagina.has_prev %}
+        <a class="temas-btn temas-btn-chico" href="{{ url_for('temas.index', **dict(otros, **{argumento: pagina.prev_num})) }}#temas-registro">
+            <i class="bi bi-chevron-left"></i> Anterior
+        </a>
+        {% else %}<span class="temas-paginacion-hueco"></span>{% endif %}
+        <span class="temas-paginacion-texto">Página {{ pagina.page }} de {{ pagina.pages }}</span>
+        {% if pagina.has_next %}
+        <a class="temas-btn temas-btn-chico" href="{{ url_for('temas.index', **dict(otros, **{argumento: pagina.next_num})) }}#temas-registro">
+            Siguiente <i class="bi bi-chevron-right"></i>
+        </a>
+        {% else %}<span class="temas-paginacion-hueco"></span>{% endif %}
+    </nav>
+    {% endif %}
+    {% endmacro %}
+
+    <section class="temas-seccion" id="temas-registro">
+        <div class="temas-pestanas" role="tablist">
+            <button type="button" class="temas-pestana{{ ' activa' if vista == 'explicados' else '' }}" role="tab"
+                    id="tab-explicados" aria-controls="panel-explicados" data-panel="panel-explicados"
+                    aria-selected="{{ 'true' if vista == 'explicados' else 'false' }}">
+                <i class="bi bi-check2-all"></i> Ya explicados ({{ explicados.total }})
+            </button>
+            <button type="button" class="temas-pestana{{ ' activa' if vista == 'historial' else '' }}" role="tab"
+                    id="tab-historial" aria-controls="panel-historial" data-panel="panel-historial"
+                    aria-selected="{{ 'true' if vista == 'historial' else 'false' }}">
+                <i class="bi bi-clock-history"></i> Últimas explicaciones ({{ historial.total }})
+            </button>
+        </div>
+
+        <div class="temas-panel" id="panel-explicados" role="tabpanel" aria-labelledby="tab-explicados"{{ '' if vista == 'explicados' else ' hidden' }}>
+            {% if explicados.items %}
             <p class="temas-ayuda">Estos ya no salen en la ruleta. Si quieres practicar alguno otra vez, devuélvelo a la lista.</p>
             <ul class="temas-lista">
-                {% for t in estudiados %}
+                {% for t in explicados.items %}
                 <li class="temas-item temas-item-estudiado">
                     <div class="temas-item-texto">
                         <span class="temas-item-titulo"><i class="bi bi-check-circle-fill"></i> {{ t.titulo }}</span>
@@ -233,28 +264,32 @@
                 </li>
                 {% endfor %}
             </ul>
-        </details>
-    </section>
-    {% endif %}
+            {{ paginacion(explicados, 'pag_explicados', 'explicados') }}
+            {% else %}
+            <p class="temas-ayuda">Todavía no has explicado ningún tema. Saca uno al azar y explícalo.</p>
+            {% endif %}
+        </div>
 
-    <!-- ── Últimas explicaciones ── -->
-    {% if sesiones %}
-    <section class="temas-seccion">
-        <h2 class="temas-seccion-titulo"><i class="bi bi-clock-history"></i> Últimas explicaciones</h2>
-        <ul class="temas-historial">
-            {% for s in sesiones %}
-            <li>
-                <span class="temas-hist-tema">{{ s.tema.titulo }}</span>
-                <span class="temas-hist-tiempo"><i class="bi bi-stopwatch"></i> {{ s.tiempo_texto() }} / {{ s.segundosObjetivo // 60 }} min</span>
-                <span class="temas-hist-estrellas" aria-label="{{ s.calificacion or 0 }} de 5 estrellas">
-                    {% for i in range(1, 6) %}<i class="bi {{ 'bi-star-fill' if s.calificacion and i <= s.calificacion else 'bi-star' }}"></i>{% endfor %}
-                </span>
-                <span class="temas-hist-fecha">{{ s.fecha.strftime('%d/%m %H:%M') }}</span>
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="temas-panel" id="panel-historial" role="tabpanel" aria-labelledby="tab-historial"{{ '' if vista == 'historial' else ' hidden' }}>
+            {% if historial.items %}
+            <ul class="temas-historial">
+                {% for s in historial.items %}
+                <li>
+                    <span class="temas-hist-tema">{{ s.tema.titulo }}</span>
+                    <span class="temas-hist-tiempo"><i class="bi bi-stopwatch"></i> {{ s.tiempo_texto() }} / {{ s.segundosObjetivo // 60 }} min</span>
+                    <span class="temas-hist-estrellas" aria-label="{{ s.calificacion or 0 }} de 5 estrellas">
+                        {% for i in range(1, 6) %}<i class="bi {{ 'bi-star-fill' if s.calificacion and i <= s.calificacion else 'bi-star' }}"></i>{% endfor %}
+                    </span>
+                    <span class="temas-hist-fecha">{{ s.fecha.strftime('%d/%m %H:%M') }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {{ paginacion(historial, 'pag_historial', 'historial') }}
+            {% else %}
+            <p class="temas-ayuda">Aquí verás cada explicación que hagas, con su tiempo y tus estrellas.</p>
+            {% endif %}
+        </div>
     </section>
-    {% endif %}
 </div>
 
 <!-- Modal: ¿cómo te fue? -->

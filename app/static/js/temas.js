@@ -213,4 +213,17 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('beforeunload', function (e) {
         if (corriendo) { e.preventDefault(); e.returnValue = ''; }
     });
+
+    // ── Botones "Ya explicados" / "Últimas explicaciones" ──
+    var pestanas = document.querySelectorAll('.temas-pestana');
+    pestanas.forEach(function (pestana) {
+        pestana.addEventListener('click', function () {
+            pestanas.forEach(function (otra) {
+                var activa = otra === pestana;
+                otra.classList.toggle('activa', activa);
+                otra.setAttribute('aria-selected', activa ? 'true' : 'false');
+                document.getElementById(otra.dataset.panel).hidden = !activa;
+            });
+        });
+    });
 });
