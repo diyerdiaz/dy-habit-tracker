@@ -1,0 +1,74 @@
+{# Correo HTML: tablas y estilos inline porque Gmail y otros clientes ignoran los .css
+   externos y los <style>. Mismo estilo que correos/resumen_mes.html.
+   La imagen del plan va incrustada (cid:plan) y también adjunta para descargarla. #}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Tu plan de hábitos de {{ mes }}</title>
+</head>
+<body style="margin:0;padding:0;background:#07000d;" bgcolor="#07000d">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#07000d" style="background:#07000d;">
+<tr><td align="center" style="padding:28px 12px;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+    <tr><td align="center" style="padding:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:{{ tema['vivo'] }};">
+      DY Habit Tracker
+    </td></tr>
+
+    <tr><td bgcolor="{{ tema['oscuro'] }}" style="background:{{ tema['oscuro'] }};background-image:linear-gradient(180deg, {{ tema['oscuro'] }} 0%, {{ tema['oscuro-2'] }} 100%);border:1px solid rgba({{ tema['vivo-rgb'] }}, 0.35);border-radius:24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+
+        <tr><td align="center" style="padding:24px 24px 0;">
+          <img src="cid:personaje" width="120" alt="{{ personaje['nombre'] }}" style="display:block;width:120px;max-width:100%;height:auto;border:0;">
+        </td></tr>
+
+        <tr><td align="center" style="padding:8px 28px 0;font-family:Georgia,'Times New Roman',serif;">
+          <h1 style="margin:0;font-size:26px;font-style:italic;font-weight:700;color:{{ tema['vivo'] }};">Tu plan de {{ mes }}</h1>
+          <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:rgba(255,255,255,0.6);">
+            ¡Hola, {{ user.nameUser }}! Estos son tus {{ total }} {{ 'hábito' if total == 1 else 'hábitos' }} y qué día te toca cada uno.
+          </p>
+        </td></tr>
+
+        <tr><td align="center" style="padding:18px 16px 0;">
+          <img src="cid:plan" width="520" alt="Plan de hábitos de {{ mes }} {{ anio }}" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:14px;">
+        </td></tr>
+
+        <tr><td style="padding:14px 28px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0;padding:12px 14px;border-radius:12px;background:rgba({{ tema['vivo-rgb'] }},0.12);border-left:4px solid {{ tema['vivo'] }};font-size:14px;line-height:1.5;color:#ffffff;">
+            📲 <strong>Guárdala en tu celular</strong>: la imagen también va como archivo adjunto. Así la ves aunque no tengas internet.
+          </p>
+        </td></tr>
+
+        <tr><td style="padding:18px 28px 0;font-family:Arial,Helvetica,sans-serif;">
+          <p style="margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);">Qué te toca cada día</p>
+          {% for dia, habitos in dias %}
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:rgba(255,255,255,0.85);">
+            <strong style="color:#ffffff;">{{ dia }}:</strong> {{ habitos | join(', ') if habitos else 'Descanso' }}
+          </p>
+          {% endfor %}
+        </td></tr>
+
+        {% if url_check %}
+        <tr><td align="center" style="padding:14px 28px 24px;">
+          <a href="{{ url_check }}" style="display:inline-block;padding:14px 30px;border-radius:14px;background:{{ tema['grad-1'] }};background-image:linear-gradient(135deg, {{ tema['grad-1'] }}, {{ tema['vivo'] }});font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-decoration:none;">
+            Marcar los hábitos de hoy →
+          </a>
+        </td></tr>
+        {% else %}
+        <tr><td style="padding:0 0 22px;"></td></tr>
+        {% endif %}
+      </table>
+    </td></tr>
+
+    <tr><td align="center" style="padding:18px 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:rgba(255,255,255,0.4);">
+      Recibes este correo porque tienes un recordatorio activo. Sale una vez, al empezar cada mes, cuando confirmas tu plan.
+    </td></tr>
+  </table>
+
+</td></tr>
+</table>
+</body>
+</html>
