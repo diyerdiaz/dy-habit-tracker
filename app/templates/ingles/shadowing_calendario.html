@@ -150,6 +150,8 @@
 
     <div class="vocab-cal-card fade-in-section">
         <div class="vocab-cal-calendar" id="shadowCalScroll">
+            <!-- Se desliza de lado en pantallas angostas (los días no se encogen) -->
+            <div class="vocab-cal-scroll">
             <div class="vocab-cal-months">
                 {% for semana in semanas %}
                 <span class="vocab-cal-month-label">{{ semana.mes }}</span>
@@ -170,6 +172,8 @@
                     </div>
                     {% endfor %}
                 </div>
+            </div>
+
             </div>
 
             <div class="vocab-day-popup" id="shadowDayPopup">

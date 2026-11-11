@@ -123,6 +123,20 @@
         <p class="ingles-desc">Cada palabra que agregas te acerca a tu siguiente rango.</p>
     </div>
 
+    <!-- ── Botones para cambiar entre los dos rangos ── -->
+    <div class="vocab-rank-tabs" role="tablist">
+        <button type="button" class="vocab-rank-tab activo" role="tab" id="tab-rango-vocabulario"
+                aria-controls="panel-rango-vocabulario" aria-selected="true" data-panel="panel-rango-vocabulario">
+            <i class="bi bi-book-half"></i> Rango de vocabulario
+        </button>
+        <button type="button" class="vocab-rank-tab" role="tab" id="tab-rango-dominio"
+                aria-controls="panel-rango-dominio" aria-selected="false" data-panel="panel-rango-dominio">
+            <i class="bi bi-bullseye"></i> Rango de dominio
+        </button>
+    </div>
+
+    <!-- ── Panel: rango de vocabulario (palabras agregadas) ── -->
+    <div class="vocab-rank-panel" id="panel-rango-vocabulario" role="tabpanel" aria-labelledby="tab-rango-vocabulario">
     <!-- Tarjeta de Rango Actual -->
     <p class="vocab-rank-subtitle fade-in-section">Tu rango de vocabulario</p>
     <div class="vocab-rank-card fade-in-section">
@@ -154,7 +168,10 @@
         {% endfor %}
     </div>
 
-    <!-- Rango de Dominio (porcentaje de palabras fáciles) -->
+    </div>
+
+    <!-- ── Panel: rango de dominio (porcentaje de palabras fáciles) ── -->
+    <div class="vocab-rank-panel" id="panel-rango-dominio" role="tabpanel" aria-labelledby="tab-rango-dominio" hidden>
     <p class="vocab-rank-subtitle fade-in-section">Tu rango de dominio</p>
 
     {% if total_calificaciones == 0 %}
@@ -229,12 +246,14 @@
         </div>
     </div>
     {% endif %}
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vocabulario_rango.js') }}"></script>
 {% endblock %}
 
 {% block footer %}

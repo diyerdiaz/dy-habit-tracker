@@ -689,22 +689,40 @@
 }
 
 .vocab-cal-card {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     background: rgba(13, 110, 253, 0.08);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(13, 110, 253, 0.25);
     border-radius: 20px;
     padding: 30px;
-    --cell-gap: 4px;
+    --cell-gap: 3px;
+    --cell-min: 16px;   /* tamaño mínimo de cada día: no se encoge más que esto */
 }
 
-@media (max-width: 480px) {
-    .vocab-cal-card { --cell-gap: 2px; }
+/* En pantallas grandes la tarjeta sale un poco de la columna central para
+   que quepa el año entero sin deslizar, con días de ~17 px */
+@media (min-width: 1280px) {
+    .vocab-cal-card {
+        width: 1100px;
+        max-width: none;
+        margin-left: calc((100% - 1100px) / 2);
+        margin-right: calc((100% - 1100px) / 2);
+    }
 }
 
 .vocab-cal-calendar {
     position: relative;
+}
+
+/* Meses y días: si no caben, se deslizan de lado en vez de encogerse */
+.vocab-cal-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(77, 171, 255, 0.5) transparent;
+    -webkit-overflow-scrolling: touch;
 }
 
 .vocab-cal-months {
@@ -715,9 +733,9 @@
 
 .vocab-cal-month-label {
     position: relative;
-    flex: 1 1 0;
-    min-width: 0;
-    font-size: 0.78rem;
+    flex: 1 0 var(--cell-min);
+    min-width: var(--cell-min);
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.45);
     font-style: italic;
     white-space: nowrap;
@@ -732,22 +750,21 @@
 .vocab-cal-weeks {
     display: flex;
     gap: var(--cell-gap);
-    flex: 1 1 auto;
-    min-width: 0;
+    flex: 1 0 auto;
 }
 
 .vocab-cal-week {
     display: flex;
     flex-direction: column;
     gap: var(--cell-gap);
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 1 0 var(--cell-min);
+    min-width: var(--cell-min);
 }
 
 .vocab-cal-day {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
     transition: transform 0.15s ease, outline 0.15s ease;
 }
@@ -782,14 +799,14 @@
     justify-content: flex-end;
     gap: 5px;
     margin-top: 18px;
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.45);
     font-style: italic;
 }
 
 .vocab-cal-legend .vocab-cal-day {
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     flex: none;
     cursor: default;
 }
@@ -859,3 +876,47 @@
     .vocab-cal-card { padding: 20px 14px; }
 }
 
+
+/* ── Mi rango: botones "Rango de vocabulario" / "Rango de dominio" ── */
+.vocab-rank-tabs {
+    display: flex;
+    gap: 12px;
+    max-width: 560px;
+    margin: 0 auto 24px;
+}
+
+.vocab-rank-tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(13, 110, 253, 0.35);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 700;
+    font-style: italic;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.vocab-rank-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.vocab-rank-tab.activo {
+    color: #fff;
+    border-color: #4dabff;
+    background: rgba(13, 110, 253, 0.35);
+}
+
+.vocab-rank-panel[hidden] {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .vocab-rank-tabs { flex-direction: column; }
+}
