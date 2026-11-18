@@ -129,8 +129,8 @@ console.log(JSON.stringify({ b, rondas }));
     assert resultado['b']['vecesMostrada'] == 1 and resultado['b']['ultimaCalificacion'] == 'dificil'
     assert resultado['b']['peso'] == 3
     for ronda in resultado['rondas']:
-        assert ronda[0] == 'B'                   # la difícil va primero
-        assert set(ronda[1:]) == {'C', 'D'}      # luego las que no se estudiaron; A espera su turno
+        # A y B ya se practicaron hoy: no vuelven hasta mañana (aunque B sea difícil)
+        assert sorted(ronda) == ['C', 'D']
 
 
 def test_resumen_dice_cuantas_se_estudiaron():

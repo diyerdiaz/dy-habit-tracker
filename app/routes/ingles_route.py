@@ -457,10 +457,15 @@ def vocabulario_aprender():
     registros_usuario = VocabularioRegistro.query.filter_by(idUser=current_user.idUser).order_by(VocabularioRegistro.fecha.desc()).all()
     conteo_por_palabra = defaultdict(int)
     ultima_calificacion_por_palabra = {}
+    # Las palabras ya practicadas hoy no vuelven a salir hasta mañana
+    hoy = date.today()
+    estudiadas_hoy = set()
     for r in registros_usuario:
         if r.idVocab is None:
             continue
         conteo_por_palabra[r.idVocab] += 1
+        if r.fecha and r.fecha.date() == hoy:
+            estudiadas_hoy.add(r.idVocab)
         if r.idVocab not in ultima_calificacion_por_palabra:
             ultima_calificacion_por_palabra[r.idVocab] = r.calificacion
 
@@ -476,9 +481,12 @@ def vocabulario_aprender():
         item['vecesMostrada'] = conteo_por_palabra.get(p.idVocab, 0)
         # Las que quedaron en "Difícil" salen primero en la siguiente ronda
         item['ultimaCalificacion'] = calificacion
+        item['estudiadaHoy'] = p.idVocab in estudiadas_hoy
         palabras_data.append(item)
 
+    pendientes_hoy = sum(1 for p in palabras_data if not p['estudiadaHoy'])
     return render_template('ingles/vocabulario_aprender.html', palabras=palabras, palabras_data=palabras_data,
+                           pendientes_hoy=pendientes_hoy,
                            letras_flotantes=letras_flotantes, tiempos_tarjeta=TIEMPOS_TARJETA,
                            tiempo_por_defecto=TIEMPO_TARJETA_POR_DEFECTO)
 

@@ -81,12 +81,19 @@ function vocabPorTurnos(lista, cantidad) {
 // (vuelven en cada ronda hasta que se marquen más fáciles) y después el resto
 // por turnos. Ninguna palabra se repite dentro de la misma ronda.
 function vocabSeleccionPonderada(lista, cantidad) {
-    const dificiles = lista.filter((p) => p.ultimaCalificacion === 'dificil');
-    const resto = lista.filter((p) => p.ultimaCalificacion !== 'dificil');
+    // Lo que ya se practicó hoy no vuelve a salir hasta mañana
+    const pendientes = vocabPendientesHoy(lista);
+    const dificiles = pendientes.filter((p) => p.ultimaCalificacion === 'dificil');
+    const resto = pendientes.filter((p) => p.ultimaCalificacion !== 'dificil');
 
     const seleccion = vocabPorTurnos(dificiles, cantidad);
     seleccion.push(...vocabPorTurnos(resto, cantidad - seleccion.length));
     return seleccion;
+}
+
+// Palabras que aún no se han practicado hoy
+function vocabPendientesHoy(lista) {
+    return lista.filter((p) => !p.estudiadaHoy);
 }
 
 // Al calificar, la palabra se actualiza también en la página: si se arma otra
@@ -95,6 +102,7 @@ function vocabRegistrarCalificacion(palabras, idVocab, calificacion) {
     const palabra = palabras.find((p) => p.idVocab === idVocab);
     if (!palabra) return null;
     palabra.vecesMostrada = (palabra.vecesMostrada || 0) + 1;
+    palabra.estudiadaHoy = true;
     palabra.ultimaCalificacion = calificacion;
     palabra.peso = VOCAB_PESOS[calificacion] || 2;
     return palabra;
@@ -239,9 +247,37 @@ function vocabMostrarResumen() {
         `Fácil: ${vocabStats.facil} · Medio fácil: ${vocabStats.medio} · Difícil: ${vocabStats.dificil}`;
 }
 
+// Al volver de una ronda: cuántas faltan hoy y la lista de cantidades.
+// Si ya se practicaron todas, se avisa que vuelven mañana.
+function vocabActualizarSetup() {
+    const todas = window.VOCAB_PALABRAS || [];
+    const pendientes = vocabPendientesHoy(todas).length;
+    const controles = document.getElementById('vocabSetupControles');
+    const todasHechas = document.getElementById('vocabTodasHechas');
+    const texto = document.getElementById('vocabPendientesTexto');
+    if (!controles || !todasHechas || !vocabCantidad) return;
+
+    controles.hidden = pendientes === 0;
+    todasHechas.hidden = pendientes !== 0;
+    if (texto) {
+        const plural = todas.length === 1 ? 'palabra' : 'palabras';
+        texto.innerHTML = `Hoy te faltan <strong>${pendientes}</strong> de <strong>${todas.length}</strong> ${plural}. ` +
+            'Las que ya practicaste hoy vuelven mañana.';
+    }
+    vocabCantidad.innerHTML = '';
+    for (let n = 1; n <= pendientes; n++) {
+        const opcion = document.createElement('option');
+        opcion.value = String(n);
+        opcion.textContent = `${n} palabra${n === 1 ? '' : 's'}`;
+        opcion.selected = n === pendientes;
+        vocabCantidad.appendChild(opcion);
+    }
+}
+
 function vocabVolverAlInicio() {
     vocabDetenerTemporizador();
     vocabDeck.style.display = 'none';
+    vocabActualizarSetup();
     vocabSetupCard.style.display = '';
 }
 
@@ -476,6 +512,7 @@ if (vocabAutocompletarBtn) {
 if (typeof module !== 'undefined') {
     module.exports = {
         vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes,
+        vocabPendientesHoy,
         vocabCorregirCalificacion, vocabContarCalificaciones,
     };
 }

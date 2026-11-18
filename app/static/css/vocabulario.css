@@ -1007,3 +1007,20 @@
 .vocab-autocompletar-estado.es-error {
     color: #ff8a8a;
 }
+
+/* Ya se practicaron todas las palabras hoy: vuelven mañana */
+.vocab-todas-hechas {
+    text-align: center;
+}
+
+.vocab-todas-hechas > i {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 2.6rem;
+    color: #4dabff;
+}
+
+.vocab-todas-hechas[hidden],
+#vocabSetupControles[hidden] {
+    display: none;
+}
