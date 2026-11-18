@@ -10,25 +10,26 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <form method="POST" action="{{ url_for('ingles.vocabulario') }}">
+                <form method="POST" action="{{ url_for(sec.bp_vocab ~ '.index') }}">
                     <div class="mb-3">
                         <label class="form-label text-white-50" for="vocabAddNombre">Nombre</label>
                         <div class="vocab-autocompletar-fila">
-                            <input type="text" name="nombre" id="vocabAddNombre" class="form-control glass-input" placeholder="Ej: Apple" required maxlength="60">
-                            <button type="button" id="vocabAutocompletarBtn" class="vocab-autocompletar-btn"
+                            <input type="text" name="nombre" id="vocabAddNombre" class="form-control glass-input" placeholder="Ej: {{ sec.ejemplo_nombre }}" required maxlength="60">
+                            {# Autocompletar solo existe en Inglés (traduce desde inglés) #}
+                            {% if sec.autocompletar %}<button type="button" id="vocabAutocompletarBtn" class="vocab-autocompletar-btn"
                                     title="Autocompletar significado y ejemplo" aria-label="Autocompletar significado y ejemplo">
                                 <i class="bi bi-search"></i>
-                            </button>
+                            </button>{% endif %}
                         </div>
                         <p class="vocab-autocompletar-estado" id="vocabAutocompletarEstado" hidden></p>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-white-50">Significado</label>
-                        <input type="text" name="significado" id="vocabAddSignificado" class="form-control glass-input" placeholder="Ej: Manzana" required>
+                        <input type="text" name="significado" id="vocabAddSignificado" class="form-control glass-input" placeholder="Ej: {{ sec.ejemplo_significado }}" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label text-white-50">Ejemplos</label>
-                        <textarea name="ejemplos" id="vocabAddEjemplos" class="form-control glass-input" rows="3" placeholder="Ej: I eat an apple every day."></textarea>
+                        <textarea name="ejemplos" id="vocabAddEjemplos" class="form-control glass-input" rows="3" placeholder="Ej: {{ sec.ejemplo_frase }}"></textarea>
                     </div>
                     <button type="submit" class="btn w-100 btn-vocab-accent fw-bold">Guardar Palabra</button>
                 </form>

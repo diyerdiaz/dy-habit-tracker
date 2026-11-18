@@ -8,10 +8,10 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <div class="ingles-wrapper juegos-wrapper">
-    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+    <a href="{{ url_for(sec.bp_juegos ~ '.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
 
     <div class="text-center mb-3">
         <h1 class="ingles-title unir-titulo">Carrera del mono</h1>
@@ -21,14 +21,15 @@
     {% if palabras | length < minimo %}
     <div class="juegos-vacio">
         <i class="bi bi-journal-plus"></i>
-        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza con un ejemplo en inglés que las use.
+        <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras de una sola pieza con un ejemplo {{ sec.en_idioma }} que las use.
             Tienes {{ palabras | length }} de {{ total_palabras }}.</p>
-        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
     </div>
     {% else %}
     <div id="juegoMono"
          data-por-ronda="{{ por_ronda }}"
-         data-resultado-url="{{ url_for('juegos.resultado', juego='mono') }}">
+         data-resultado-url="{{ url_for(sec.bp_juegos ~ '.resultado', juego='mono') }}"
+         data-voz="{{ sec.voz }}" data-lang="{{ sec.lang }}">
 
         <div class="juego-barra">
             <span><i class="bi bi-flag-fill"></i> <strong id="monoNumero">1</strong>/<span id="monoTotal">0</span></span>
@@ -41,7 +42,7 @@
         </div>
 
         <div class="mono-zona" id="monoZona">
-            <p class="mono-frase" id="monoFrase" lang="en"></p>
+            <p class="mono-frase" id="monoFrase" lang="{{ sec.lang }}"></p>
 
             <div class="mono-escena" id="monoEscena" aria-hidden="true">
                 <div class="mono-suelo"></div>
@@ -68,9 +69,9 @@
 
             <div class="mono-aprende" id="monoAprende" hidden>
                 <h2 id="monoAprendeTitulo"></h2>
-                <p class="mono-aprende-palabra" id="monoAprendePalabra" lang="en"></p>
+                <p class="mono-aprende-palabra" id="monoAprendePalabra" lang="{{ sec.lang }}"></p>
                 <p class="mono-aprende-significado" id="monoAprendeSignificado"></p>
-                <p class="mono-aprende-frase" id="monoAprendeFrase" lang="en"></p>
+                <p class="mono-aprende-frase" id="monoAprendeFrase" lang="{{ sec.lang }}"></p>
                 <button type="button" class="btn btn-juego fw-bold" id="monoSeguir">Seguir corriendo</button>
             </div>
         </div>
@@ -91,7 +92,7 @@
             <p class="juego-final-nota" id="monoFinalNota" aria-live="polite"></p>
             <div class="juego-final-botones">
                 <button type="button" class="btn btn-juego fw-bold" id="monoOtra"><i class="bi bi-arrow-repeat"></i> Otra carrera</button>
-                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+                <a href="{{ url_for(sec.bp_juegos ~ '.index') }}" class="btn btn-outline-light">Volver a juegos</a>
             </div>
         </div>
     </div>

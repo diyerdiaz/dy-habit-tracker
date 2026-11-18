@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{# Dashboard de una sección de idioma: lo usan Inglés (ingles/index.html) y
+   Español (espanol/index.html). Los textos y colores salen de `sec`. #}
+
+{% block titulo_pagina %}{{ sec.inicio_nombre }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ingles.css') }}">
+{% endblock %}
+
+{% block content %}
+{% include sec.sidebar %}
+
+<!-- Efectos de Fondo -->
+<div class="ingles-letters">
+    {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
+</div>
+
+<!-- Contenedor Principal -->
+<div class="ingles-wrapper">
+    <div class="text-center mb-4 fade-in-section ingles-hero">
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} {{ sec.badge_dashboard }} {{ sec.banderas[1] }}</span>
+        <h1 class="ingles-title">{{ sec.titulo_dashboard }}</h1>
+        <p class="ingles-subtitle">
+            {% if resumen.practico_hoy %}¡Ya practicaste hoy, sigue así!{% else %}Aún no practicas hoy: ¡una palabra cuenta!{% endif %}
+        </p>
+    </div>
+
+    {# Resumen tipo dashboard: números de la sección (Inglés o Español) #}
+    <section class="ingles-stats fade-in-section" aria-label="Resumen de {{ sec.nombre | lower }}">
+        <div class="ingles-stat">
+            <i class="bi bi-fire ingles-stat-icon ico-racha"></i>
+            <span class="ingles-stat-valor">{{ resumen.racha }}</span>
+            <span class="ingles-stat-label">{{ 'día' if resumen.racha == 1 else 'días' }} de racha</span>
+        </div>
+        <div class="ingles-stat">
+            <i class="bi bi-journal-text ingles-stat-icon ico-vocabulario"></i>
+            <span class="ingles-stat-valor">{{ resumen.palabras_total }}</span>
+            <span class="ingles-stat-label">palabras · +{{ resumen.palabras_semana }} esta semana</span>
+        </div>
+        <div class="ingles-stat">
+            <i class="bi bi-lightning-charge-fill ingles-stat-icon ico-repasos"></i>
+            <span class="ingles-stat-valor">{{ resumen.repasos_hoy }}</span>
+            <span class="ingles-stat-label">repasos hoy · {{ resumen.repasos_total }} en total</span>
+        </div>
+        {% if sec.shadowing %}
+        <div class="ingles-stat">
+            <i class="bi bi-headphones ingles-stat-icon ico-shadowing"></i>
+            <span class="ingles-stat-valor">{{ resumen.minutos_shadowing_semana }}</span>
+            <span class="ingles-stat-label">min de shadowing esta semana · {{ resumen.minutos_shadowing_total }} en total</span>
+        </div>
+        {% endif %}
+        <div class="ingles-stat">
+            <i class="bi bi-controller ingles-stat-icon ico-juegos"></i>
+            <span class="ingles-stat-valor">{{ resumen.partidas_total }}</span>
+            <span class="ingles-stat-label">partidas jugadas</span>
+        </div>
+    </section>
+
+    <section class="ingles-panel fade-in-section">
+        <div class="ingles-rango">
+            <div class="ingles-rango-cabecera">
+                <span>{{ resumen.rango.emoji }} {{ resumen.rango.nombre }}</span>
+                {% if resumen.siguiente_rango %}
+                <span class="ingles-rango-faltan">faltan {{ resumen.faltan_rango }} palabras para {{ resumen.siguiente_rango.emoji }} {{ resumen.siguiente_rango.nombre }}</span>
+                {% else %}
+                <span class="ingles-rango-faltan">¡Rango máximo!</span>
+                {% endif %}
+            </div>
+            <div class="ingles-rango-barra"><span style="width: {{ resumen.pct_rango }}%"></span></div>
+        </div>
+        <div class="ingles-semana" aria-label="Práctica de los últimos 7 días">
+            {% for dia in resumen.semana %}
+            <div class="ingles-dia{% if dia.activo %} activo{% endif %}{% if dia.hoy %} hoy{% endif %}" title="{{ 'Practicaste' if dia.activo else 'Sin práctica' }}">
+                <span class="ingles-dia-letra">{{ dia.letra }}</span>
+                <span class="ingles-dia-punto">{% if dia.activo %}<i class="bi bi-check-lg"></i>{% else %}{{ dia.numero }}{% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {# Rendimiento en gráficas de líneas: día a día, mes a mes y año a año #}
+    <section class="ingles-graficas fade-in-section" aria-label="Rendimiento en {{ sec.nombre | lower }}">
+        <div class="ingles-graficas-cabecera">
+            <h2 class="ingles-graficas-titulo"><i class="bi bi-graph-up"></i> Tu rendimiento</h2>
+            <div class="ingles-periodos" role="tablist" aria-label="Periodo">
+                <button type="button" class="ingles-periodo activo" data-periodo="dia" role="tab" aria-selected="true">Día a día</button>
+                <button type="button" class="ingles-periodo" data-periodo="mes" role="tab" aria-selected="false">Mes a mes</button>
+                <button type="button" class="ingles-periodo" data-periodo="anio" role="tab" aria-selected="false">Año a año</button>
+            </div>
+        </div>
+
+        <div class="ingles-grafica">
+            <h3 class="ingles-grafica-titulo">Palabras, repasos y partidas</h3>
+            <p class="ingles-grafica-sub" data-subtitulo>Últimos 30 días</p>
+            <div class="ingles-grafica-lienzo"><canvas id="graficaActividad" aria-label="Gráfica de palabras agregadas, repasos y partidas" role="img"></canvas></div>
+        </div>
+
+        {% if sec.shadowing %}
+        <div class="ingles-grafica">
+            <h3 class="ingles-grafica-titulo">Minutos de shadowing</h3>
+            <p class="ingles-grafica-sub" data-subtitulo>Últimos 30 días</p>
+            <div class="ingles-grafica-lienzo"><canvas id="graficaShadowing" aria-label="Gráfica de minutos de shadowing" role="img"></canvas></div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+<script type="application/json" id="inglesGraficasDatos">{{ graficas | tojson }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ingles.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/ingles_graficas.js') }}"></script>
+{% endblock %}
+
+{% block footer %}
+<footer class="futuristic-footer">
+    <div class="marquee-container">
+        <div class="marquee-track track-ltr">
+            <div class="marquee-content">
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+            </div>
+        </div>
+        <div class="marquee-track track-rtl">
+            <div class="marquee-content">
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

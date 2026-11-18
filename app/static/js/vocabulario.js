@@ -29,6 +29,15 @@ const VOCAB_PESOS = { dificil: 3, medio: 2, facil: 1 };
 const VOCAB_CLAVE_TIEMPO = 'vocab-tiempo-tarjeta';
 const VOCAB_NOMBRES = { facil: 'Fácil', medio: 'Medio fácil', dificil: 'Difícil' };
 
+// Inglés (/menu/ingles/vocabulario) y Español (/menu/espanol/vocabulario) usan este
+// mismo archivo: las peticiones van a la sección de la página que está abierta
+function vocabUrl(ruta) {
+    const camino = typeof location !== 'undefined' ? location.pathname : '';
+    const i = camino.indexOf('/vocabulario');
+    const base = i >= 0 ? camino.slice(0, i) + '/vocabulario' : '/menu/ingles/vocabulario';
+    return base + ruta;
+}
+
 // Elige "cantidad" palabras al azar (ponderado por dificultad) dentro de un mismo grupo,
 // sin repetir ninguna, hasta agotar ese grupo.
 function vocabElegirDeGrupo(grupo, cantidad) {
@@ -328,7 +337,7 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
                 anterior.rating = rating;
                 anterior.idRegistro.then((id) => {
                     if (!id) return;
-                    fetch(`/menu/ingles/vocabulario/calificar/${id}/corregir`, {
+                    fetch(vocabUrl(`/calificar/${id}/corregir`), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         keepalive: true,
@@ -339,7 +348,7 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
             }
         } else {
             // Se guarda en el momento (keepalive: aunque se salga de la página enseguida)
-            const idRegistro = fetch('/menu/ingles/vocabulario/calificar', {
+            const idRegistro = fetch(vocabUrl('/calificar'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 keepalive: true,
@@ -400,7 +409,7 @@ if (vocabCambiarCantidad) {
 
 // Modales de la lista "Mis Palabras" (editar / eliminar)
 function openVocabEditModal(id, nombre, significado, ejemplos) {
-    document.getElementById('vocabEditForm').action = `/menu/ingles/vocabulario/${id}/editar`;
+    document.getElementById('vocabEditForm').action = vocabUrl(`/${id}/editar`);
     document.getElementById('vocabEditNombre').value = nombre;
     document.getElementById('vocabEditSignificado').value = significado;
     document.getElementById('vocabEditEjemplos').value = ejemplos;
@@ -409,7 +418,7 @@ function openVocabEditModal(id, nombre, significado, ejemplos) {
 }
 
 function openVocabDeleteModal(id, nombre) {
-    document.getElementById('vocabDeleteForm').action = `/menu/ingles/vocabulario/${id}/eliminar`;
+    document.getElementById('vocabDeleteForm').action = vocabUrl(`/${id}/eliminar`);
     document.getElementById('vocabDelNombre').textContent = nombre;
     var modal = new bootstrap.Modal(document.getElementById('vocabDeleteModal'));
     modal.show();
@@ -484,7 +493,7 @@ if (vocabAutocompletarBtn) {
         vocabAutocompletarBtn.classList.add('is-buscando');
         mostrarEstado('Buscando significado y ejemplo…', false);
         try {
-            const resp = await fetch('/menu/ingles/vocabulario/autocompletar', {
+            const resp = await fetch(vocabUrl('/autocompletar'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ palabra })
@@ -512,7 +521,7 @@ if (vocabAutocompletarBtn) {
 if (typeof module !== 'undefined') {
     module.exports = {
         vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes,
-        vocabPendientesHoy,
+        vocabPendientesHoy, vocabUrl,
         vocabCorregirCalificacion, vocabContarCalificaciones,
     };
 }

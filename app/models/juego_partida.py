@@ -18,6 +18,8 @@ class JuegoPartida(db.Model):
     __tablename__ = 'juego_partidas'
     idPartida = db.Column(db.Integer, primary_key=True)
     idUser = db.Column(db.Integer, db.ForeignKey('users.idUser'), nullable=False, index=True)
+    # 'en' = sección Inglés, 'es' = sección Español (cada una con sus propias palabras)
+    idioma = db.Column(db.String(2), nullable=False, default='en', server_default='en')
     juego = db.Column(db.String(20), nullable=False)
     parejas = db.Column(db.Integer, nullable=False)
     errores = db.Column(db.Integer, nullable=False, default=0)

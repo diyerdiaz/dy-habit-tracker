@@ -249,7 +249,7 @@ def test_ronda_con_pistas_no_es_perfecta(logged_client, user):
 def test_esquema_agrega_columnas_nuevas_a_partidas():
     from pathlib import Path as P
     texto = (P(__file__).resolve().parent.parent / 'services' / 'esquema.py').read_text()
-    assert "'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'}" in texto
+    assert "'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0', 'idioma': \"VARCHAR(2) NOT NULL DEFAULT 'en'\"}" in texto
 
 
 NODE = shutil.which('node')

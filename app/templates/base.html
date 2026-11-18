@@ -33,6 +33,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/medallas_aviso.css') }}">
   {%- endif %}
   {% block extra_css %}{% endblock %}
+  {%- if sec and sec.css_extra %}
+  {# Sección Español: sus colores van después del CSS de la página (comparte el de Inglés) #}
+  <link rel="stylesheet" href="{{ url_for('static', filename=sec.css_extra) }}">
+  {%- endif %}
 </head>
 
 <body class="d-flex flex-column">

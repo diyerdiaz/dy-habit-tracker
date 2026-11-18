@@ -8,10 +8,10 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <!-- Botón de Historial -->
-<a href="{{ url_for('ingles.vocabulario_historial') }}" class="vocab-historial-btn">
+<a href="{{ url_for(sec.bp_vocab ~ '.historial') }}" class="vocab-historial-btn">
     <i class="bi bi-bar-chart-fill"></i> Historial
 </a>
 
@@ -23,10 +23,10 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('ingles.vocabulario') }}" class="vocabulario-back">
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="vocabulario-back">
             <i class="bi bi-arrow-left"></i> Volver a Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Practice Time 🇺🇸</span>
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} {{ sec.badge_practica }} {{ sec.banderas[1] }}</span>
         <h1 class="ingles-title">Aprender Vocabulario</h1>
         <p class="ingles-desc">Repasa las palabras que has agregado a tu lista.</p>
     </div>
@@ -39,7 +39,7 @@
             <i class="bi bi-check2-circle"></i>
             <h3>¡Ya practicaste todas tus palabras hoy!</h3>
             <p class="ingles-desc">Vuelven a salir mañana. Mientras tanto, puedes agregar palabras nuevas.</p>
-            <a href="{{ url_for('ingles.vocabulario') }}" class="btn w-100 btn-vocab-accent fw-bold">Agregar palabras</a>
+            <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="btn w-100 btn-vocab-accent fw-bold">Agregar palabras</a>
         </div>
         <div id="vocabSetupControles"{% if not pendientes_hoy %} hidden{% endif %}>
             <h3>¿Cuántas palabras quieres aprender?</h3>
@@ -117,7 +117,7 @@
     {% else %}
     <div class="ingles-hero fade-in-section" style="max-width: 500px;">
         <p class="ingles-desc">
-            <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            <i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: var(--tema-vivo);"></i>
             Aún no has agregado palabras. Vuelve y usa "Agregar Vocabulario" para crear tu primera palabra.
         </p>
     </div>
@@ -136,18 +136,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
     </div>

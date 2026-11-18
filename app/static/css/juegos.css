@@ -13,10 +13,10 @@
     text-decoration: none;
     font-size: .95rem;
 }
-.juegos-volver:hover { color: #4dabff; }
+.juegos-volver:hover { color: var(--tema-vivo); }
 
 .btn-juego {
-    background: linear-gradient(135deg, #4dabff, #0d6efd);
+    background: linear-gradient(135deg, var(--tema-vivo), var(--tema-grad-1));
     color: #fff;
     border: none;
     padding: 10px 22px;
@@ -30,11 +30,11 @@
     padding: 28px 22px;
     text-align: center;
     border-radius: 18px;
-    background: rgba(13, 110, 253, .08);
-    border: 1px dashed rgba(77, 171, 255, .4);
+    background: rgba(var(--tema-fuerte-rgb), .08);
+    border: 1px dashed rgba(var(--tema-vivo-rgb), .4);
     color: rgba(255, 255, 255, .85);
 }
-.juegos-vacio i { font-size: 2rem; color: #4dabff; }
+.juegos-vacio i { font-size: 2rem; color: var(--tema-vivo); }
 
 /* ── Tarjetas del menú de juegos ── */
 .juego-desc {
@@ -60,14 +60,14 @@
     width: 3.2rem;
     height: 2.2rem;
     margin: .3rem 0;
-    fill: #4dabff;
-    filter: drop-shadow(0 0 7px rgba(77, 171, 255, .6));
+    fill: var(--tema-vivo);
+    filter: drop-shadow(0 0 7px rgba(var(--tema-vivo-rgb), .6));
     transition: transform .3s;
 }
 .ingles-card:hover .pato-icono { transform: scale(1.15); }
-.pato-icono-ala { fill: #04162e; stroke: #4dabff; stroke-width: 2; stroke-linejoin: round; }
-.pato-icono-ojo { fill: #04162e; }
-.mono-icono-boca { fill: none; stroke: #4dabff; stroke-width: 2.5; stroke-linecap: round; }
+.pato-icono-ala { fill: var(--juego-ficha, #04162e); stroke: var(--tema-vivo); stroke-width: 2; stroke-linejoin: round; }
+.pato-icono-ojo { fill: var(--juego-ficha, #04162e); }
+.mono-icono-boca { fill: none; stroke: var(--tema-vivo); stroke-width: 2.5; stroke-linecap: round; }
 .juego-card.bloqueado,
 .juego-card.proximamente {
     opacity: .45;
@@ -88,17 +88,17 @@
     padding: 10px 18px;
     max-width: 640px;
     border-radius: 14px;
-    background: rgba(13, 110, 253, .08);
-    border: 1px solid rgba(77, 171, 255, .25);
+    background: rgba(var(--tema-fuerte-rgb), .08);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .25);
     color: rgba(255, 255, 255, .75);
 }
 .juego-barra strong { color: #fff; }
-.juego-barra i { color: #4dabff; }
+.juego-barra i { color: var(--tema-vivo); }
 
 .juego-sonido {
-    border: 1px solid rgba(77, 171, 255, .35);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .35);
     background: transparent;
-    color: #4dabff;
+    color: var(--tema-vivo);
     border-radius: 10px;
     width: 38px;
     height: 34px;
@@ -130,8 +130,8 @@
     min-height: 56px;
     padding: 10px 14px;
     border-radius: 14px;
-    border: 1px solid rgba(77, 171, 255, .3);
-    background: #04162e;
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
+    background: var(--juego-ficha, #04162e);
     color: #fff;
     font-size: clamp(.9rem, 2.6vw, 1.05rem);
     line-height: 1.25;
@@ -140,13 +140,13 @@
     transition: transform .15s, background .2s, border-color .2s, box-shadow .2s, opacity .35s;
 }
 .unir-ficha[lang="en"] { font-weight: 600; }
-.unir-ficha:hover { background: #082448; }
-.unir-ficha:focus-visible { outline: 2px solid #4dabff; outline-offset: 2px; }
+.unir-ficha:hover { background: var(--juego-ficha-hover, #082448); }
+.unir-ficha:focus-visible { outline: 2px solid var(--tema-vivo); outline-offset: 2px; }
 
 .unir-ficha.elegida {
-    border-color: #4dabff;
-    background: #0c3566;
-    box-shadow: 0 0 18px rgba(77, 171, 255, .55);
+    border-color: var(--tema-vivo);
+    background: var(--juego-ficha-activa, #0c3566);
+    box-shadow: 0 0 18px rgba(var(--tema-vivo-rgb), .55);
     transform: scale(1.03);
 }
 .unir-ficha.acertada {
@@ -174,9 +174,9 @@
     padding: 30px 22px;
     text-align: center;
     border-radius: 20px;
-    background: rgba(13, 110, 253, .1);
-    border: 1px solid rgba(77, 171, 255, .35);
-    box-shadow: 0 0 30px rgba(13, 110, 253, .25);
+    background: rgba(var(--tema-fuerte-rgb), .1);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .35);
+    box-shadow: 0 0 30px rgba(var(--tema-fuerte-rgb), .25);
     animation: unir-aparecer .35s ease;
 }
 .juego-final h2 { color: #fff; font-size: 1.5rem; margin: 8px 0 16px; }
@@ -232,17 +232,17 @@
     min-width: 96px;
     padding: 6px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(77, 171, 255, .3);
-    background: #04162e;
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
+    background: var(--juego-ficha, #04162e);
     color: rgba(255, 255, 255, .75);
     font-weight: 600;
 }
 .sopa-nivel small { font-weight: 400; font-size: .7rem; color: rgba(255, 255, 255, .5); }
 .sopa-nivel[aria-pressed="true"] {
-    border-color: #4dabff;
-    background: #0c3566;
+    border-color: var(--tema-vivo);
+    background: var(--juego-ficha-activa, #0c3566);
     color: #fff;
-    box-shadow: 0 0 14px rgba(77, 171, 255, .4);
+    box-shadow: 0 0 14px rgba(var(--tema-vivo-rgb), .4);
 }
 
 #sopaPista { width: auto; padding: 0 10px; color: #ffd54f; border-color: rgba(255, 213, 79, .4); }
@@ -264,8 +264,8 @@
     aspect-ratio: 1;
     padding: 8px;
     border-radius: 16px;
-    background: #031024;
-    border: 1px solid rgba(77, 171, 255, .25);
+    background: var(--juego-hondo, #031024);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .25);
     touch-action: manipulation;
     user-select: none;
 }
@@ -276,7 +276,7 @@
     padding: 0;
     border: 1px solid transparent;
     border-radius: 8px;
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     color: #e6f1ff;
     font-weight: 700;
     font-size: clamp(.85rem, 3.6vw, 1.25rem);
@@ -284,17 +284,17 @@
     cursor: pointer;
     transition: background .15s, transform .15s, box-shadow .15s;
 }
-.sopa-celda:hover { background: #082448; }
-.sopa-celda:focus-visible { outline: 2px solid #4dabff; outline-offset: 1px; }
-.sopa-celda.previa { background: #0c3566; }
+.sopa-celda:hover { background: var(--juego-ficha-hover, #082448); }
+.sopa-celda:focus-visible { outline: 2px solid var(--tema-vivo); outline-offset: 1px; }
+.sopa-celda.previa { background: var(--juego-ficha-activa, #0c3566); }
 .sopa-celda.inicio {
-    background: #4dabff;
+    background: var(--tema-vivo);
     color: #001833;
     transform: scale(1.08);
-    box-shadow: 0 0 14px rgba(77, 171, 255, .7);
+    box-shadow: 0 0 14px rgba(var(--tema-vivo-rgb), .7);
 }
 .sopa-celda.encontrada {
-    background: color-mix(in srgb, var(--color) 32%, #04162e);
+    background: color-mix(in srgb, var(--color) 32%, var(--juego-ficha, #04162e));
     border-color: var(--color);
     color: #fff;
 }
@@ -327,7 +327,7 @@
     padding: 10px 12px;
     border-radius: 12px;
     border-left: 4px solid var(--color);
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     color: #fff;
 }
 .sopa-significado { font-weight: 600; }
@@ -381,8 +381,8 @@
     width: 100%;
     padding: 10px;
     border-radius: 16px;
-    background: #031024;
-    border: 1px solid rgba(77, 171, 255, .25);
+    background: var(--juego-hondo, #031024);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .25);
 }
 .ahorcado-poste, .ahorcado-parte {
     fill: none;
@@ -402,8 +402,8 @@
     margin-bottom: 18px;
     padding: 12px 16px;
     border-radius: 14px;
-    border-left: 4px solid #4dabff;
-    background: #04162e;
+    border-left: 4px solid var(--tema-vivo);
+    background: var(--juego-ficha, #04162e);
 }
 .ahorcado-pista-titulo {
     color: rgba(255, 255, 255, .5);
@@ -432,7 +432,7 @@
     justify-content: center;
     width: clamp(26px, 7vw, 40px);
     height: clamp(36px, 9vw, 48px);
-    border-bottom: 3px solid #4dabff;
+    border-bottom: 3px solid var(--tema-vivo);
     color: #fff;
     font-size: clamp(1.2rem, 4.5vw, 1.7rem);
     font-weight: 700;
@@ -447,21 +447,21 @@
 .ahorcado-tecla {
     min-height: 42px;
     padding: 0;
-    border: 1px solid rgba(77, 171, 255, .3);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     border-radius: 10px;
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     color: #e6f1ff;
     font-weight: 700;
     transition: background .15s;
 }
-.ahorcado-tecla:hover:not(:disabled) { background: #082448; }
-.ahorcado-tecla:focus-visible { outline: 2px solid #4dabff; outline-offset: 1px; }
+.ahorcado-tecla:hover:not(:disabled) { background: var(--juego-ficha-hover, #082448); }
+.ahorcado-tecla:focus-visible { outline: 2px solid var(--tema-vivo); outline-offset: 1px; }
 .ahorcado-tecla.acertada { border-color: #00e676; background: #03301f; color: #00e676; }
 .ahorcado-tecla.fallida { border-color: #ff5c7a; background: #3a0f1c; color: #ff5c7a; }
 
 .ahorcado-veredicto { text-align: center; animation: unir-aparecer .35s ease; }
 .ahorcado-veredicto h2 { margin: 0 0 6px; color: #fff; font-size: 1.3rem; }
-.ahorcado-respuesta { margin: 0; color: #4dabff; font-size: 1.6rem; font-weight: 700; overflow-wrap: anywhere; }
+.ahorcado-respuesta { margin: 0; color: var(--tema-vivo); font-size: 1.6rem; font-weight: 700; overflow-wrap: anywhere; }
 .ahorcado-significado { margin: 0 0 14px; color: rgba(255, 255, 255, .7); overflow-wrap: anywhere; }
 
 @media (max-width: 767px) {
@@ -491,8 +491,8 @@
     padding: 10px 16px;
     text-align: center;
     border-radius: 14px;
-    background: #04162e;
-    border: 1px solid rgba(77, 171, 255, .3);
+    background: var(--juego-ficha, #04162e);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     color: #fff;
     font-size: clamp(1.05rem, 3.5vw, 1.4rem);
     font-weight: 700;
@@ -506,7 +506,7 @@
     height: clamp(340px, 52vh, 460px);
     overflow: hidden;
     border-radius: 18px;
-    border: 1px solid rgba(77, 171, 255, .3);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     background: linear-gradient(#0a2a55, #1b5c94 75%, #1f6b4f 75%, #123f2f);
     cursor: crosshair;
     touch-action: manipulation;
@@ -548,7 +548,7 @@
     max-width: 100%;
     padding: 1px 8px;
     border-radius: 8px;
-    background: rgba(3, 16, 36, .85);
+    background: rgba(var(--juego-hondo-rgb, 3, 16, 36), .85);
     color: #fff;
     font-size: .9rem;
     font-weight: 700;
@@ -661,8 +661,8 @@
     padding: 10px 16px;
     text-align: center;
     border-radius: 14px;
-    background: #04162e;
-    border: 1px solid rgba(77, 171, 255, .3);
+    background: var(--juego-ficha, #04162e);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     color: #fff;
     font-size: clamp(1.05rem, 3.2vw, 1.35rem);
     font-weight: 600;
@@ -676,7 +676,7 @@
     height: 190px;
     overflow: hidden;
     border-radius: 18px;
-    border: 1px solid rgba(77, 171, 255, .3);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     background: linear-gradient(#0a3a55, #1a7a6a);
 }
 .mono-suelo {
@@ -804,12 +804,12 @@
     padding: 16px;
     text-align: center;
     border-radius: 16px;
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     border: 1px solid rgba(255, 213, 79, .45);
     animation: unir-aparecer .3s ease;
 }
 .mono-aprende h2 { margin: 0 0 6px; color: #ffd54f; font-size: 1.05rem; }
-.mono-aprende-palabra { margin: 0; color: #4dabff; font-size: 1.6rem; font-weight: 700; overflow-wrap: anywhere; }
+.mono-aprende-palabra { margin: 0; color: var(--tema-vivo); font-size: 1.6rem; font-weight: 700; overflow-wrap: anywhere; }
 .mono-aprende-significado { margin: 0 0 6px; color: #fff; overflow-wrap: anywhere; }
 .mono-aprende-frase { margin: 0 0 14px; color: rgba(255, 255, 255, .7); font-style: italic; overflow-wrap: anywhere; }
 
@@ -819,12 +819,12 @@
 .mono-repaso li {
     padding: 8px 10px;
     border-radius: 10px;
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     color: #fff;
     font-size: .9rem;
     overflow-wrap: anywhere;
 }
-.mono-repaso strong { color: #4dabff; }
+.mono-repaso strong { color: var(--tema-vivo); }
 .mono-repaso em { display: block; color: rgba(255, 255, 255, .65); }
 #juegoMono .juego-final-stats { flex-wrap: wrap; }
 
@@ -862,8 +862,8 @@
     padding: 8px 12px;
     text-align: center;
     border-radius: 12px;
-    background: #04162e;
-    border: 1px solid rgba(77, 171, 255, .3);
+    background: var(--juego-ficha, #04162e);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .3);
     color: #fff;
     font-weight: 700;
     overflow-wrap: anywhere;
@@ -876,8 +876,8 @@
     gap: 2px;
     padding: 8px;
     border-radius: 16px;
-    background: #031024;
-    border: 1px solid rgba(77, 171, 255, .25);
+    background: var(--juego-hondo, #031024);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .25);
 }
 .cruci-vacia, .cruci-celda { aspect-ratio: 1; }
 .cruci-celda { position: relative; }
@@ -896,9 +896,9 @@
     height: 100%;
     padding: 0;
     text-align: center;
-    border: 1px solid rgba(77, 171, 255, .35);
+    border: 1px solid rgba(var(--tema-vivo-rgb), .35);
     border-radius: 5px;
-    background: #082448;
+    background: var(--juego-ficha-hover, #082448);
     color: #fff;
     caret-color: transparent;
     font-size: clamp(.8rem, 3.6vw, 1.25rem);
@@ -906,7 +906,7 @@
     text-transform: uppercase;
     cursor: pointer;
 }
-.cruci-letra.en-palabra { background: #0c3566; border-color: #4dabff; }
+.cruci-letra.en-palabra { background: var(--juego-ficha-activa, #0c3566); border-color: var(--tema-vivo); }
 .cruci-letra:focus { outline: 2px solid #ffd54f; outline-offset: -2px; background: #14508f; }
 .cruci-letra.revelada { color: #ffd54f; }
 .cruci-letra.incorrecta { background: #3a0f1c; border-color: #ff5c7a; color: #ff9db0; }
@@ -938,15 +938,15 @@
 .cruci-lista li {
     padding: 8px 10px;
     border-radius: 10px;
-    background: #04162e;
+    background: var(--juego-ficha, #04162e);
     border: 1px solid transparent;
     color: #fff;
     font-size: .9rem;
     overflow-wrap: anywhere;
     cursor: pointer;
 }
-.cruci-lista li strong { color: #4dabff; }
-.cruci-lista li.activa { border-color: #4dabff; background: #0c3566; }
+.cruci-lista li strong { color: var(--tema-vivo); }
+.cruci-lista li.activa { border-color: var(--tema-vivo); background: var(--juego-ficha-activa, #0c3566); }
 .cruci-lista li.hecha { opacity: .65; color: #7dffb8; }
 
 @media (max-width: 899px) {

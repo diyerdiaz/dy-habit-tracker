@@ -385,7 +385,8 @@ def _meses_80(idUser):
 def _vocab_dominadas(idUser):
     """Palabras cuyo último repaso se calificó como 'fácil'."""
     ultima = {}
-    for r in VocabularioRegistro.query.filter_by(idUser=idUser).order_by(VocabularioRegistro.fecha.desc()).all():
+    # Las medallas de vocabulario son de la sección Inglés
+    for r in VocabularioRegistro.query.filter_by(idUser=idUser, idioma='en').order_by(VocabularioRegistro.fecha.desc()).all():
         ultima.setdefault(r.idVocab or r.palabraNombre, r.calificacion)
     return sum(1 for c in ultima.values() if c == 'facil')
 
@@ -409,8 +410,8 @@ def obtener_metricas(idUser):
                           .filter(HistHabit.idUser == idUser).scalar(),
         'nivel': calcular_progreso(progress.xpTotal, creados)['nivel'],
         'tareas': Tarea.query.filter_by(idUser=idUser, completada=True).count(),
-        'palabras': Vocabulario.query.filter_by(idUser=idUser).count(),
-        'repasos': VocabularioRegistro.query.filter_by(idUser=idUser).count(),
+        'palabras': Vocabulario.query.filter_by(idUser=idUser, idioma='en').count(),
+        'repasos': VocabularioRegistro.query.filter_by(idUser=idUser, idioma='en').count(),
         'shadowing_min': int(segundos_shadowing) // 60,
         'castigos': Castigo.query.filter_by(idUser=idUser, castigoState='Completado').count(),
         'xp': progress.xpTotal,

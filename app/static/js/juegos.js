@@ -34,6 +34,16 @@ function guardarPreferencia(clave, valor) {
     try { localStorage.setItem(clave, valor); } catch (e) { /* sin almacenamiento */ }
 }
 
+// ── Idioma de las palabras: Inglés o Español (lo dice la página en data-voz / data-lang) ──
+// En los datos, "en" es siempre la palabra que se aprende y "es" su significado.
+function idiomaDelJuego() {
+    const juego = typeof document !== 'undefined' && document.querySelector ? document.querySelector('[data-voz]') : null;
+    return {
+        voz: (juego && juego.dataset.voz) || 'en-US',
+        lang: (juego && juego.dataset.lang) || 'en',
+    };
+}
+
 // ── Sonido: pronunciar la palabra al acertar (se recuerda la preferencia) ──
 function crearSonido(boton) {
     let activo = 'speechSynthesis' in window && leerPreferencia('juegosSonido') !== 'no';
@@ -51,7 +61,7 @@ function crearSonido(boton) {
     return function pronunciar(texto) {
         if (!activo) return;
         const voz = new SpeechSynthesisUtterance(texto);
-        voz.lang = 'en-US';
+        voz.lang = idiomaDelJuego().voz;
         voz.rate = 0.9;
         speechSynthesis.cancel();
         speechSynthesis.speak(voz);
@@ -192,7 +202,7 @@ function iniciarUnir(juego) {
         boton.dataset.lado = lado;
         boton.dataset.id = palabra.id;
         boton.textContent = lado === 'en' ? palabra.en : palabra.es;
-        boton.lang = lado === 'en' ? 'en' : 'es';
+        boton.lang = lado === 'en' ? idiomaDelJuego().lang : 'es';
         return boton;
     }
 
@@ -480,7 +490,7 @@ function iniciarSopa(juego) {
             significado.textContent = r.palabra.es;
             const ingles = document.createElement('span');
             ingles.className = 'sopa-ingles';
-            ingles.lang = 'en';
+            ingles.lang = idiomaDelJuego().lang;
             ingles.textContent = r.palabra.en;
             const largo = document.createElement('span');
             largo.className = 'sopa-largo';
@@ -858,7 +868,7 @@ function iniciarPatos(juego) {
         dibujo.append(uso);
         const texto = document.createElement('span');
         texto.className = 'pato-palabra';
-        texto.lang = 'en';
+        texto.lang = idiomaDelJuego().lang;
         texto.textContent = palabra.en;
         cuerpo.append(dibujo, texto);
         pato.append(cuerpo);
@@ -1537,7 +1547,7 @@ function iniciarMono(juego) {
             liana.type = 'button';
             liana.className = 'mono-liana';
             liana.dataset.id = p.id;
-            liana.lang = 'en';
+            liana.lang = idiomaDelJuego().lang;
             const numero = document.createElement('span');
             numero.textContent = i + 1;
             // En minúsculas: una mayúscula guardada en el vocabulario delataría la respuesta
@@ -1630,12 +1640,12 @@ function iniciarMono(juego) {
         $('monoRepasoLista').replaceChildren(...repaso.map(({ palabra, frase: texto }) => {
             const item = document.createElement('li');
             const ingles = document.createElement('strong');
-            ingles.lang = 'en';
+            ingles.lang = idiomaDelJuego().lang;
             ingles.textContent = palabra.en;
             const significado = document.createElement('span');
             significado.textContent = ` — ${palabra.es}`;
             const ejemploEl = document.createElement('em');
-            ejemploEl.lang = 'en';
+            ejemploEl.lang = idiomaDelJuego().lang;
             ejemploEl.textContent = texto;
             item.append(ingles, significado, ejemploEl);
             return item;

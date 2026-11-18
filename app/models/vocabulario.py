@@ -5,6 +5,8 @@ class Vocabulario(db.Model):
     __tablename__ = 'vocabularios'
     idVocab = db.Column(db.Integer, primary_key=True)
     idUser = db.Column(db.Integer, db.ForeignKey('users.idUser'), nullable=False)
+    # 'en' = sección Inglés, 'es' = sección Español (cada una con sus propias palabras)
+    idioma = db.Column(db.String(2), nullable=False, default='en', server_default='en')
     nombre = db.Column(db.String(120), nullable=False)
     significado = db.Column(db.String(255), nullable=False)
     ejemplos = db.Column(db.String(500), nullable=True)

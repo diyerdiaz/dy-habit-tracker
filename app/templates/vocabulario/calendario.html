@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -18,10 +18,10 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('ingles.vocabulario') }}" class="vocabulario-back">
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="vocabulario-back">
             <i class="bi bi-arrow-left"></i> Volver a Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Constancia 🇺🇸</span>
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} Constancia {{ sec.banderas[1] }}</span>
         <h1 class="ingles-title">Calendario y Rachas</h1>
         <p class="ingles-desc">Cada cuadro es un día. Míralo crecer conforme practiques.</p>
     </div>
@@ -46,7 +46,7 @@
 
     <div class="vocab-cal-year-row fade-in-section">
         {% for anio in anios_disponibles %}
-        <a href="{{ url_for('ingles.vocabulario_calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
+        <a href="{{ url_for(sec.bp_vocab ~ '.calendario', year=anio) }}" class="vocab-cal-year-pill{{ ' active' if anio == anio_seleccionado else '' }}">{{ anio }}</a>
         {% endfor %}
     </div>
 
@@ -110,18 +110,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
     </div>
