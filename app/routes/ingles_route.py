@@ -13,6 +13,7 @@ from app.services.palabras_aleatorias import (
     palabras_aleatorias as elegir_palabras_aleatorias, normalizar_cantidad, total_vocabulario,
     MINIMO_PALABRAS, MAXIMO_PALABRAS, CANTIDAD_POR_DEFECTO,
 )
+from app.services import diccionario
 from collections import defaultdict
 from datetime import date, timedelta
 from math import ceil
@@ -260,6 +261,26 @@ def vocabulario():
 
     letras_flotantes = get_letras_flotantes(current_user.idUser)
     return render_template('ingles/vocabulario.html', letras_flotantes=letras_flotantes)
+
+
+@bp.route('/vocabulario/autocompletar', methods=['POST'])
+@login_required
+def vocabulario_autocompletar():
+    """Significados en español y una frase de ejemplo para la palabra en inglés
+    que se escribió (MyMemory + Tatoeba, gratis y sin clave)."""
+    data = request.get_json(silent=True) or {}
+    palabra = diccionario.limpiar_palabra(data.get('palabra'))
+    if not palabra:
+        return jsonify({'success': False,
+                        'error': 'Escribe una palabra o expresión en inglés (solo letras).'}), 400
+    if not diccionario.registrar_uso(current_user.idUser):
+        return jsonify({'success': False,
+                        'error': 'Llegaste al límite de autocompletados de hoy. Mañana puedes seguir.'}), 429
+    try:
+        resultado = diccionario.autocompletar(palabra)
+    except diccionario.ErrorDiccionario as e:
+        return jsonify({'success': False, 'error': str(e)}), 502
+    return jsonify({'success': True, **resultado})
 
 @bp.route('/vocabulario/lista')
 @login_required

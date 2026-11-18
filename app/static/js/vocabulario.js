@@ -341,6 +341,56 @@ if (vocabDayPopup) {
     vocabDayPopup.addEventListener('click', (e) => e.stopPropagation());
 }
 
+// Agregar palabra: "Autocompletar" llena el significado (casa / hogar) y una
+// frase de ejemplo. La búsqueda la hace el servidor; aquí solo se pide.
+const vocabAutocompletarBtn = document.getElementById('vocabAutocompletarBtn');
+if (vocabAutocompletarBtn) {
+    const nombre = document.getElementById('vocabAddNombre');
+    const significado = document.getElementById('vocabAddSignificado');
+    const ejemplos = document.getElementById('vocabAddEjemplos');
+    const estado = document.getElementById('vocabAutocompletarEstado');
+
+    const mostrarEstado = (texto, esError) => {
+        estado.hidden = false;
+        estado.textContent = texto;
+        estado.classList.toggle('es-error', !!esError);
+    };
+
+    vocabAutocompletarBtn.addEventListener('click', async () => {
+        const palabra = nombre.value.trim();
+        if (!palabra) {
+            mostrarEstado('Primero escribe la palabra en inglés.', true);
+            nombre.focus();
+            return;
+        }
+        vocabAutocompletarBtn.disabled = true;
+        vocabAutocompletarBtn.classList.add('is-buscando');
+        mostrarEstado('Buscando significado y ejemplo…', false);
+        try {
+            const resp = await fetch('/menu/ingles/vocabulario/autocompletar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ palabra })
+            });
+            const datos = await resp.json().catch(() => ({}));
+            if (!resp.ok || !datos.success) {
+                mostrarEstado(datos.error || 'No se pudo autocompletar. Escríbelo a mano.', true);
+                return;
+            }
+            significado.value = datos.significado;
+            ejemplos.value = datos.ejemplo;
+            mostrarEstado(datos.ejemplo
+                ? 'Listo. Revísalo y cámbialo si quieres antes de guardar.'
+                : 'Significado listo. No se encontró un ejemplo: escríbelo tú si quieres.', false);
+        } catch (e) {
+            mostrarEstado('Sin conexión. Escríbelo a mano.', true);
+        } finally {
+            vocabAutocompletarBtn.disabled = false;
+            vocabAutocompletarBtn.classList.remove('is-buscando');
+        }
+    });
+}
+
 // Para probar la selección de la ronda con node (en el navegador no hace nada)
 if (typeof module !== 'undefined') {
     module.exports = { vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes };
