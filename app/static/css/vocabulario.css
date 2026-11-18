@@ -232,6 +232,33 @@
     background: rgba(255, 255, 255, 0.16);
 }
 
+.vocab-deck-acciones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.vocab-terminar-btn[hidden] {
+    display: none;
+}
+
+.vocab-corregir-ultima {
+    margin-top: 12px;
+}
+
+/* Al volver a una tarjeta: qué calificación tenía */
+.vocab-corrigiendo {
+    color: #ffcc66;
+    font-size: 0.9rem;
+    margin: -4px 0 10px 0;
+}
+
+/* La calificación que se le había dado a la tarjeta */
+.vocab-rating-btn.vocab-rating-elegida {
+    outline: 3px solid #fff;
+    outline-offset: 3px;
+}
+
 .vocab-setup-label {
     display: block;
     color: #fff;

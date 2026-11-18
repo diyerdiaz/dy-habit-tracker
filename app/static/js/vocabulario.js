@@ -12,16 +12,22 @@ const vocabReiniciarBtn = document.getElementById('vocabReiniciarBtn');
 const vocabTiempo = document.getElementById('vocabTiempo');
 const vocabTerminarBtn = document.getElementById('vocabTerminarBtn');
 const vocabEspera = document.getElementById('vocabEspera');
+const vocabAnteriorBtn = document.getElementById('vocabAnteriorBtn');
+const vocabCorregirUltimaBtn = document.getElementById('vocabCorregirUltimaBtn');
+const vocabCorrigiendo = document.getElementById('vocabCorrigiendo');
 
 let vocabSesion = [];
 let vocabIndice = 0;
-let vocabStats = { facil: 0, medio: 0, dificil: 0 };
+// Calificación de cada tarjeta de la ronda (por posición), para poder volver
+// atrás y corregirla: { rating, idRegistro } (idRegistro es una promesa)
+let vocabRespuestas = [];
 let vocabMinimoSeg = 0;        // tiempo mínimo en cada tarjeta
 let vocabInicioTarjeta = 0;    // cuándo se mostró la tarjeta actual
 let vocabTemporizador = null;
 let vocabPuedePasar = true;
 const VOCAB_PESOS = { dificil: 3, medio: 2, facil: 1 };
 const VOCAB_CLAVE_TIEMPO = 'vocab-tiempo-tarjeta';
+const VOCAB_NOMBRES = { facil: 'Fácil', medio: 'Medio fácil', dificil: 'Difícil' };
 
 // Elige "cantidad" palabras al azar (ponderado por dificultad) dentro de un mismo grupo,
 // sin repetir ninguna, hasta agotar ese grupo.
@@ -94,6 +100,23 @@ function vocabRegistrarCalificacion(palabras, idVocab, calificacion) {
     return palabra;
 }
 
+// Corregir una calificación (se le dio al botón equivocado): cambia la dificultad
+// de la palabra pero no cuenta como una vez más que salió.
+function vocabCorregirCalificacion(palabras, idVocab, calificacion) {
+    const palabra = palabras.find((p) => p.idVocab === idVocab);
+    if (!palabra) return null;
+    palabra.ultimaCalificacion = calificacion;
+    palabra.peso = VOCAB_PESOS[calificacion] || 2;
+    return palabra;
+}
+
+// Cuántas Fácil / Medio / Difícil quedaron en la ronda (ya con las correcciones)
+function vocabContarCalificaciones(respuestas) {
+    const stats = { facil: 0, medio: 0, dificil: 0 };
+    respuestas.forEach((r) => { if (r && r.rating in stats) stats[r.rating]++; });
+    return stats;
+}
+
 // Segundos que faltan para poder pasar de tarjeta (0 = ya se puede)
 function vocabSegundosRestantes(inicioMs, ahoraMs, minimoSeg) {
     return Math.max(0, Math.ceil(minimoSeg - (ahoraMs - inicioMs) / 1000));
@@ -153,6 +176,7 @@ function vocabIniciarTemporizador() {
 
 function vocabMostrarPalabra() {
     const palabra = vocabSesion[vocabIndice];
+    const respuesta = vocabRespuestas[vocabIndice];
 
     vocabProgress.textContent = `Palabra ${vocabIndice + 1} de ${vocabSesion.length}`;
     document.getElementById('vocabFlashWord').textContent = palabra.nombre;
@@ -164,9 +188,24 @@ function vocabMostrarPalabra() {
     vocabFlashcard.style.display = '';
     vocabSummary.style.display = 'none';
     vocabTerminarBtn.style.display = '';
+    vocabAnteriorBtn.hidden = vocabIndice === 0;
+    document.querySelectorAll('.vocab-rating-btn').forEach((b) => {
+        b.classList.toggle('vocab-rating-elegida', !!respuesta && b.dataset.rating === respuesta.rating);
+    });
     // El tiempo todavía no corre: empieza al ver el significado
     vocabDetenerTemporizador();
     vocabEspera.hidden = true;
+
+    if (respuesta) {
+        // Tarjeta ya calificada (se volvió con "Anterior"): se ve abierta y se puede corregir ya
+        vocabFlashBack.style.display = '';
+        vocabRevelarBtn.style.display = 'none';
+        vocabCorrigiendo.hidden = false;
+        vocabCorrigiendo.textContent = `Le pusiste "${VOCAB_NOMBRES[respuesta.rating]}". Elige otra para corregirla o la misma para seguir.`;
+        vocabBotonesCalificar(true);
+        return;
+    }
+    vocabCorrigiendo.hidden = true;
     vocabBotonesCalificar(false);
 }
 
@@ -174,10 +213,13 @@ function vocabMostrarPalabra() {
 // las que de verdad se estudiaron (ya quedaron guardadas una por una).
 function vocabMostrarResumen() {
     vocabDetenerTemporizador();
-    const estudiadas = vocabIndice;
+    const estudiadas = vocabRespuestas.filter(Boolean).length;
     const total = vocabSesion.length;
+    const vocabStats = vocabContarCalificaciones(vocabRespuestas);
     vocabFlashcard.style.display = 'none';
     vocabTerminarBtn.style.display = 'none';
+    vocabAnteriorBtn.hidden = true;
+    vocabCorregirUltimaBtn.hidden = estudiadas === 0;
     vocabSummary.style.display = '';
     vocabProgress.textContent = `Estudiaste ${estudiadas} de ${total}`;
 
@@ -222,7 +264,7 @@ if (vocabIniciarBtn) {
         vocabMinimoSeg = Math.max(0, parseInt(vocabTiempo ? vocabTiempo.value : '0', 10) || 0);
         vocabSesion = vocabSeleccionPonderada(todas, cantidad);
         vocabIndice = 0;
-        vocabStats = { facil: 0, medio: 0, dificil: 0 };
+        vocabRespuestas = [];
 
         vocabMostrarDeck();
         vocabMostrarPalabra();
@@ -242,20 +284,40 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
         if (!vocabPuedePasar) return;  // todavía no se cumple el tiempo mínimo
         const rating = btn.dataset.rating;
         const palabra = vocabSesion[vocabIndice];
-        vocabStats[rating] = (vocabStats[rating] || 0) + 1;
+        const anterior = vocabRespuestas[vocabIndice];
 
-        // Se guarda en el momento (keepalive: aunque se salga de la página enseguida)
-        fetch('/menu/ingles/vocabulario/calificar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            keepalive: true,
-            body: JSON.stringify({
-                idVocab: palabra.idVocab,
-                nombre: palabra.nombre,
-                calificacion: rating
-            })
-        }).catch(() => {});
-        vocabRegistrarCalificacion(window.VOCAB_PALABRAS || [], palabra.idVocab, rating);
+        if (anterior) {
+            // Corrección: se cambia el mismo registro (no cuenta como otra vista)
+            if (anterior.rating !== rating) {
+                anterior.rating = rating;
+                anterior.idRegistro.then((id) => {
+                    if (!id) return;
+                    fetch(`/menu/ingles/vocabulario/calificar/${id}/corregir`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        keepalive: true,
+                        body: JSON.stringify({ calificacion: rating })
+                    }).catch(() => {});
+                });
+                vocabCorregirCalificacion(window.VOCAB_PALABRAS || [], palabra.idVocab, rating);
+            }
+        } else {
+            // Se guarda en el momento (keepalive: aunque se salga de la página enseguida)
+            const idRegistro = fetch('/menu/ingles/vocabulario/calificar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true,
+                body: JSON.stringify({
+                    idVocab: palabra.idVocab,
+                    nombre: palabra.nombre,
+                    calificacion: rating
+                })
+            }).then((r) => (r.ok ? r.json() : null))
+              .then((d) => (d && d.idRegistro) || null)
+              .catch(() => null);
+            vocabRespuestas[vocabIndice] = { rating, idRegistro };
+            vocabRegistrarCalificacion(window.VOCAB_PALABRAS || [], palabra.idVocab, rating);
+        }
 
         vocabIndice++;
         if (vocabIndice >= vocabSesion.length) {
@@ -268,6 +330,25 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
 
 if (vocabTerminarBtn) {
     vocabTerminarBtn.addEventListener('click', vocabMostrarResumen);
+}
+
+// "Anterior": vuelve a la tarjeta de antes para corregir su calificación
+if (vocabAnteriorBtn) {
+    vocabAnteriorBtn.addEventListener('click', () => {
+        if (vocabIndice === 0) return;
+        vocabIndice--;
+        vocabMostrarPalabra();
+    });
+}
+
+// Desde el resumen: volver a la última tarjeta calificada
+if (vocabCorregirUltimaBtn) {
+    vocabCorregirUltimaBtn.addEventListener('click', () => {
+        const ultima = vocabRespuestas.length - 1;
+        if (ultima < 0) return;
+        vocabIndice = ultima;
+        vocabMostrarPalabra();
+    });
 }
 
 if (vocabReiniciarBtn) {
@@ -343,5 +424,8 @@ if (vocabDayPopup) {
 
 // Para probar la selección de la ronda con node (en el navegador no hace nada)
 if (typeof module !== 'undefined') {
-    module.exports = { vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes };
+    module.exports = {
+        vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes,
+        vocabCorregirCalificacion, vocabContarCalificaciones,
+    };
 }

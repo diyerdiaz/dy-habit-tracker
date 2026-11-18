@@ -536,6 +536,24 @@ def vocabulario_calificar():
     )
     db.session.add(registro)
     db.session.commit()
+    return jsonify({'success': True, 'idRegistro': registro.idRegistro})
+
+
+@bp.route('/vocabulario/calificar/<int:id_registro>/corregir', methods=['POST'])
+@login_required
+def vocabulario_corregir(id_registro):
+    """Cambia la calificación de una tarjeta ya calificada (se le dio al botón
+    equivocado): se corrige el mismo registro, no se suma una vista más."""
+    data = request.get_json(silent=True) or {}
+    calificacion = data.get('calificacion')
+    if calificacion not in ('facil', 'medio', 'dificil'):
+        return jsonify({'success': False}), 400
+
+    registro = VocabularioRegistro.query.filter_by(
+        idRegistro=id_registro, idUser=current_user.idUser
+    ).first_or_404()
+    registro.calificacion = calificacion
+    db.session.commit()
     return jsonify({'success': True})
 
 @bp.route('/vocabulario/historial')

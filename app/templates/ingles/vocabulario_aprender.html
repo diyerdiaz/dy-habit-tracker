@@ -152,9 +152,14 @@
             <a href="#" id="vocabCambiarCantidad" class="vocabulario-back vocab-cambiar-cantidad">
                 <i class="bi bi-arrow-left"></i> Cambiar cantidad
             </a>
-            <button type="button" id="vocabTerminarBtn" class="vocab-terminar-btn">
-                <i class="bi bi-box-arrow-right"></i> Terminar aquí
-            </button>
+            <div class="vocab-deck-acciones">
+                <button type="button" id="vocabAnteriorBtn" class="vocab-terminar-btn" hidden>
+                    <i class="bi bi-arrow-counterclockwise"></i> Anterior
+                </button>
+                <button type="button" id="vocabTerminarBtn" class="vocab-terminar-btn">
+                    <i class="bi bi-box-arrow-right"></i> Terminar aquí
+                </button>
+            </div>
         </div>
 
         <p class="vocab-progress" id="vocabProgress"></p>
@@ -168,6 +173,7 @@
                 <p class="vocab-word-example" id="vocabFlashExample"></p>
 
                 <p class="vocab-rating-question">¿Qué tan fácil te resultó?</p>
+                <p class="vocab-corrigiendo" id="vocabCorrigiendo" hidden></p>
                 <div class="vocab-rating-buttons">
                     <button type="button" class="vocab-rating-btn vocab-rating-easy" data-rating="facil">Fácil</button>
                     <button type="button" class="vocab-rating-btn vocab-rating-medium" data-rating="medio">Medio fácil</button>
@@ -186,6 +192,9 @@
             <h3 id="vocabSummaryTitulo">¡Sesión completada!</h3>
             <p class="ingles-desc" id="vocabSummaryText"></p>
             <button type="button" id="vocabReiniciarBtn" class="btn w-100 btn-vocab-accent fw-bold">Aprender más palabras</button>
+            <button type="button" id="vocabCorregirUltimaBtn" class="vocab-terminar-btn vocab-corregir-ultima" hidden>
+                <i class="bi bi-arrow-counterclockwise"></i> Corregir la última
+            </button>
         </div>
     </div>
 
