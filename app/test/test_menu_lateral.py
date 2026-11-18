@@ -108,3 +108,74 @@ def test_diseno_del_login_dentro_de_la_app(client):
     assert 'linear-gradient(90deg, var(--tema-grad-1' in diseno
     assert "font-family: 'Great Vibes'" in diseno
     assert 'Great+Vibes' in css
+
+
+# ── Menú de Hábitos por grupos que se despliegan ──
+
+import pytest  # noqa: E402
+
+GRUPOS = {
+    'Mis hábitos': ['Gestión de Hábitos', 'Check de Hábitos', 'Recuperar Día', 'Tareas del Día'],
+    'Mi progreso': ['Estadísticas', 'Mi Nivel Personal', 'Medallas'],
+    'Inspiración y estudio': ['Motivación', 'Métodos de Estudio', 'Vision Board', 'Temas Aleatorios'],
+}
+
+
+def _menu(html):
+    return html.split('id="sidebar"', 1)[1].split('id="sidebarOverlay"', 1)[0]
+
+
+def _grupo(menu, titulo):
+    """HTML del <details> cuyo título es `titulo`."""
+    inicio = menu.rindex('<details', 0, menu.index(f'<span>{titulo}</span>'))
+    return menu[inicio:menu.index('</details>', inicio)]
+
+
+def test_cada_boton_esta_en_su_grupo(logged_client):
+    menu = _menu(logged_client.get('/dashboard').get_data(as_text=True))
+    for titulo, botones in GRUPOS.items():
+        grupo = _grupo(menu, titulo)
+        assert 'name="menu-grupo"' in grupo
+        for boton in botones:
+            assert boton in grupo, (titulo, boton)
+    # Inicio, perfil y cerrar sesión quedan fuera de los grupos, siempre a la vista
+    assert menu.index('</i> Inicio') < menu.index('<details')
+    assert menu.rindex('</details>') < menu.index('Mi Perfil') < menu.index('sidebar-link-salir')
+
+
+def test_en_el_inicio_los_grupos_empiezan_cerrados(logged_client):
+    menu = _menu(logged_client.get('/dashboard').get_data(as_text=True))
+    assert ' open>' not in menu
+    assert 'href="/dashboard" class="sidebar-link active"' in menu
+
+
+@pytest.mark.parametrize('url, grupo, boton', [
+    ('/tareas/', 'Mis hábitos', 'Tareas del Día'),
+    ('/register_habit', 'Mis hábitos', 'Gestión de Hábitos'),
+    ('/estadisticas/', 'Mi progreso', 'Estadísticas'),
+    ('/menu/nivel', 'Mi progreso', 'Mi Nivel Personal'),
+    ('/medallas/', 'Mi progreso', 'Medallas'),
+    ('/motivacion/', 'Inspiración y estudio', 'Motivación'),
+    ('/temas/', 'Inspiración y estudio', 'Temas Aleatorios'),
+])
+def test_se_abre_el_grupo_de_la_pagina_actual(logged_client, url, grupo, boton):
+    menu = _menu(logged_client.get(url, follow_redirects=True).get_data(as_text=True))
+    abierto = _grupo(menu, grupo)
+    assert abierto.startswith('<details class="menu-grupo" name="menu-grupo" open>'), url
+    assert menu.count(' open>') == 1, url
+    activo = abierto.split('sidebar-link active', 1)[1].split('</a>', 1)[0]
+    assert boton in activo, url
+
+
+def test_todas_las_paginas_de_habitos_usan_el_menu_compartido(app):
+    for ruta in glob.glob(os.path.join(app.template_folder, '**', '*.html'), recursive=True):
+        with open(ruta, encoding='utf-8') as f:
+            html = f.read()
+        if 'id="sidebar"' in html:
+            assert os.path.basename(ruta).startswith('_sidebar_'), ruta
+
+
+def test_css_de_los_grupos(app):
+    css = _css(app)
+    assert '.menu-grupo-titulo::-webkit-details-marker { display: none; }' in css
+    assert '.menu-grupo[open] .menu-grupo-flecha { transform: rotate(180deg); }' in css

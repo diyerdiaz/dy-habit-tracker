@@ -153,7 +153,9 @@ def test_logout_por_post_cierra_la_sesion(logged_client):
 def test_ninguna_plantilla_cierra_sesion_con_un_enlace():
     plantillas = list((RAIZ / 'app' / 'templates').rglob('*.html'))
     con_logout = [p for p in plantillas if "auth.logout" in p.read_text()]
-    assert len(con_logout) >= 20
+    # El botón de salir vive en los menús compartidos (antes estaba copiado en cada página)
+    nombres = {p.name for p in con_logout}
+    assert {'_sidebar_habitos.html', '_sidebar_ingles.html', '_sidebar_espanol.html'} <= nombres
     for p in con_logout:
         texto = p.read_text()
         assert not re.search(r'<a [^>]*auth\.logout', texto), p.name
