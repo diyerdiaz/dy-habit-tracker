@@ -5,7 +5,7 @@ from app.models.vocabulario_registro import VocabularioRegistro
 from app.models.shadowing_sesion import ShadowingSesion
 from app import db
 from app.services.ingles import (
-    get_letras_flotantes, calcular_rango,
+    get_letras_flotantes, calcular_rango, resumen_ingles, graficas_ingles,
     RANGOS_VOCABULARIO, RANGOS_DOMINIO, MINIMO_CALIFICACIONES_DOMINIO,
     TIEMPOS_TARJETA, TIEMPO_TARJETA_POR_DEFECTO,
 )
@@ -24,7 +24,9 @@ bp = Blueprint('ingles', __name__, url_prefix='/menu/ingles')
 @login_required
 def ingles():
     letras_flotantes = get_letras_flotantes(current_user.idUser)
-    return render_template('ingles/index.html', letras_flotantes=letras_flotantes)
+    return render_template('ingles/index.html', letras_flotantes=letras_flotantes,
+                           resumen=resumen_ingles(current_user.idUser),
+                           graficas=graficas_ingles(current_user.idUser))
 
 @bp.route('/palabras-aleatorias')
 @login_required

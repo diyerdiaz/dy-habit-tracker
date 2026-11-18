@@ -19,7 +19,7 @@ from app.routes import (
     users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
     medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
     perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route, admin_route,
-    retos_route,
+    retos_route, espanol_route,
 )
 from app.services.admin import registrar_comandos as registrar_comandos_admin
 from app.services.correo import registrar_comandos
@@ -71,6 +71,7 @@ def create_app(config_overrides=None):
     app.register_blueprint(juegos_route.bp)
     app.register_blueprint(admin_route.bp)
     app.register_blueprint(retos_route.bp)
+    app.register_blueprint(espanol_route.bp)
 
     # Quien entró con una contraseña que no cumple los requisitos solo puede
     # cambiarla o cerrar sesión hasta que la actualice (ver auth_route.login)

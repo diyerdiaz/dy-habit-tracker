@@ -878,7 +878,8 @@ body {
     position: absolute;
     top: 4px;
     left: 4px;
-    width: calc(50% - 4px);
+    /* Tres opciones: Hábitos | Inglés | Español */
+    width: calc((100% - 8px) / 3);
     height: calc(100% - 8px);
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.22);
@@ -887,8 +888,18 @@ body {
     z-index: 1;
 }
 
-.sidebar-toggle.toggle-right .sidebar-toggle-thumb {
+.sidebar-toggle.toggle-ingles .sidebar-toggle-thumb {
     transform: translateX(100%);
+}
+
+.sidebar-toggle.toggle-espanol .sidebar-toggle-thumb {
+    transform: translateX(200%);
+}
+
+/* En Español el interruptor toma los colores de esa sección */
+.sidebar-toggle.toggle-espanol {
+    background: linear-gradient(90deg, #c60b1e, #d99a00);
+    box-shadow: 0 0 15px rgba(198, 11, 30, 0.4);
 }
 
 .sidebar-toggle-option {
@@ -898,10 +909,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
+    min-width: 0;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-style: italic;
     font-weight: 600;
     transition: color 0.3s;
@@ -1514,6 +1526,10 @@ body {
 .ico-vision { color: #ff8c42; }
 .ico-temas { color: #00e5ff; }
 .ico-perfil { color: var(--tema-vivo, #d966ff); }
+.ico-vocabulario { color: #a9d1ff; }
+.ico-shadowing { color: #c084fc; }
+.ico-juegos { color: #00e676; }
+.ico-pronunciacion { color: #ff6fb5; }
 .sidebar-item-toggle { margin-top: 24px; }
 .sidebar-link.sidebar-link-salir {
     color: #ff6666;

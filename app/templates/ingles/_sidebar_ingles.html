@@ -1,4 +1,5 @@
-{# Menú lateral de la sección Inglés (lo usan Inglés y Juegos) #}
+{# Menú lateral de la sección Inglés (lo usan Inglés y Juegos): solo botones de inglés #}
+{%- set ep = request.endpoint or '' %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
     <span></span>
@@ -11,85 +12,46 @@
     {% include "menu/_marca_menu.html" %}
     <ul class="sidebar-menu">
         <li class="sidebar-item">
-            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link">
-                <i class="bi bi-house-door" style="margin-right: 15px; font-size: 1.2rem;"></i> Inicio
+            <a href="{{ url_for('ingles.ingles') }}" class="sidebar-link{% if ep == 'ingles.ingles' %} active{% endif %}">
+                <i class="bi bi-grid-1x2-fill sidebar-icon"></i> Inicio Inglés
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link">
-                <i class="bi bi-plus-circle" style="margin-right: 15px; font-size: 1.2rem;"></i> Registrar Hábito
+            <a href="{{ url_for('ingles.vocabulario') }}" class="sidebar-link{% if ep.startswith('ingles.vocabulario') %} active{% endif %}">
+                <i class="bi bi-journal-text sidebar-icon ico-vocabulario"></i> Vocabulario
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link">
-                <i class="bi bi-check2-square" style="margin-right: 15px; font-size: 1.2rem;"></i> Check de Hábitos
+            <a href="{{ url_for('ingles.shadowing') }}" class="sidebar-link{% if ep.startswith('ingles.shadowing') %} active{% endif %}">
+                <i class="bi bi-headphones sidebar-icon ico-shadowing"></i> Shadowing
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link">
-                <i class="bi bi-arrow-counterclockwise" style="margin-right: 15px; font-size: 1.2rem; color: #ffcc66;"></i> Recuperar Día
+            <a href="{{ url_for('juegos.index') }}" class="sidebar-link{% if ep.startswith('juegos.') %} active{% endif %}">
+                <i class="bi bi-controller sidebar-icon ico-juegos"></i> Juegos
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('tareas.index') }}" class="sidebar-link">
-                <i class="bi bi-card-checklist" style="margin-right: 15px; font-size: 1.2rem;"></i> Tareas del Día
+            <a href="{{ url_for('ingles.palabras_aleatorias') }}" class="sidebar-link{% if ep == 'ingles.palabras_aleatorias' %} active{% endif %}">
+                <i class="bi bi-shuffle sidebar-icon ico-temas"></i> Palabras aleatorias
             </a>
         </li>
         <li class="sidebar-item">
-            <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link">
-                <i class="bi bi-bar-chart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00e676;"></i> Estadísticas
+            <a href="{{ url_for('ingles.pronunciacion') }}" class="sidebar-link{% if ep == 'ingles.pronunciacion' %} active{% endif %}">
+                <i class="bi bi-mic-fill sidebar-icon ico-pronunciacion"></i> Pronunciación
             </a>
         </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('menu.nivel') }}" class="sidebar-link">
-                <i class="bi bi-award-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffd700;"></i> Mi Nivel Personal
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('medallas.index') }}" class="sidebar-link">
-                <i class="bi bi-trophy-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ffb347;"></i> Medallas
-            </a>
-        </li>
-        {% include 'retos/_item_menu.html' %}
-        <li class="sidebar-item">
-            <a href="{{ url_for('motivacion.index') }}" class="sidebar-link">
-                <i class="bi bi-chat-heart-fill" style="margin-right: 15px; font-size: 1.2rem; color: #ff6fb5;"></i> Motivación
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('metodos.index') }}" class="sidebar-link">
-                <i class="bi bi-kanban-fill" style="margin-right: 15px; font-size: 1.2rem; color: #00bac6;"></i> Métodos de Estudio
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('vision.index') }}" class="sidebar-link">
-                <i class="bi bi-images" style="margin-right: 15px; font-size: 1.2rem; color: #ff8c42;"></i> Vision Board
-            </a>
-        </li>
-        <li class="sidebar-item">
-            <a href="{{ url_for('temas.index') }}" class="sidebar-link">
-                <i class="bi bi-shuffle" style="margin-right: 15px; font-size: 1.2rem; color: #00e5ff;"></i> Temas Aleatorios
-            </a>
-        </li>
-        <li class="sidebar-item" style="margin-top: 24px;">
-            <div class="sidebar-toggle toggle-right">
-                <span class="sidebar-toggle-thumb"></span>
-                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option">
-                    <i class="bi bi-house-door"></i> Hábitos
-                </a>
-                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option active-side">
-                    <i class="bi bi-translate"></i> Inglés
-                </a>
-            </div>
+        <li class="sidebar-item sidebar-item-toggle">
+            {% with seccion_menu='ingles' %}{% include 'menu/_switch_seccion.html' %}{% endwith %}
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
-                <i class="bi bi-person-circle" style="margin-right: 15px; font-size: 1.2rem; color: var(--tema-vivo, #d966ff);"></i> Mi Perfil
+                <i class="bi bi-person-circle sidebar-icon ico-perfil"></i> Mi Perfil
             </a>
         </li>
         <li class="sidebar-item">
             <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
-                <i class="bi bi-box-arrow-right" style="margin-right: 15px; font-size: 1.2rem;"></i> Cerrar Sesión
+                <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
             </button></form>
         </li>
     </ul>

@@ -76,15 +76,7 @@
             </a>
         </li>
         <li class="sidebar-item" style="margin-top: 24px;">
-            <div class="sidebar-toggle">
-                <span class="sidebar-toggle-thumb"></span>
-                <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option active-side">
-                    <i class="bi bi-house-door"></i> Hábitos
-                </a>
-                <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option">
-                    <i class="bi bi-translate"></i> Inglés
-                </a>
-            </div>
+            {% include 'menu/_switch_seccion.html' %}
         </li>
         <li class="sidebar-item">
             <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
