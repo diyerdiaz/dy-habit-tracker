@@ -43,10 +43,11 @@ def test_paginas_de_ingles_piden_sesion(client, url):
 def test_endpoints_cambian_a_blueprint_ingles(app):
     with app.test_request_context():
         assert url_for("ingles.ingles") == "/menu/ingles"
-        assert url_for("ingles.vocabulario_calificar") == "/menu/ingles/vocabulario/calificar"
+        assert url_for("vocabulario.calificar") == "/menu/ingles/vocabulario/calificar"
+        assert url_for("vocabulario_es.calificar") == "/menu/espanol/vocabulario/calificar"
         assert url_for("ingles.shadowing_guardar") == "/menu/ingles/shadowing/guardar"
         assert url_for("ingles.shadowing_editar", sesion_id=3) == "/menu/ingles/shadowing/3/editar"
-        assert url_for("ingles.vocabulario_eliminar", vocab_id=3) == "/menu/ingles/vocabulario/3/eliminar"
+        assert url_for("vocabulario.eliminar", vocab_id=3) == "/menu/ingles/vocabulario/3/eliminar"
     rutas_menu = [r.endpoint for r in app.url_map.iter_rules() if r.endpoint.startswith("menu.")]
     assert not [e for e in rutas_menu if "vocabulario" in e or "shadowing" in e or e == "menu.ingles"]
 

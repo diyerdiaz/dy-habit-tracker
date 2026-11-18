@@ -20,7 +20,8 @@ def normalizar_cantidad(valor):
 
 def palabras_aleatorias(id_user, cantidad):
     """Elige hasta `cantidad` palabras distintas al azar del vocabulario del usuario."""
-    vocabulario = Vocabulario.query.filter_by(idUser=id_user).all()
+    # Página de la sección Inglés: solo palabras en inglés
+    vocabulario = Vocabulario.query.filter_by(idUser=id_user, idioma='en').all()
     # Una palabra guardada dos veces cuenta una sola vez
     unicas = list({v.nombre.strip().lower(): v for v in vocabulario}.values())
     elegidas = random.sample(unicas, min(cantidad, len(unicas)))
@@ -29,5 +30,5 @@ def palabras_aleatorias(id_user, cantidad):
 
 def total_vocabulario(id_user):
     """Cuántas palabras distintas tiene el usuario para practicar."""
-    nombres = Vocabulario.query.with_entities(Vocabulario.nombre).filter_by(idUser=id_user).all()
+    nombres = Vocabulario.query.with_entities(Vocabulario.nombre).filter_by(idUser=id_user, idioma='en').all()
     return len({nombre.strip().lower() for (nombre,) in nombres})

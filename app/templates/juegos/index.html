@@ -8,14 +8,14 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <div class="ingles-letters">
     {% for letra in letras_flotantes %}<span>{{ letra }}</span>{% endfor %}
 </div>
 
 <div class="ingles-wrapper juegos-wrapper">
-    <a href="{{ url_for('ingles.ingles') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Aprende Inglés</a>
+    <a href="{{ url_for(sec.inicio) }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> {{ sec.inicio_nombre }}</a>
 
     <div class="text-center mb-4 ingles-hero">
         <span class="ingles-flag-badge"><i class="bi bi-controller"></i> Game Zone</span>
@@ -27,16 +27,16 @@
     <div class="juegos-vacio">
         <i class="bi bi-journal-plus"></i>
         <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras en tu vocabulario para jugar. Tienes {{ total_palabras }}.</p>
-        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
     </div>
     {% endif %}
 
     <div class="ingles-grid juegos-grid">
         {% set unir = resumen.get('unir') %}
-        <a href="{{ url_for('juegos.unir') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.unir') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
             <i class="bi bi-link-45deg"></i>
             <h3>Unir parejas</h3>
-            <p class="juego-desc">Conecta cada palabra en inglés con su significado.</p>
+            <p class="juego-desc">Conecta cada palabra {{ sec.en_idioma }} con su significado.</p>
             {% if unir %}
             <ul class="juego-stats">
                 <li><span>{{ unir.jugadas }}</span> {{ 'ronda' if unir.jugadas == 1 else 'rondas' }}</li>
@@ -46,10 +46,10 @@
             {% endif %}
         </a>
         {% set sopa = resumen.get('sopa') %}
-        <a href="{{ url_for('juegos.sopa') }}" class="ingles-card juego-card{% if total_sopa < minimo_sopa %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.sopa') }}" class="ingles-card juego-card{% if total_sopa < minimo_sopa %} bloqueado{% endif %}">
             <i class="bi bi-grid-3x3"></i>
             <h3>Sopa de letras</h3>
-            <p class="juego-desc">Encuentra en la cuadrícula la palabra en inglés de cada significado.</p>
+            <p class="juego-desc">Encuentra en la cuadrícula la palabra {{ sec.en_idioma }} de cada significado.</p>
             {% if total_sopa < minimo_sopa %}
             <p class="juego-desc">Necesitas {{ minimo_sopa }} palabras de una sola pieza (tienes {{ total_sopa }}).</p>
             {% elif sopa %}
@@ -61,10 +61,10 @@
             {% endif %}
         </a>
         {% set ahorcado = resumen.get('ahorcado') %}
-        <a href="{{ url_for('juegos.ahorcado') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.ahorcado') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
             <i class="bi bi-person-exclamation"></i>
             <h3>Ahorcado</h3>
-            <p class="juego-desc">Adivina la palabra letra por letra. La pista es tu ejemplo en inglés.</p>
+            <p class="juego-desc">Adivina la palabra letra por letra. La pista es tu ejemplo {{ sec.en_idioma }}.</p>
             {% if total_ahorcado < minimo %}
             <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
             {% elif ahorcado %}
@@ -76,7 +76,7 @@
             {% endif %}
         </a>
         {% set patos = resumen.get('patos') %}
-        <a href="{{ url_for('juegos.patos') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.patos') }}" class="ingles-card juego-card{% if total_palabras < minimo %} bloqueado{% endif %}">
             <svg class="pato-icono" viewBox="0 0 64 44" aria-hidden="true">
                 <ellipse cx="26" cy="27" rx="22" ry="13"/>
                 <path d="M6 24 L0 15 L14 19 Z"/>
@@ -86,7 +86,7 @@
                 <circle class="pato-icono-ojo" cx="50" cy="13" r="2"/>
             </svg>
             <h3>Caza de patos</h3>
-            <p class="juego-desc">Dispárale al pato que lleva la palabra en inglés del significado.</p>
+            <p class="juego-desc">Dispárale al pato que lleva la palabra {{ sec.en_idioma }} del significado.</p>
             {% if patos %}
             <ul class="juego-stats">
                 <li><span>{{ patos.jugadas }}</span> {{ 'ronda' if patos.jugadas == 1 else 'rondas' }}</li>
@@ -96,10 +96,10 @@
             {% endif %}
         </a>
         {% set crucigrama = resumen.get('crucigrama') %}
-        <a href="{{ url_for('juegos.crucigrama') }}" class="ingles-card juego-card{% if total_crucigrama < minimo_crucigrama %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.crucigrama') }}" class="ingles-card juego-card{% if total_crucigrama < minimo_crucigrama %} bloqueado{% endif %}">
             <i class="bi bi-puzzle"></i>
             <h3>Crucigrama</h3>
-            <p class="juego-desc">Escribe en inglés la palabra de cada significado y crúzalas.</p>
+            <p class="juego-desc">Escribe {{ sec.en_idioma }} la palabra de cada significado y crúzalas.</p>
             {% if total_crucigrama < minimo_crucigrama %}
             <p class="juego-desc">Necesitas {{ minimo_crucigrama }} palabras de una sola pieza (tienes {{ total_crucigrama }}).</p>
             {% elif crucigrama %}
@@ -111,7 +111,7 @@
             {% endif %}
         </a>
         {% set mono = resumen.get('mono') %}
-        <a href="{{ url_for('juegos.mono') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
+        <a href="{{ url_for(sec.bp_juegos ~ '.mono') }}" class="ingles-card juego-card{% if total_ahorcado < minimo %} bloqueado{% endif %}">
             <svg class="pato-icono" viewBox="0 0 64 44" aria-hidden="true">
                 <circle cx="14" cy="20" r="8"/>
                 <circle cx="50" cy="20" r="8"/>
@@ -122,7 +122,7 @@
                 <path class="mono-icono-boca" d="M26 30 Q32 35 38 30"/>
             </svg>
             <h3>Carrera del mono</h3>
-            <p class="juego-desc">Completa la frase en inglés para saltar cada obstáculo.</p>
+            <p class="juego-desc">Completa la frase {{ sec.en_idioma }} para saltar cada obstáculo.</p>
             {% if total_ahorcado < minimo %}
             <p class="juego-desc">Necesitas {{ minimo }} palabras de una sola pieza con ejemplo (tienes {{ total_ahorcado }}).</p>
             {% elif mono %}

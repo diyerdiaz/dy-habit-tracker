@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -18,12 +18,12 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('ingles.ingles') }}" class="vocabulario-back">
-            <i class="bi bi-arrow-left"></i> Volver a Aprende Inglés
+        <a href="{{ url_for(sec.inicio) }}" class="vocabulario-back">
+            <i class="bi bi-arrow-left"></i> Volver a {{ sec.inicio_nombre }}
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Vocabulario 🇺🇸</span>
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} Vocabulario {{ sec.banderas[1] }}</span>
         <h1 class="ingles-title">Bienvenido a esta sección de vocabulario</h1>
-        <p class="ingles-desc">En la cual vas a aprender nuevas palabras en inglés.</p>
+        <p class="ingles-desc">En la cual vas a aprender nuevas palabras {{ sec.en_idioma }}.</p>
     </div>
 
     <div class="ingles-grid vocabulario-grid fade-in-section">
@@ -31,26 +31,26 @@
             <i class="bi bi-plus-circle"></i>
             <h3>Agregar Vocabulario</h3>
         </a>
-        <a href="{{ url_for('ingles.vocabulario_aprender') }}" class="ingles-card">
+        <a href="{{ url_for(sec.bp_vocab ~ '.aprender') }}" class="ingles-card">
             <i class="bi bi-book"></i>
             <h3>Aprender Vocabulario</h3>
         </a>
-        <a href="{{ url_for('ingles.vocabulario_rango') }}" class="ingles-card">
+        <a href="{{ url_for(sec.bp_vocab ~ '.rango') }}" class="ingles-card">
             <i class="bi bi-award-fill"></i>
             <h3>Mi Rango de Vocabulario</h3>
         </a>
-        <a href="{{ url_for('ingles.vocabulario_lista') }}" class="ingles-card">
+        <a href="{{ url_for(sec.bp_vocab ~ '.lista') }}" class="ingles-card">
             <i class="bi bi-list-ul"></i>
             <h3>Mis Palabras</h3>
         </a>
-        <a href="{{ url_for('ingles.vocabulario_calendario') }}" class="ingles-card">
+        <a href="{{ url_for(sec.bp_vocab ~ '.calendario') }}" class="ingles-card">
             <i class="bi bi-calendar3"></i>
             <h3>Calendario y Rachas</h3>
         </a>
     </div>
 </div>
 
-{% include 'ingles/vocabulario_add.html' %}
+{% include 'vocabulario/create.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -64,18 +64,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
     </div>

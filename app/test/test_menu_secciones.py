@@ -83,3 +83,16 @@ def test_css_del_interruptor_tiene_tres_posiciones(app):
     assert 'width: calc((100% - 8px) / 3);' in css
     assert '.sidebar-toggle.toggle-ingles .sidebar-toggle-thumb' in css
     assert '.sidebar-toggle.toggle-espanol .sidebar-toggle-thumb' in css
+
+
+def test_el_interruptor_toma_el_color_de_la_seccion(app):
+    """Antes era siempre azul: ahora usa los colores del tema de la página."""
+    with open(os.path.join(app.static_folder, 'css', 'm.css'), encoding='utf-8') as f:
+        css = f.read()
+    bloque = css.split('\n.sidebar-toggle {', 1)[1].split('}', 1)[0]
+    assert 'var(--tema-grad-1' in bloque and 'var(--tema-grad-2' in bloque
+    assert '#0d6efd' not in bloque
+    # Cada sección define esos colores en su propio CSS
+    for hoja in ('ingles.css', 'espanol.css'):
+        with open(os.path.join(app.static_folder, 'css', hoja), encoding='utf-8') as f:
+            assert '--tema-grad-1:' in f.read(), hoja

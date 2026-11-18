@@ -11,6 +11,8 @@ import pytest
 
 from app import db
 from app.models.vocabulario import Vocabulario
+from app.models.vocabulario_registro import VocabularioRegistro
+from datetime import datetime, timedelta
 
 JS = Path(__file__).resolve().parents[1] / 'static' / 'js' / 'vocabulario.js'
 
@@ -123,14 +125,86 @@ def test_las_3_dificiles_de_la_ronda_anterior_salen_primero(logged_client, user)
         db.session.add(palabras[n])
     db.session.commit()
 
-    # Ronda anterior: 5 palabras, 3 marcadas difíciles
+    # Ronda de AYER: 5 palabras, 3 marcadas difíciles (las de hoy no vuelven hasta mañana)
+    ayer = datetime.now() - timedelta(days=1)
     calificaciones = {'Habit': 'dificil', 'Goal': 'facil', 'Effort': 'dificil', 'Achieve': 'medio', 'Improve': 'dificil'}
     for n, cal in calificaciones.items():
-        logged_client.post('/menu/ingles/vocabulario/calificar',
-                           json={'idVocab': palabras[n].idVocab, 'nombre': n, 'calificacion': cal})
+        db.session.add(VocabularioRegistro(idUser=user.idUser, idVocab=palabras[n].idVocab,
+                                           palabraNombre=n, calificacion=cal, fecha=ayer))
+    db.session.commit()
 
     for ronda in _rondas(_palabras_de_la_pagina(logged_client), 5):
         assert set(ronda[:3]) == {'Habit', 'Effort', 'Improve'}
         # Luego las que no salieron en la ronda anterior
         assert set(ronda[3:]) <= {'Schedule', 'Reliable', 'Overcome'}
         assert len(set(ronda)) == 5
+
+
+# ── Lo que se practica hoy no vuelve a salir hasta mañana ──
+
+def _calificar(client, palabra, cal='facil'):
+    client.post('/menu/ingles/vocabulario/calificar',
+                json={'idVocab': palabra.idVocab, 'nombre': palabra.nombre, 'calificacion': cal})
+
+
+def _crear(user, nombres):
+    palabras = [Vocabulario(idUser=user.idUser, nombre=n, significado=n.lower()) for n in nombres]
+    db.session.add_all(palabras)
+    db.session.commit()
+    return palabras
+
+
+def test_la_pagina_marca_las_estudiadas_hoy(logged_client, user):
+    a, b, c = _crear(user, ['Apple', 'Bread', 'Cheese'])
+    _calificar(logged_client, a)
+    _calificar(logged_client, b, 'dificil')
+    datos = {p['nombre']: p['estudiadaHoy'] for p in _palabras_de_la_pagina(logged_client)}
+    assert datos == {'Apple': True, 'Bread': True, 'Cheese': False}
+
+
+def test_lo_de_ayer_si_vuelve_a_salir(logged_client, user):
+    a, = _crear(user, ['Apple'])
+    db.session.add(VocabularioRegistro(idUser=user.idUser, idVocab=a.idVocab, palabraNombre='Apple',
+                                       calificacion='facil', fecha=datetime.now() - timedelta(days=1)))
+    db.session.commit()
+    assert _palabras_de_la_pagina(logged_client)[0]['estudiadaHoy'] is False
+
+
+def test_la_segunda_ronda_no_repite_las_de_la_primera(logged_client, user):
+    nombres = [f'Word{i}' for i in range(10)]
+    palabras = _crear(user, nombres)
+    for p in palabras[:6]:          # primera ronda: 6 palabras
+        _calificar(logged_client, p, 'dificil' if p.nombre == 'Word0' else 'facil')
+    for ronda in _rondas(_palabras_de_la_pagina(logged_client), 10):
+        # Solo quedan las 4 que no salieron, aunque se pidan 10 y Word0 sea difícil
+        assert sorted(ronda) == ['Word6', 'Word7', 'Word8', 'Word9']
+
+
+def test_el_selector_solo_ofrece_las_que_faltan_hoy(logged_client, user):
+    palabras = _crear(user, ['A1', 'B2', 'C3', 'D4', 'E5'])
+    for p in palabras[:2]:
+        _calificar(logged_client, p)
+    html = logged_client.get('/menu/ingles/vocabulario/aprender').get_data(as_text=True)
+    assert 'Hoy te faltan <strong>3</strong> de <strong>5</strong> palabras' in html
+    selector = html.split('id="vocabCantidad"', 1)[1].split('</select>', 1)[0]
+    assert selector.count('<option') == 3 and '<option value="3" selected>' in selector
+    assert 'id="vocabTodasHechas" class="vocab-todas-hechas" hidden' in html
+
+
+def test_si_ya_practico_todas_hoy_vuelven_manana(logged_client, user):
+    for p in _crear(user, ['A1', 'B2']):
+        _calificar(logged_client, p)
+    html = logged_client.get('/menu/ingles/vocabulario/aprender').get_data(as_text=True)
+    assert '¡Ya practicaste todas tus palabras hoy!' in html and 'Vuelven a salir mañana' in html
+    assert 'id="vocabTodasHechas" class="vocab-todas-hechas">' in html
+    assert 'id="vocabSetupControles" hidden' in html
+
+
+def test_sin_recargar_al_volver_se_actualiza_lo_que_falta(app):
+    js = JS.read_text()
+    volver = js.split('function vocabVolverAlInicio() {', 1)[1].split('\n}', 1)[0]
+    assert 'vocabActualizarSetup();' in volver
+    actualizar = js.split('function vocabActualizarSetup() {', 1)[1].split('\n}\n', 1)[0]
+    assert 'vocabPendientesHoy(todas)' in actualizar
+    assert 'todasHechas.hidden = pendientes !== 0;' in actualizar
+    assert 'palabra.estudiadaHoy = true;' in js

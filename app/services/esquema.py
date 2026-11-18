@@ -20,7 +20,10 @@ def actualizar_esquema():
         'users': {'avatar': 'VARCHAR(64)', 'email': 'VARCHAR(120)', 'sesionVersion': 'INTEGER NOT NULL DEFAULT 0', 'rol': "VARCHAR(20) NOT NULL DEFAULT 'usuario'", 'bloqueado': 'BOOLEAN NOT NULL DEFAULT FALSE'},
         'metas_vision': {'ancho': 'INTEGER', 'alto': 'INTEGER'},
         'temas_explicar': {'estudiado': 'BOOLEAN NOT NULL DEFAULT FALSE', 'fechaEstudiado': 'TIMESTAMP'},
-        'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0'},
+        'juego_partidas': {'nivel': 'VARCHAR(10)', 'pistas': 'INTEGER NOT NULL DEFAULT 0', 'idioma': "VARCHAR(2) NOT NULL DEFAULT 'en'"},
+        # Lo que ya existía es de Inglés: la sección Español empieza vacía
+        'vocabularios': {'idioma': "VARCHAR(2) NOT NULL DEFAULT 'en'"},
+        'vocabulario_registros': {'idioma': "VARCHAR(2) NOT NULL DEFAULT 'en'"},
         'tareas': {'horaRecordatorio': 'VARCHAR(5)', 'recordatorioEnviado': 'BOOLEAN NOT NULL DEFAULT FALSE'},
         'retos_usuario': {'todoXp': 'BOOLEAN NOT NULL DEFAULT FALSE'},
     }

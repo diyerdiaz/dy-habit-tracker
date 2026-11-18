@@ -1,0 +1,129 @@
+{# Menú lateral de la sección Hábitos, ordenado por grupos que se despliegan.
+   El grupo de la página actual se abre solo; al abrir otro, el anterior se cierra
+   (los <details> comparten name="menu-grupo"). Incluye el sidebar y el overlay,
+   el botón hamburguesa queda en cada página. #}
+{%- set ep = request.endpoint or '' %}
+{%- set bp_actual = request.blueprint or '' %}
+{%- set en_habitos = ep in ('habits.register_habit', 'habits.habits_check', 'habits.recuperar') or bp_actual == 'tareas' %}
+{%- set en_estadisticas = bp_actual == 'estadisticas' or ep in ('menu.estadisticas', 'menu.historial') %}
+{%- set en_progreso = en_estadisticas or ep == 'menu.nivel' or bp_actual in ('medallas', 'retos') %}
+{%- set en_inspiracion = bp_actual in ('motivacion', 'metodos', 'vision', 'temas') %}
+<div class="sidebar" id="sidebar">
+    {% include "menu/_marca_menu.html" %}
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('auth.dashboard') }}" class="sidebar-link{% if ep == 'auth.dashboard' %} active{% endif %}">
+                <i class="bi bi-house-door sidebar-icon"></i> Inicio
+            </a>
+        </li>
+
+        <li class="sidebar-item">
+            <details class="menu-grupo" name="menu-grupo"{% if en_habitos %} open{% endif %}>
+                <summary class="menu-grupo-titulo">
+                    <i class="bi bi-check2-circle sidebar-icon ico-grupo-habitos"></i>
+                    <span>Mis hábitos</span>
+                    <i class="bi bi-chevron-down menu-grupo-flecha" aria-hidden="true"></i>
+                </summary>
+                <ul class="menu-grupo-lista">
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('habits.register_habit') }}" class="sidebar-link{% if ep == 'habits.register_habit' %} active{% endif %}">
+                            <i class="bi bi-list-check sidebar-icon"></i> Gestión de Hábitos
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('habits.habits_check') }}" class="sidebar-link{% if ep == 'habits.habits_check' %} active{% endif %}">
+                            <i class="bi bi-check2-square sidebar-icon"></i> Check de Hábitos
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('habits.recuperar') }}" class="sidebar-link{% if ep == 'habits.recuperar' %} active{% endif %}">
+                            <i class="bi bi-arrow-counterclockwise sidebar-icon ico-recuperar"></i> Recuperar Día
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('tareas.index') }}" class="sidebar-link{% if bp_actual == 'tareas' %} active{% endif %}">
+                            <i class="bi bi-card-checklist sidebar-icon"></i> Tareas del Día
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <li class="sidebar-item">
+            <details class="menu-grupo" name="menu-grupo"{% if en_progreso %} open{% endif %}>
+                <summary class="menu-grupo-titulo">
+                    <i class="bi bi-graph-up-arrow sidebar-icon ico-estadisticas"></i>
+                    <span>Mi progreso</span>
+                    <i class="bi bi-chevron-down menu-grupo-flecha" aria-hidden="true"></i>
+                </summary>
+                <ul class="menu-grupo-lista">
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('estadisticas.index') }}" class="sidebar-link{% if en_estadisticas %} active{% endif %}">
+                            <i class="bi bi-bar-chart-fill sidebar-icon ico-estadisticas"></i> Estadísticas
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('menu.nivel') }}" class="sidebar-link{% if ep == 'menu.nivel' %} active{% endif %}">
+                            <i class="bi bi-award-fill sidebar-icon ico-nivel"></i> Mi Nivel Personal
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('medallas.index') }}" class="sidebar-link{% if bp_actual == 'medallas' %} active{% endif %}">
+                            <i class="bi bi-trophy-fill sidebar-icon ico-medallas"></i> Medallas
+                        </a>
+                    </li>
+                    {% include 'retos/_item_menu.html' %}
+                </ul>
+            </details>
+        </li>
+
+        <li class="sidebar-item">
+            <details class="menu-grupo" name="menu-grupo"{% if en_inspiracion %} open{% endif %}>
+                <summary class="menu-grupo-titulo">
+                    <i class="bi bi-lightbulb-fill sidebar-icon ico-nivel"></i>
+                    <span>Inspiración y estudio</span>
+                    <i class="bi bi-chevron-down menu-grupo-flecha" aria-hidden="true"></i>
+                </summary>
+                <ul class="menu-grupo-lista">
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('motivacion.index') }}" class="sidebar-link{% if bp_actual == 'motivacion' %} active{% endif %}">
+                            <i class="bi bi-chat-heart-fill sidebar-icon ico-motivacion"></i> Motivación
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('metodos.index') }}" class="sidebar-link{% if bp_actual == 'metodos' %} active{% endif %}">
+                            <i class="bi bi-kanban-fill sidebar-icon ico-metodos"></i> Métodos de Estudio
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('vision.index') }}" class="sidebar-link{% if bp_actual == 'vision' %} active{% endif %}">
+                            <i class="bi bi-images sidebar-icon ico-vision"></i> Vision Board
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('temas.index') }}" class="sidebar-link{% if bp_actual == 'temas' %} active{% endif %}">
+                            <i class="bi bi-shuffle sidebar-icon ico-temas"></i> Temas Aleatorios
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <li class="sidebar-item sidebar-item-toggle">
+            {% include 'menu/_switch_seccion.html' %}
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link{% if bp_actual == 'perfil' %} active{% endif %}">
+                <i class="bi bi-person-circle sidebar-icon ico-perfil"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
+                <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
+            </button></form>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

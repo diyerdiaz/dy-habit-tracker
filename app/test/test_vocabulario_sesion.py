@@ -129,8 +129,8 @@ console.log(JSON.stringify({ b, rondas }));
     assert resultado['b']['vecesMostrada'] == 1 and resultado['b']['ultimaCalificacion'] == 'dificil'
     assert resultado['b']['peso'] == 3
     for ronda in resultado['rondas']:
-        assert ronda[0] == 'B'                   # la difícil va primero
-        assert set(ronda[1:]) == {'C', 'D'}      # luego las que no se estudiaron; A espera su turno
+        # A y B ya se practicaron hoy: no vuelven hasta mañana (aunque B sea difícil)
+        assert sorted(ronda) == ['C', 'D']
 
 
 def test_resumen_dice_cuantas_se_estudiaron():
@@ -154,7 +154,7 @@ def test_los_desplegables_usan_lista_oscura(logged_client, user):
     assert re.search(r'<select id="vocabTiempo" class="[^"]*glass-input', html)
     css = (JS.parents[1] / 'css' / 'vocabulario.css').read_text()
     assert '.glass-input { color-scheme: dark; }' in css
-    assert '.glass-input option { background: #002347; color: #fff; }' in css
+    assert '.glass-input option { background: var(--tema-oscuro, #001833); color: #fff; }' in css
 
 
 def test_el_tiempo_empieza_al_ver_el_significado(logged_client, user):

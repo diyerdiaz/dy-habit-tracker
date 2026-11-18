@@ -57,21 +57,21 @@
     gap: 8px;
     padding: 10px 20px;
     border-radius: 30px;
-    background: rgba(13, 110, 253, 0.15);
-    border: 1px solid rgba(13, 110, 253, 0.4);
-    color: #a9d1ff;
+    background: rgba(var(--tema-fuerte-rgb), 0.15);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.4);
+    color: rgb(var(--tema-claro-rgb));
     font-style: italic;
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
-    box-shadow: 0 0 15px rgba(13, 110, 253, 0.15);
+    box-shadow: 0 0 15px rgba(var(--tema-fuerte-rgb), 0.15);
     transition: 0.3s;
 }
 
 .vocab-historial-btn:hover {
-    background: rgba(13, 110, 253, 0.28);
+    background: rgba(var(--tema-fuerte-rgb), 0.28);
     color: #fff;
-    box-shadow: 0 0 20px rgba(13, 110, 253, 0.35);
+    box-shadow: 0 0 20px rgba(var(--tema-fuerte-rgb), 0.35);
     transform: translateY(-2px);
 }
 
@@ -85,7 +85,7 @@
 }
 
 .glass-modal {
-    background: rgba(0, 20, 45, 0.85);
+    background: rgba(var(--tema-oscuro-rgb), 0.85);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
@@ -116,31 +116,92 @@
 }
 
 .glass-input::placeholder { color: rgba(255, 255, 255, 0.4) !important; }
-.glass-input:focus { border-color: #0d6efd !important; box-shadow: 0 0 10px rgba(13, 110, 253, 0.4) !important; }
+.glass-input:focus { border-color: var(--tema-grad-1) !important; box-shadow: 0 0 10px rgba(var(--tema-fuerte-rgb), 0.4) !important; }
 /* Lista desplegable (palabras y segundos) con el fondo oscuro de la página y
    letras claras. color-scheme pide al navegador/celular su lista en modo oscuro,
    porque muchos dibujan la lista abierta con el estilo del sistema. */
 .glass-input { color-scheme: dark; }
-.glass-input option { background: #002347; color: #fff; }
-.glass-input option:checked { background: #0d6efd; color: #fff; }
+.glass-input option { background: var(--tema-oscuro, #001833); color: #fff; }
+.glass-input option:checked { background: var(--tema-grad-1); color: #fff; }
+
+/* Navegadores que dejan pintar la lista abierta (Chrome/Edge recientes): la lista y
+   la opción señalada toman el color de la sección (azul en Inglés, rojo y dorado
+   en Español) en vez del azul claro del sistema. Los demás usan lo de arriba. */
+@supports (appearance: base-select) {
+    select.glass-input,
+    select.glass-input::picker(select) {
+        appearance: base-select;
+    }
+    /* El número elegido queda centrado, como antes; la flecha a la derecha */
+    select.glass-input {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    select.glass-input::picker-icon {
+        position: absolute;
+        right: 14px;
+        color: var(--tema-vivo);
+    }
+    select.glass-input::picker(select) {
+        background: var(--tema-oscuro, #001833);
+        border: 1px solid rgba(var(--tema-vivo-rgb), 0.5);
+        border-radius: 12px;
+        padding: 4px;
+        max-height: 320px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    select.glass-input option {
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: transparent;
+    }
+    select.glass-input option::checkmark { display: none; }
+    select.glass-input option:hover,
+    select.glass-input option:focus-visible {
+        background: rgba(var(--tema-vivo-rgb), 0.25);
+        outline: none;
+    }
+    select.glass-input option:checked {
+        background: linear-gradient(90deg, var(--tema-grad-1), var(--tema-grad-2));
+        font-weight: 600;
+    }
+}
 
 .text-vocab-accent {
-    color: #4dabff;
+    color: var(--tema-vivo);
 }
 
 .btn-vocab-accent {
-    background: linear-gradient(135deg, #0d6efd, #0099ff);
+    background: linear-gradient(135deg, var(--tema-grad-1), var(--tema-grad-2));
     color: #fff;
     border: none;
 }
 
 .btn-vocab-accent:hover {
-    background: linear-gradient(135deg, #0b5ed7, #0080d6);
+    background: linear-gradient(135deg, var(--tema-grad-1), var(--tema-grad-2));
+    filter: brightness(1.1);
     color: #fff;
 }
 
+/* Al presionarlo (o con el foco después de presionarlo) el botón se queda con su
+   mismo color: Bootstrap le pondría su color de :active y un borde/sombra azul */
+.btn-vocab-accent:active,
+.btn-vocab-accent:focus,
+.btn-vocab-accent:focus-visible,
+.btn-vocab-accent.active,
+.btn-vocab-accent:first-child:active {
+    background: linear-gradient(135deg, var(--tema-grad-1), var(--tema-grad-2));
+    color: #fff;
+    border: none;
+    box-shadow: none;
+}
+.btn-vocab-accent:focus-visible { outline: 2px solid var(--tema-vivo); outline-offset: 3px; }
+
 .vocab-word-meaning {
-    color: #4dabff;
+    color: var(--tema-vivo);
     font-style: italic;
     font-size: 1.3rem;
     margin: 0 0 10px 0;
@@ -158,7 +219,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 20px;
-    color: #4dabff;
+    color: var(--tema-vivo);
     font-style: italic;
     font-size: 0.95rem;
     text-decoration: none;
@@ -175,16 +236,16 @@
     margin: 0 auto;
     padding: 35px 30px;
     border-radius: 20px;
-    background: rgba(13, 110, 253, 0.1);
-    border: 1px solid rgba(13, 110, 253, 0.3);
-    box-shadow: 0 0 15px rgba(13, 110, 253, 0.1);
+    background: rgba(var(--tema-fuerte-rgb), 0.1);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.3);
+    box-shadow: 0 0 15px rgba(var(--tema-fuerte-rgb), 0.1);
     text-align: center;
     transition: 0.3s;
 }
 
 .vocab-setup-card:hover {
-    background: rgba(13, 110, 253, 0.14);
-    box-shadow: 0 0 20px rgba(13, 110, 253, 0.25);
+    background: rgba(var(--tema-fuerte-rgb), 0.14);
+    box-shadow: 0 0 20px rgba(var(--tema-fuerte-rgb), 0.25);
 }
 
 .vocab-setup-card h3 {
@@ -292,21 +353,21 @@
 .vocab-espera-fill {
     height: 100%;
     width: 0;
-    background: linear-gradient(90deg, #0d6efd, #4dabff);
+    background: linear-gradient(90deg, var(--tema-grad-1), var(--tema-vivo));
     transition: width 0.2s linear;
 }
 
 .vocab-espera-texto {
     margin: 8px 0 0;
     text-align: center;
-    color: #4dabff;
+    color: var(--tema-vivo);
     font-size: 0.9rem;
     font-style: italic;
 }
 
 .vocab-progress {
     text-align: center;
-    color: #4dabff;
+    color: var(--tema-vivo);
     font-style: italic;
     font-size: 0.95rem;
     margin-bottom: 15px;
@@ -465,8 +526,8 @@
     max-width: 700px;
     margin: 0 auto;
     border-radius: 20px;
-    background: rgba(13, 110, 253, 0.08);
-    border: 1px solid rgba(13, 110, 253, 0.25);
+    background: rgba(var(--tema-fuerte-rgb), 0.08);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.25);
     overflow: hidden;
 }
 
@@ -520,9 +581,9 @@
 }
 
 .vocab-row-edit:hover {
-    background: rgba(13, 110, 253, 0.25);
-    border-color: #4dabff;
-    color: #4dabff;
+    background: rgba(var(--tema-fuerte-rgb), 0.25);
+    border-color: var(--tema-vivo);
+    color: var(--tema-vivo);
 }
 
 .vocab-row-delete:hover {
@@ -546,9 +607,9 @@
     gap: 8px;
     padding: 8px 18px;
     border-radius: 30px;
-    background: rgba(13, 110, 253, 0.15);
-    border: 1px solid rgba(13, 110, 253, 0.4);
-    color: #a9d1ff;
+    background: rgba(var(--tema-fuerte-rgb), 0.15);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.4);
+    color: rgb(var(--tema-claro-rgb));
     font-style: italic;
     font-size: 0.9rem;
     text-decoration: none;
@@ -556,7 +617,7 @@
 }
 
 .vocab-pagination-btn:hover {
-    background: rgba(13, 110, 253, 0.28);
+    background: rgba(var(--tema-fuerte-rgb), 0.28);
     color: #fff;
 }
 
@@ -578,9 +639,9 @@
     padding: 40px 30px;
     border-radius: 24px;
     text-align: center;
-    background: rgba(13, 110, 253, 0.1);
-    border: 1px solid rgba(13, 110, 253, 0.3);
-    box-shadow: 0 0 25px rgba(13, 110, 253, 0.15);
+    background: rgba(var(--tema-fuerte-rgb), 0.1);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.3);
+    box-shadow: 0 0 25px rgba(var(--tema-fuerte-rgb), 0.15);
 }
 
 .vocab-rank-emoji {
@@ -596,7 +657,7 @@
     font-weight: 700;
     font-size: 2rem;
     margin-bottom: 8px;
-    background: linear-gradient(90deg, #4dabff, #ffffff, #0d6efd, #4dabff);
+    background: linear-gradient(90deg, var(--tema-vivo), #ffffff, var(--tema-grad-1), var(--tema-vivo));
     background-size: 300% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -646,14 +707,14 @@
 
 .vocab-rank-chip.achieved {
     opacity: 1;
-    background: rgba(13, 110, 253, 0.1);
-    border-color: rgba(13, 110, 253, 0.3);
+    background: rgba(var(--tema-fuerte-rgb), 0.1);
+    border-color: rgba(var(--tema-fuerte-rgb), 0.3);
 }
 
 .vocab-rank-chip.current {
-    background: rgba(13, 110, 253, 0.25);
-    border-color: #4dabff;
-    box-shadow: 0 0 20px rgba(13, 110, 253, 0.4);
+    background: rgba(var(--tema-fuerte-rgb), 0.25);
+    border-color: var(--tema-vivo);
+    box-shadow: 0 0 20px rgba(var(--tema-fuerte-rgb), 0.4);
     transform: translateY(-4px);
 }
 
@@ -706,21 +767,21 @@
 
 .vocab-cal-year-pill:hover {
     color: #fff;
-    border-color: rgba(13, 110, 253, 0.4);
+    border-color: rgba(var(--tema-fuerte-rgb), 0.4);
 }
 
 .vocab-cal-year-pill.active {
-    background: rgba(13, 110, 253, 0.35);
-    border-color: rgba(13, 110, 253, 0.6);
+    background: rgba(var(--tema-fuerte-rgb), 0.35);
+    border-color: rgba(var(--tema-fuerte-rgb), 0.6);
     color: #fff;
 }
 
 .vocab-cal-card {
     max-width: 1200px;
     margin: 0 auto;
-    background: rgba(13, 110, 253, 0.08);
+    background: rgba(var(--tema-fuerte-rgb), 0.08);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(13, 110, 253, 0.25);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.25);
     border-radius: 20px;
     padding: 30px;
     --cell-gap: 3px;
@@ -748,7 +809,7 @@
     overflow-y: hidden;
     padding: 4px 2px 10px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(77, 171, 255, 0.5) transparent;
+    scrollbar-color: rgba(var(--tema-vivo-rgb), 0.5) transparent;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -812,12 +873,12 @@
 }
 
 .vocab-cal-day.level-0 { background: rgba(255, 255, 255, 0.06); }
-.vocab-cal-day.level-1 { background: rgba(13, 110, 253, 0.35); }
-.vocab-cal-day.level-2 { background: rgba(13, 110, 253, 0.6); }
-.vocab-cal-day.level-3 { background: rgba(77, 171, 255, 0.85); }
+.vocab-cal-day.level-1 { background: rgba(var(--tema-fuerte-rgb), 0.35); }
+.vocab-cal-day.level-2 { background: rgba(var(--tema-fuerte-rgb), 0.6); }
+.vocab-cal-day.level-3 { background: rgba(var(--tema-vivo-rgb), 0.85); }
 .vocab-cal-day.level-4 {
-    background: #4dabff;
-    box-shadow: 0 0 8px rgba(77, 171, 255, 0.8);
+    background: var(--tema-vivo);
+    box-shadow: 0 0 8px rgba(var(--tema-vivo-rgb), 0.8);
 }
 
 .vocab-cal-legend {
@@ -848,13 +909,13 @@
     position: absolute;
     z-index: 50;
     transform: translate(-50%, -100%);
-    background: rgba(0, 20, 45, 0.97);
-    border: 1px solid rgba(13, 110, 253, 0.4);
+    background: rgba(var(--tema-oscuro-rgb), 0.97);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.4);
     border-radius: 14px;
     padding: 14px 18px;
     min-width: 200px;
     max-width: 260px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(13, 110, 253, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(var(--tema-fuerte-rgb), 0.15);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.15s ease;
@@ -874,7 +935,7 @@
     left: 50%;
     transform: translateX(-50%);
     border: 6px solid transparent;
-    border-top-color: rgba(0, 20, 45, 0.97);
+    border-top-color: rgba(var(--tema-oscuro-rgb), 0.97);
 }
 
 .vocab-day-popup-title {
@@ -893,7 +954,7 @@
 }
 
 .vocab-day-popup-words {
-    color: #4dabff;
+    color: var(--tema-vivo);
     font-size: 0.82rem;
     font-style: italic;
     line-height: 1.4;
@@ -920,7 +981,7 @@
     gap: 8px;
     padding: 12px 16px;
     border-radius: 14px;
-    border: 1px solid rgba(13, 110, 253, 0.35);
+    border: 1px solid rgba(var(--tema-fuerte-rgb), 0.35);
     background: rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.75);
     font-weight: 700;
@@ -936,8 +997,8 @@
 
 .vocab-rank-tab.activo {
     color: #fff;
-    border-color: #4dabff;
-    background: rgba(13, 110, 253, 0.35);
+    border-color: var(--tema-vivo);
+    background: rgba(var(--tema-fuerte-rgb), 0.35);
 }
 
 .vocab-rank-panel[hidden] {
@@ -973,15 +1034,15 @@
     padding: 0;
     font-size: 0.9rem;
     color: #fff;
-    background: linear-gradient(135deg, #0d6efd, #0099ff);
-    box-shadow: 0 2px 10px rgba(13, 110, 253, 0.45);
+    background: linear-gradient(135deg, var(--tema-grad-1), var(--tema-grad-2));
+    box-shadow: 0 2px 10px rgba(var(--tema-fuerte-rgb), 0.45);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .vocab-autocompletar-btn:hover {
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 3px 14px rgba(13, 110, 253, 0.7);
+    box-shadow: 0 3px 14px rgba(var(--tema-fuerte-rgb), 0.7);
 }
 
 .vocab-autocompletar-btn:disabled {
@@ -1006,4 +1067,21 @@
 
 .vocab-autocompletar-estado.es-error {
     color: #ff8a8a;
+}
+
+/* Ya se practicaron todas las palabras hoy: vuelven mañana */
+.vocab-todas-hechas {
+    text-align: center;
+}
+
+.vocab-todas-hechas > i {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 2.6rem;
+    color: var(--tema-vivo);
+}
+
+.vocab-todas-hechas[hidden],
+#vocabSetupControles[hidden] {
+    display: none;
 }

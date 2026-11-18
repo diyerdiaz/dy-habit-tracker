@@ -1,4 +1,9 @@
-"""Juegos de vocabulario de la sección Inglés.
+"""Juegos de vocabulario de las secciones Inglés y Español.
+
+El mismo blueprint se registra dos veces (ver app/__init__.py): 'juegos' en
+/menu/ingles/juegos y 'juegos_es' en /menu/espanol/juegos. Cada uno juega solo
+con las palabras de su idioma (idioma_actual()); abajo se explica en inglés,
+pero en Español es igual con palabras en español.
 
 Unir parejas: palabras en inglés a la izquierda y significados a la derecha.
 Sopa de letras: los significados son las pistas y hay que encontrar la palabra
@@ -22,6 +27,7 @@ from app import db
 from app.models.juego_partida import JuegoPartida, JUEGOS, NIVELES_SOPA
 from app.models.vocabulario import Vocabulario
 from app.services.ingles import get_letras_flotantes
+from app.services.secciones import idioma_actual
 
 bp = Blueprint('juegos', __name__, url_prefix='/menu/ingles/juegos')
 
@@ -46,7 +52,7 @@ def _palabras_para_jugar(idUser):
     """Todas las palabras del usuario; el orden al azar lo decide el navegador."""
     return [
         {'id': p.idVocab, 'en': p.nombre.strip(), 'es': p.significado.strip()}
-        for p in Vocabulario.query.filter_by(idUser=idUser).all()
+        for p in Vocabulario.query.filter_by(idUser=idUser, idioma=idioma_actual()).all()
         if p.nombre and p.nombre.strip() and p.significado and p.significado.strip()
     ]
 
@@ -94,7 +100,7 @@ def _palabras_para_sopa(idUser):
 def _palabras_para_ahorcado(idUser):
     """Solo palabras con pista en inglés, y cada una una sola vez."""
     salida, vistas = [], set()
-    for p in Vocabulario.query.filter_by(idUser=idUser).all():
+    for p in Vocabulario.query.filter_by(idUser=idUser, idioma=idioma_actual()).all():
         nombre, significado = (p.nombre or '').strip(), (p.significado or '').strip()
         letras = solo_letras(nombre, LETRAS_AHORCADO)
         pistas = ejemplos_con_hueco(nombre, p.ejemplos)
@@ -107,7 +113,7 @@ def _palabras_para_ahorcado(idUser):
 def _palabras_para_mono(idUser):
     """Como las del ahorcado, y con cada ejemplo completo para enseñarlo: 'pistas[i]'
     es 'frases[i]' con la palabra tapada."""
-    ejemplos = {p.idVocab: p.ejemplos for p in Vocabulario.query.filter_by(idUser=idUser).all()}
+    ejemplos = {p.idVocab: p.ejemplos for p in Vocabulario.query.filter_by(idUser=idUser, idioma=idioma_actual()).all()}
     return [{**p, 'frases': _lineas_con_palabra(p['en'], ejemplos[p['id']])}
             for p in _palabras_para_ahorcado(idUser)]
 
@@ -124,7 +130,7 @@ def _palabras_para_crucigrama(idUser):
 
 
 def _resumen(idUser):
-    partidas = JuegoPartida.query.filter_by(idUser=idUser).all()
+    partidas = JuegoPartida.query.filter_by(idUser=idUser, idioma=idioma_actual()).all()
     por_juego = defaultdict(list)
     for p in partidas:
         por_juego[p.juego].append(p)
@@ -152,7 +158,7 @@ def index():
         total_crucigrama=len(_palabras_para_crucigrama(current_user.idUser)),
         minimo_crucigrama=MINIMO_PALABRAS_CRUCIGRAMA,
         resumen=_resumen(current_user.idUser),
-        letras_flotantes=get_letras_flotantes(current_user.idUser),
+        letras_flotantes=get_letras_flotantes(current_user.idUser, idioma_actual()),
     )
 
 
@@ -259,12 +265,13 @@ def resultado(juego):
 
     # Las palabras tienen que ser del usuario: no se puede inventar una ronda
     propias = Vocabulario.query.filter(
-        Vocabulario.idUser == current_user.idUser, Vocabulario.idVocab.in_(ids)).count()
+        Vocabulario.idUser == current_user.idUser, Vocabulario.idioma == idioma_actual(),
+        Vocabulario.idVocab.in_(ids)).count()
     if propias != len(ids):
         return jsonify({'success': False, 'error': 'Resultado no válido.'}), 400
 
     db.session.add(JuegoPartida(
-        idUser=current_user.idUser, juego=juego, parejas=len(ids),
+        idUser=current_user.idUser, idioma=idioma_actual(), juego=juego, parejas=len(ids),
         errores=errores, segundos=segundos, nivel=nivel, pistas=pistas,
     ))
     db.session.commit()

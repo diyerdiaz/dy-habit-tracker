@@ -77,11 +77,13 @@
         options: opciones('', true),
     });
 
-    const shadowing = new Chart(document.getElementById('graficaShadowing'), {
+    // Español no tiene shadowing: esa gráfica solo existe en Inglés
+    const lienzoShadowing = document.getElementById('graficaShadowing');
+    const shadowing = lienzoShadowing ? new Chart(lienzoShadowing, {
         type: 'line',
         data: { labels: [], datasets: [linea('Shadowing', COLORES.minutos)] },
         options: opciones(' min', false),
-    });
+    }) : null;
 
     function mostrar(periodo) {
         const d = datos[periodo];
@@ -95,10 +97,12 @@
         actividad.data.datasets.forEach((s) => { s.pointRadius = radio; });
         actividad.update();
 
-        shadowing.data.labels = d.etiquetas;
-        shadowing.data.datasets[0].data = d.minutos;
-        shadowing.data.datasets[0].pointRadius = radio;
-        shadowing.update();
+        if (shadowing) {
+            shadowing.data.labels = d.etiquetas;
+            shadowing.data.datasets[0].data = d.minutos;
+            shadowing.data.datasets[0].pointRadius = radio;
+            shadowing.update();
+        }
 
         document.querySelectorAll('[data-subtitulo]').forEach((p) => { p.textContent = SUBTITULOS[periodo]; });
         document.querySelectorAll('.ingles-periodo').forEach((b) => {

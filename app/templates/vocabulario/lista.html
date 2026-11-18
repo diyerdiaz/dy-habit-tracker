@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -18,19 +18,19 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('ingles.vocabulario') }}" class="vocabulario-back">
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="vocabulario-back">
             <i class="bi bi-arrow-left"></i> Volver a Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Mis Palabras 🇺🇸</span>
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} Mis Palabras {{ sec.banderas[1] }}</span>
         <h1 class="ingles-title">Mis Palabras</h1>
         <p class="ingles-desc">Revisa, modifica o elimina las palabras que has agregado.</p>
     </div>
 
-    <form method="GET" action="{{ url_for('ingles.vocabulario_lista') }}" class="vocab-search-form fade-in-section">
+    <form method="GET" action="{{ url_for(sec.bp_vocab ~ '.lista') }}" class="vocab-search-form fade-in-section">
         <i class="bi bi-search"></i>
         <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar una palabra..." class="form-control glass-input">
         {% if busqueda %}
-        <a href="{{ url_for('ingles.vocabulario_lista') }}" class="vocab-search-clear" title="Limpiar búsqueda">
+        <a href="{{ url_for(sec.bp_vocab ~ '.lista') }}" class="vocab-search-clear" title="Limpiar búsqueda">
             <i class="bi bi-x-circle"></i>
         </a>
         {% endif %}
@@ -80,12 +80,12 @@
 
     {% if total_paginas > 1 %}
     <div class="vocab-pagination fade-in-section">
-        <a href="{{ url_for('ingles.vocabulario_lista', page=pagina - 1, q=busqueda if busqueda else None) }}"
+        <a href="{{ url_for(sec.bp_vocab ~ '.lista', page=pagina - 1, q=busqueda if busqueda else None) }}"
            class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
             <i class="bi bi-arrow-left"></i> Anterior
         </a>
         <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
-        <a href="{{ url_for('ingles.vocabulario_lista', page=pagina + 1, q=busqueda if busqueda else None) }}"
+        <a href="{{ url_for(sec.bp_vocab ~ '.lista', page=pagina + 1, q=busqueda if busqueda else None) }}"
            class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
             Siguiente <i class="bi bi-arrow-right"></i>
         </a>
@@ -94,22 +94,22 @@
     {% elif busqueda %}
     <div class="ingles-hero fade-in-section" style="max-width: 500px;">
         <p class="ingles-desc">
-            <i class="bi bi-search" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            <i class="bi bi-search" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: var(--tema-vivo);"></i>
             No encontramos ninguna palabra que coincida con "<strong>{{ busqueda }}</strong>".
         </p>
     </div>
     {% else %}
     <div class="ingles-hero fade-in-section" style="max-width: 500px;">
         <p class="ingles-desc">
-            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            <i class="bi bi-journal-x" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: var(--tema-vivo);"></i>
             Aún no has agregado palabras. Vuelve a Vocabulario y usa "Agregar Vocabulario" para crear la primera.
         </p>
     </div>
     {% endif %}
 </div>
 
-{% include 'ingles/vocabulario_edit.html' %}
-{% include 'ingles/vocabulario_delete.html' %}
+{% include 'vocabulario/edit.html' %}
+{% include 'vocabulario/delete.html' %}
 {% endblock %}
 
 {% block extra_js %}
@@ -123,18 +123,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
     </div>

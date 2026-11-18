@@ -1,6 +1,6 @@
 import logging
 import os
-from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
+from flask import Flask, request, has_request_context, jsonify, render_template, session, redirect, url_for, flash
 from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
@@ -19,13 +19,14 @@ from app.routes import (
     users_route, auth_route, habits_route, menu_route, castigos_route, tareas_route,
     medallas_route, motivacion_route, ingles_route, metodos_route, estadisticas_route,
     perfil_route, pwa_route, vision_route, temas_route, recuperar_route, juegos_route, admin_route,
-    retos_route, espanol_route,
+    retos_route, espanol_route, vocabulario_route,
 )
 from app.services.admin import registrar_comandos as registrar_comandos_admin
 from app.services.correo import registrar_comandos
 from app.services.motivacion import tarjeta_del_dia
 from app.services.personajes_login import tema_del_sitio, personaje_del_sitio
 from app.services.retos import mostrar_en_menu as retos_en_menu
+from app.services.secciones import seccion_actual
 
 
 def create_app(config_overrides=None):
@@ -69,6 +70,11 @@ def create_app(config_overrides=None):
     app.register_blueprint(temas_route.bp)
     app.register_blueprint(recuperar_route.bp)
     app.register_blueprint(juegos_route.bp)
+    app.register_blueprint(vocabulario_route.bp)
+    # Español usa las mismas páginas de vocabulario y juegos, con sus propias palabras
+    # (services/secciones.py dice qué cambia según el nombre del blueprint)
+    app.register_blueprint(vocabulario_route.bp, name='vocabulario_es', url_prefix='/menu/espanol/vocabulario')
+    app.register_blueprint(juegos_route.bp, name='juegos_es', url_prefix='/menu/espanol/juegos')
     app.register_blueprint(admin_route.bp)
     app.register_blueprint(retos_route.bp)
     app.register_blueprint(espanol_route.bp)
@@ -163,6 +169,8 @@ def create_app(config_overrides=None):
             'personaje_sitio': personaje_del_sitio(session.get('tema_sitio')),
             'requisitos_contrasena': REQUISITOS_CONTRASENA,
             'tarjeta_dia': tarjeta_del_dia(),
+            # Inglés o Español: textos, colores y enlaces de la sección actual
+            'sec': seccion_actual() if has_request_context() else None,
             # Función: solo consulta la base si la plantilla tiene el menú lateral
             'hay_retos': lambda: (current_user.is_authenticated and not current_user.es_admin
                                   and retos_en_menu(current_user.idUser)),

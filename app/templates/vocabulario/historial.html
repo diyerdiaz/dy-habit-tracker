@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <!-- Efectos de Fondo -->
 <div class="ingles-letters">
@@ -18,10 +18,10 @@
 <!-- Contenedor Principal -->
 <div class="ingles-wrapper">
     <div class="text-center mb-4 fade-in-section ingles-hero">
-        <a href="{{ url_for('ingles.vocabulario_aprender') }}" class="vocabulario-back">
+        <a href="{{ url_for(sec.bp_vocab ~ '.aprender') }}" class="vocabulario-back">
             <i class="bi bi-arrow-left"></i> Volver a Aprender Vocabulario
         </a>
-        <span class="ingles-flag-badge">🇬🇧 Tu Progreso 🇺🇸</span>
+        <span class="ingles-flag-badge">{{ sec.banderas[0] }} Tu Progreso {{ sec.banderas[1] }}</span>
         <h1 class="ingles-title">Historial de Aprendizaje</h1>
         <p class="ingles-desc">Así te ha ido calificando cada palabra que has practicado.</p>
     </div>
@@ -29,7 +29,7 @@
     {% if total == 0 %}
     <div class="ingles-hero fade-in-section" style="max-width: 500px;">
         <p class="ingles-desc">
-            <i class="bi bi-graph-up" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: #4dabff;"></i>
+            <i class="bi bi-graph-up" style="font-size: 2.5rem; display: block; margin-bottom: 15px; color: var(--tema-vivo);"></i>
             Aún no has calificado ninguna palabra. Ve a "Aprender Vocabulario" y completa una sesión para ver tu historial aquí.
         </p>
     </div>
@@ -96,12 +96,12 @@
 
     {% if total_paginas > 1 %}
     <div class="vocab-pagination fade-in-section">
-        <a href="{{ url_for('ingles.vocabulario_historial', page=pagina - 1) }}"
+        <a href="{{ url_for(sec.bp_vocab ~ '.historial', page=pagina - 1) }}"
            class="vocab-pagination-btn {{ 'disabled' if pagina <= 1 else '' }}">
             <i class="bi bi-arrow-left"></i> Anterior
         </a>
         <span class="vocab-pagination-info">Página {{ pagina }} de {{ total_paginas }}</span>
-        <a href="{{ url_for('ingles.vocabulario_historial', page=pagina + 1) }}"
+        <a href="{{ url_for(sec.bp_vocab ~ '.historial', page=pagina + 1) }}"
            class="vocab-pagination-btn {{ 'disabled' if pagina >= total_paginas else '' }}">
             Siguiente <i class="bi bi-arrow-right"></i>
         </a>
@@ -121,18 +121,18 @@
     <div class="marquee-container">
         <div class="marquee-track track-ltr">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
         <div class="marquee-track track-rtl">
             <div class="marquee-content">
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
-                <span>Vocabulario &bull; Gramática &bull; Pronunciación &bull; Conversación &bull; Aprende Inglés &bull;</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
+                <span>{{ sec.marquesina }}</span>
             </div>
         </div>
     </div>

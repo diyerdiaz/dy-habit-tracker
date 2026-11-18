@@ -1,4 +1,6 @@
-{# Menú lateral de la sección Español: solo botones de español #}
+{# Menú lateral de la sección Español: solo botones de español (lo usan el dashboard,
+   Vocabulario y Juegos de español) #}
+{%- set ep = request.endpoint or '' %}
 <!-- Botón Hamburguesa -->
 <button class="hamburger-menu" id="sidebarToggle">
     <span></span>
@@ -11,8 +13,18 @@
     {% include "menu/_marca_menu.html" %}
     <ul class="sidebar-menu">
         <li class="sidebar-item">
-            <a href="{{ url_for('espanol.index') }}" class="sidebar-link active">
+            <a href="{{ url_for('espanol.index') }}" class="sidebar-link{% if ep == 'espanol.index' %} active{% endif %}">
                 <i class="bi bi-grid-1x2-fill sidebar-icon"></i> Inicio Español
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('vocabulario_es.index') }}" class="sidebar-link{% if ep.startswith('vocabulario_es.') %} active{% endif %}">
+                <i class="bi bi-journal-text sidebar-icon ico-vocabulario"></i> Vocabulario
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('juegos_es.index') }}" class="sidebar-link{% if ep.startswith('juegos_es.') %} active{% endif %}">
+                <i class="bi bi-controller sidebar-icon ico-juegos"></i> Juegos
             </a>
         </li>
         <li class="sidebar-item sidebar-item-toggle">

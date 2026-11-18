@@ -8,26 +8,27 @@
 {% endblock %}
 
 {% block content %}
-{% include 'ingles/_sidebar_ingles.html' %}
+{% include sec.sidebar %}
 
 <div class="ingles-wrapper juegos-wrapper">
-    <a href="{{ url_for('juegos.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
+    <a href="{{ url_for(sec.bp_juegos ~ '.index') }}" class="juegos-volver"><i class="bi bi-arrow-left"></i> Juegos</a>
 
     <div class="text-center mb-3">
         <h1 class="ingles-title unir-titulo">Unir parejas</h1>
-        <p class="ingles-desc">Toca una palabra en inglés y luego su significado.</p>
+        <p class="ingles-desc">Toca una palabra {{ sec.en_idioma }} y luego su significado.</p>
     </div>
 
     {% if palabras | length < minimo %}
     <div class="juegos-vacio">
         <i class="bi bi-journal-plus"></i>
         <p>Necesitas al menos <strong>{{ minimo }}</strong> palabras en tu vocabulario para jugar. Tienes {{ palabras | length }}.</p>
-        <a href="{{ url_for('ingles.vocabulario') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
+        <a href="{{ url_for(sec.bp_vocab ~ '.index') }}" class="btn btn-juego fw-bold">Agregar palabras</a>
     </div>
     {% else %}
     <div id="juegoUnir"
          data-por-ronda="{{ parejas_por_ronda }}"
-         data-resultado-url="{{ url_for('juegos.resultado', juego='unir') }}">
+         data-resultado-url="{{ url_for(sec.bp_juegos ~ '.resultado', juego='unir') }}"
+         data-voz="{{ sec.voz }}" data-lang="{{ sec.lang }}">
 
         <div class="juego-barra">
             <span><i class="bi bi-link-45deg"></i> <strong id="unirAciertos">0</strong>/<span id="unirTotal">0</span></span>
@@ -40,11 +41,11 @@
 
         <div class="unir-tablero" id="unirTablero">
             <div class="unir-columna">
-                <h2 class="unir-columna-titulo">English</h2>
+                <h2 class="unir-columna-titulo">{{ sec.columna_palabra }}</h2>
                 <div class="unir-lista" id="unirIngles"></div>
             </div>
             <div class="unir-columna">
-                <h2 class="unir-columna-titulo">Español</h2>
+                <h2 class="unir-columna-titulo">{{ sec.columna_significado }}</h2>
                 <div class="unir-lista" id="unirEspanol"></div>
             </div>
         </div>
@@ -60,7 +61,7 @@
             <p class="juego-final-nota" id="unirFinalNota" aria-live="polite"></p>
             <div class="juego-final-botones">
                 <button type="button" class="btn btn-juego fw-bold" id="unirOtra"><i class="bi bi-arrow-repeat"></i> Otra ronda</button>
-                <a href="{{ url_for('juegos.index') }}" class="btn btn-outline-light">Volver a juegos</a>
+                <a href="{{ url_for(sec.bp_juegos ~ '.index') }}" class="btn btn-outline-light">Volver a juegos</a>
             </div>
         </div>
     </div>

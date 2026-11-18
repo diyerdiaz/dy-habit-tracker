@@ -29,6 +29,15 @@ const VOCAB_PESOS = { dificil: 3, medio: 2, facil: 1 };
 const VOCAB_CLAVE_TIEMPO = 'vocab-tiempo-tarjeta';
 const VOCAB_NOMBRES = { facil: 'Fácil', medio: 'Medio fácil', dificil: 'Difícil' };
 
+// Inglés (/menu/ingles/vocabulario) y Español (/menu/espanol/vocabulario) usan este
+// mismo archivo: las peticiones van a la sección de la página que está abierta
+function vocabUrl(ruta) {
+    const camino = typeof location !== 'undefined' ? location.pathname : '';
+    const i = camino.indexOf('/vocabulario');
+    const base = i >= 0 ? camino.slice(0, i) + '/vocabulario' : '/menu/ingles/vocabulario';
+    return base + ruta;
+}
+
 // Elige "cantidad" palabras al azar (ponderado por dificultad) dentro de un mismo grupo,
 // sin repetir ninguna, hasta agotar ese grupo.
 function vocabElegirDeGrupo(grupo, cantidad) {
@@ -81,12 +90,19 @@ function vocabPorTurnos(lista, cantidad) {
 // (vuelven en cada ronda hasta que se marquen más fáciles) y después el resto
 // por turnos. Ninguna palabra se repite dentro de la misma ronda.
 function vocabSeleccionPonderada(lista, cantidad) {
-    const dificiles = lista.filter((p) => p.ultimaCalificacion === 'dificil');
-    const resto = lista.filter((p) => p.ultimaCalificacion !== 'dificil');
+    // Lo que ya se practicó hoy no vuelve a salir hasta mañana
+    const pendientes = vocabPendientesHoy(lista);
+    const dificiles = pendientes.filter((p) => p.ultimaCalificacion === 'dificil');
+    const resto = pendientes.filter((p) => p.ultimaCalificacion !== 'dificil');
 
     const seleccion = vocabPorTurnos(dificiles, cantidad);
     seleccion.push(...vocabPorTurnos(resto, cantidad - seleccion.length));
     return seleccion;
+}
+
+// Palabras que aún no se han practicado hoy
+function vocabPendientesHoy(lista) {
+    return lista.filter((p) => !p.estudiadaHoy);
 }
 
 // Al calificar, la palabra se actualiza también en la página: si se arma otra
@@ -95,6 +111,7 @@ function vocabRegistrarCalificacion(palabras, idVocab, calificacion) {
     const palabra = palabras.find((p) => p.idVocab === idVocab);
     if (!palabra) return null;
     palabra.vecesMostrada = (palabra.vecesMostrada || 0) + 1;
+    palabra.estudiadaHoy = true;
     palabra.ultimaCalificacion = calificacion;
     palabra.peso = VOCAB_PESOS[calificacion] || 2;
     return palabra;
@@ -239,9 +256,37 @@ function vocabMostrarResumen() {
         `Fácil: ${vocabStats.facil} · Medio fácil: ${vocabStats.medio} · Difícil: ${vocabStats.dificil}`;
 }
 
+// Al volver de una ronda: cuántas faltan hoy y la lista de cantidades.
+// Si ya se practicaron todas, se avisa que vuelven mañana.
+function vocabActualizarSetup() {
+    const todas = window.VOCAB_PALABRAS || [];
+    const pendientes = vocabPendientesHoy(todas).length;
+    const controles = document.getElementById('vocabSetupControles');
+    const todasHechas = document.getElementById('vocabTodasHechas');
+    const texto = document.getElementById('vocabPendientesTexto');
+    if (!controles || !todasHechas || !vocabCantidad) return;
+
+    controles.hidden = pendientes === 0;
+    todasHechas.hidden = pendientes !== 0;
+    if (texto) {
+        const plural = todas.length === 1 ? 'palabra' : 'palabras';
+        texto.innerHTML = `Hoy te faltan <strong>${pendientes}</strong> de <strong>${todas.length}</strong> ${plural}. ` +
+            'Las que ya practicaste hoy vuelven mañana.';
+    }
+    vocabCantidad.innerHTML = '';
+    for (let n = 1; n <= pendientes; n++) {
+        const opcion = document.createElement('option');
+        opcion.value = String(n);
+        opcion.textContent = `${n} palabra${n === 1 ? '' : 's'}`;
+        opcion.selected = n === pendientes;
+        vocabCantidad.appendChild(opcion);
+    }
+}
+
 function vocabVolverAlInicio() {
     vocabDetenerTemporizador();
     vocabDeck.style.display = 'none';
+    vocabActualizarSetup();
     vocabSetupCard.style.display = '';
 }
 
@@ -292,7 +337,7 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
                 anterior.rating = rating;
                 anterior.idRegistro.then((id) => {
                     if (!id) return;
-                    fetch(`/menu/ingles/vocabulario/calificar/${id}/corregir`, {
+                    fetch(vocabUrl(`/calificar/${id}/corregir`), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         keepalive: true,
@@ -303,7 +348,7 @@ document.querySelectorAll('.vocab-rating-btn').forEach((btn) => {
             }
         } else {
             // Se guarda en el momento (keepalive: aunque se salga de la página enseguida)
-            const idRegistro = fetch('/menu/ingles/vocabulario/calificar', {
+            const idRegistro = fetch(vocabUrl('/calificar'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 keepalive: true,
@@ -364,7 +409,7 @@ if (vocabCambiarCantidad) {
 
 // Modales de la lista "Mis Palabras" (editar / eliminar)
 function openVocabEditModal(id, nombre, significado, ejemplos) {
-    document.getElementById('vocabEditForm').action = `/menu/ingles/vocabulario/${id}/editar`;
+    document.getElementById('vocabEditForm').action = vocabUrl(`/${id}/editar`);
     document.getElementById('vocabEditNombre').value = nombre;
     document.getElementById('vocabEditSignificado').value = significado;
     document.getElementById('vocabEditEjemplos').value = ejemplos;
@@ -373,7 +418,7 @@ function openVocabEditModal(id, nombre, significado, ejemplos) {
 }
 
 function openVocabDeleteModal(id, nombre) {
-    document.getElementById('vocabDeleteForm').action = `/menu/ingles/vocabulario/${id}/eliminar`;
+    document.getElementById('vocabDeleteForm').action = vocabUrl(`/${id}/eliminar`);
     document.getElementById('vocabDelNombre').textContent = nombre;
     var modal = new bootstrap.Modal(document.getElementById('vocabDeleteModal'));
     modal.show();
@@ -448,7 +493,7 @@ if (vocabAutocompletarBtn) {
         vocabAutocompletarBtn.classList.add('is-buscando');
         mostrarEstado('Buscando significado y ejemplo…', false);
         try {
-            const resp = await fetch('/menu/ingles/vocabulario/autocompletar', {
+            const resp = await fetch(vocabUrl('/autocompletar'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ palabra })
@@ -476,6 +521,7 @@ if (vocabAutocompletarBtn) {
 if (typeof module !== 'undefined') {
     module.exports = {
         vocabSeleccionPonderada, vocabPorTurnos, vocabRegistrarCalificacion, vocabSegundosRestantes,
+        vocabPendientesHoy, vocabUrl,
         vocabCorregirCalificacion, vocabContarCalificaciones,
     };
 }
