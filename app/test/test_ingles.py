@@ -243,3 +243,111 @@ def test_temporizador_no_muestra_ultimas_sesiones(logged_client, user):
     assert "vocab-history-table" not in html
     # Los totales de arriba siguen contando la sesión
     assert "2m 5s" in html
+
+
+# ── Dashboard de Inglés: resumen con estadísticas ──
+
+def test_resumen_ingles_vacio(app, user):
+    from app.services.ingles import resumen_ingles
+    r = resumen_ingles(user.idUser)
+    assert r['palabras_total'] == 0 and r['racha'] == 0 and r['practico_hoy'] is False
+    assert len(r['semana']) == 7 and r['semana'][-1]['hoy'] is True
+
+
+def test_resumen_ingles_cuenta_palabras_shadowing_juegos_y_racha(app, user, other_user):
+    from datetime import datetime, timedelta, date
+    from app.services.ingles import resumen_ingles
+    from app.models.vocabulario_registro import VocabularioRegistro
+    from app.models.juego_partida import JuegoPartida
+    hoy = date(2026, 11, 18)
+    ahora = datetime(2026, 11, 18, 10, 0)
+    db.session.add_all([
+        Vocabulario(idUser=user.idUser, nombre='apple', significado='manzana', createdAt=ahora),
+        Vocabulario(idUser=user.idUser, nombre='old', significado='viejo', createdAt=ahora - timedelta(days=30)),
+        VocabularioRegistro(idUser=user.idUser, palabraNombre='apple', calificacion='facil', fecha=ahora),
+        ShadowingSesion(idUser=user.idUser, duracionSegundos=600, fecha=ahora - timedelta(days=1)),
+        ShadowingSesion(idUser=user.idUser, duracionSegundos=300, fecha=ahora - timedelta(days=20)),
+        JuegoPartida(idUser=user.idUser, juego='unir', parejas=6, fecha=ahora - timedelta(days=2)),
+        # Lo de otro usuario no cuenta
+        Vocabulario(idUser=other_user.idUser, nombre='x', significado='y', createdAt=ahora),
+    ])
+    db.session.commit()
+    r = resumen_ingles(user.idUser, hoy=hoy)
+    assert r['palabras_total'] == 2 and r['palabras_semana'] == 1
+    assert r['repasos_hoy'] == 1 and r['repasos_total'] == 1
+    assert r['minutos_shadowing_total'] == 15 and r['minutos_shadowing_semana'] == 10
+    assert r['partidas_total'] == 1
+    assert r['racha'] == 3 and r['practico_hoy'] is True
+    assert [d['activo'] for d in r['semana']] == [False, False, False, False, True, True, True]
+
+
+def test_racha_de_ayer_sigue_viva_si_hoy_no_practica(app, user):
+    from datetime import datetime, date
+    from app.services.ingles import resumen_ingles
+    db.session.add(ShadowingSesion(idUser=user.idUser, duracionSegundos=60, fecha=datetime(2026, 11, 17, 9)))
+    db.session.commit()
+    r = resumen_ingles(user.idUser, hoy=date(2026, 11, 18))
+    assert r['racha'] == 1 and r['practico_hoy'] is False
+
+
+def test_dashboard_de_ingles_muestra_estadisticas_y_graficas_sin_botones(logged_client):
+    html = logged_client.get('/menu/ingles').get_data(as_text=True)
+    assert 'English Dashboard' in html and 'ingles-stats' in html
+    assert 'de racha' in html and 'partidas jugadas' in html and 'ingles-semana' in html
+    # Las gráficas de líneas reemplazan a los botones grandes (esos quedan en el menú lateral)
+    assert 'ingles-card' not in html and 'ingles-grid' not in html
+    assert 'id="graficaActividad"' in html and 'id="graficaShadowing"' in html
+    for periodo in ('dia', 'mes', 'anio'):
+        assert f'data-periodo="{periodo}"' in html
+    assert 'chart.js@4.5.1' in html and 'js/ingles_graficas.js' in html
+    assert 'id="inglesGraficasDatos"' in html
+
+
+def test_graficas_ingles_dia_mes_y_anio(app, user, other_user):
+    from datetime import datetime, date
+    from app.services.ingles import graficas_ingles
+    from app.models.vocabulario_registro import VocabularioRegistro
+    from app.models.juego_partida import JuegoPartida
+    hoy = date(2026, 11, 18)
+    db.session.add_all([
+        Vocabulario(idUser=user.idUser, nombre='a', significado='a', createdAt=datetime(2026, 11, 18, 9)),
+        Vocabulario(idUser=user.idUser, nombre='b', significado='b', createdAt=datetime(2026, 11, 18, 20)),
+        Vocabulario(idUser=user.idUser, nombre='c', significado='c', createdAt=datetime(2026, 10, 2, 9)),
+        Vocabulario(idUser=user.idUser, nombre='d', significado='d', createdAt=datetime(2022, 5, 1, 9)),
+        VocabularioRegistro(idUser=user.idUser, palabraNombre='a', calificacion='facil', fecha=datetime(2026, 11, 17, 9)),
+        ShadowingSesion(idUser=user.idUser, duracionSegundos=600, fecha=datetime(2026, 11, 18, 8)),
+        ShadowingSesion(idUser=user.idUser, duracionSegundos=330, fecha=datetime(2025, 12, 31, 8)),
+        JuegoPartida(idUser=user.idUser, juego='unir', parejas=6, fecha=datetime(2026, 11, 1, 8)),
+        Vocabulario(idUser=other_user.idUser, nombre='x', significado='x', createdAt=datetime(2026, 11, 18, 9)),
+    ])
+    db.session.commit()
+    g = graficas_ingles(user.idUser, hoy=hoy)
+
+    dia = g['dia']
+    assert len(dia['etiquetas']) == 30 and dia['etiquetas'][-1] == '18 Nov'
+    assert dia['palabras'][-1] == 2 and dia['repasos'][-2] == 1 and dia['minutos'][-1] == 10
+    assert sum(dia['palabras']) == 2   # la del 2 de octubre queda fuera de los 30 días
+
+    mes = g['mes']
+    assert len(mes['etiquetas']) == 12 and mes['etiquetas'][0] == 'Dic 2025' and mes['etiquetas'][-1] == 'Nov 2026'
+    assert mes['palabras'][-1] == 2 and mes['palabras'][-2] == 1 and mes['partidas'][-1] == 1
+    assert mes['minutos'][0] == 6   # 330 s del 31 de diciembre de 2025
+
+    anio = g['anio']
+    assert anio['etiquetas'] == ['2022', '2023', '2024', '2025', '2026']
+    assert anio['palabras'] == [1, 0, 0, 0, 3] and anio['minutos'] == [0, 0, 0, 6, 10]
+
+
+def test_graficas_ingles_sin_datos_muestra_ultimos_anios(app, user):
+    from datetime import date
+    from app.services.ingles import graficas_ingles
+    g = graficas_ingles(user.idUser, hoy=date(2026, 11, 18))
+    assert g['anio']['etiquetas'] == ['2024', '2025', '2026']
+    assert sum(g['dia']['palabras']) == 0 and sum(g['mes']['minutos']) == 0
+
+
+def test_graficas_js_usa_lineas_y_cambia_de_periodo(app):
+    with open(os.path.join(app.static_folder, 'js', 'ingles_graficas.js'), encoding='utf-8') as f:
+        js = f.read()
+    assert "type: 'line'" in js and "mode: 'index'" in js
+    assert "mostrar(b.dataset.periodo)" in js

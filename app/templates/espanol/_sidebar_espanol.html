@@ -1,0 +1,35 @@
+{# Menú lateral de la sección Español: solo botones de español #}
+<!-- Botón Hamburguesa -->
+<button class="hamburger-menu" id="sidebarToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    {% include "menu/_marca_menu.html" %}
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href="{{ url_for('espanol.index') }}" class="sidebar-link active">
+                <i class="bi bi-grid-1x2-fill sidebar-icon"></i> Inicio Español
+            </a>
+        </li>
+        <li class="sidebar-item sidebar-item-toggle">
+            {% with seccion_menu='espanol' %}{% include 'menu/_switch_seccion.html' %}{% endwith %}
+        </li>
+        <li class="sidebar-item">
+            <a href="{{ url_for('perfil.index') }}" class="sidebar-link">
+                <i class="bi bi-person-circle sidebar-icon ico-perfil"></i> Mi Perfil
+            </a>
+        </li>
+        <li class="sidebar-item">
+            <form method="post" action="{{ url_for('auth.logout') }}" class="form-logout"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="sidebar-link sidebar-link-salir">
+                <i class="bi bi-box-arrow-right sidebar-icon"></i> Cerrar Sesión
+            </button></form>
+        </li>
+    </ul>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

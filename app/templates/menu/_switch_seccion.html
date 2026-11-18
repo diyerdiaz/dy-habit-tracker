@@ -1,0 +1,16 @@
+{# Interruptor del menú lateral: Hábitos | Inglés | Español.
+   Uso: {% with seccion_menu='ingles' %}{% include 'menu/_switch_seccion.html' %}{% endwith %}
+   Sin `seccion_menu` se marca Hábitos. #}
+{%- set seccion_activa = seccion_menu | default('habitos') %}
+<div class="sidebar-toggle toggle-{{ seccion_activa }}">
+    <span class="sidebar-toggle-thumb"></span>
+    <a href="{{ url_for('auth.dashboard') }}" class="sidebar-toggle-option{% if seccion_activa == 'habitos' %} active-side{% endif %}">
+        <i class="bi bi-house-door"></i> Hábitos
+    </a>
+    <a href="{{ url_for('ingles.ingles') }}" class="sidebar-toggle-option{% if seccion_activa == 'ingles' %} active-side{% endif %}">
+        <i class="bi bi-translate"></i> Inglés
+    </a>
+    <a href="{{ url_for('espanol.index') }}" class="sidebar-toggle-option{% if seccion_activa == 'espanol' %} active-side{% endif %}">
+        <i class="bi bi-book"></i> Español
+    </a>
+</div>
